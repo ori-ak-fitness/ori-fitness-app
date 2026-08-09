@@ -1,0 +1,7 @@
+.DS_Store
+Thumbs.db
+desktop.ini
+*.log
+
+# הגדרות מקומיות של Claude Code — נתיבים מהמחשב הפרטי, לא חלק מהאפליקציה
+.claude/settings.local.json

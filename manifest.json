@@ -1,0 +1,23 @@
+{
+  "name": "Ori Fitness App",
+  "short_name": "Ori Fitness",
+  "description": "אפליקציית כושר ותזונה אישית — כל הנתונים נשמרים במכשיר בלבד",
+  "lang": "he",
+  "dir": "rtl",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f4efe4",
+  "theme_color": "#f4efe4",
+  "categories": ["health", "fitness", "lifestyle"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "התחל אימון", "short_name": "אימון", "url": "./index.html#workout" },
+    { "name": "יומן תזונה", "short_name": "תזונה", "url": "./index.html#nutrition" }
+  ]
+}

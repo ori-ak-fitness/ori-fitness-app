@@ -1,0 +1,18 @@
+<!--
+  לוגו Ori Fitness — קרם ושחור, תואם לערכת הצבעים הבהירה של האפליקציה.
+  מוצג ב-28 פיקסלים בסרגל העליון (שם רק הצורה נראית) וגם כבסיס
+  לאייקוני ההתקנה (192/512/מסכה), שם גם "ORI FITNESS" קריא למטה.
+
+  להחלפה בלוגו שלך: פשוט דרוס את הקובץ הזה. מומלץ ריבועי.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Ori Fitness">
+  <rect width="512" height="512" rx="102" fill="#f4efe4"/>
+  <g fill="#2f2a22">
+    <rect x="146" y="146" width="220" height="60"  rx="26"/>
+    <rect x="76"  y="90"  width="72"  height="172" rx="30"/>
+    <rect x="364" y="90"  width="72"  height="172" rx="30"/>
+  </g>
+  <text x="256" y="390" text-anchor="middle" fill="#2f2a22"
+        font-family="'Monotype Corsiva', 'Segoe Script', cursive" font-size="52" font-weight="400"
+        font-style="italic" letter-spacing="1">ORI FITNESS</text>
+</svg>
