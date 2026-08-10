@@ -2,7 +2,31 @@
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+  <!-- רוחב קבוע של 620px במקום רוחב המכשיר: הטלפון מצייר בדיוק את אותה
+       תצוגה כמו המחשב (620px היא רוחב עמודת התוכן ב-main) ומקטין אותה
+       להתאמה למסך. כך אין שום הבדל בפריסה בין מחשב לטלפון — רק קנה מידה.
+       דפדפני מחשב מתעלמים מתגית זו, ולכן המחשב לא מושפע. -->
+  <meta name="viewport" content="width=620, viewport-fit=cover, maximum-scale=1.0">
+  <script>
+    /* משלים את תגית ה-viewport שמעליי. כשהאפליקציה היא הדף הראשי (GitHub
+       Pages, או קיצור דרך במסך הבית) הדפדפן מכבד את width=620 לבדו והסקריפט
+       הזה לא עושה כלום. אבל בתוך iframe — כמו התצוגה ב-claude.ai — דפדפנים
+       מתעלמים לגמרי מתגית viewport, ואז המסגרת צרה מ-620 והפריסה הייתה
+       נדחסת ונראית שונה מהמחשב. במקרה כזה מקטינים את כל העמוד ביחס אחיד
+       כדי לקבל בדיוק את אותה תצוגה, רק בקנה מידה קטן יותר. */
+    (function () {
+      var BASE = 620;
+      function fitToDesktopWidth() {
+        var el = document.documentElement;
+        el.style.zoom = '';                 // איפוס לפני מדידה, אחרת המדידה
+        var w = el.clientWidth;             // מושפעת מהערך הקודם ונוצר לולאה
+        if (w && w < BASE) el.style.zoom = w / BASE;
+      }
+      fitToDesktopWidth();
+      addEventListener('resize', fitToDesktopWidth);
+      addEventListener('DOMContentLoaded', fitToDesktopWidth);
+    })();
+  </script>
   <meta name="theme-color" content="#f4efe4">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">

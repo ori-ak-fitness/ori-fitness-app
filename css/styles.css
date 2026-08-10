@@ -1271,22 +1271,10 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .toast.out { animation: toastOut .25s ease forwards; }
 @keyframes toastOut { to { transform: translateY(12px); opacity: 0; } }
 
-/* ---------- מסכים צרים (טלפון) ----------
-   באפליקציה יש עיצוב אחד בלבד לכל הרוחבים, ולכן במסך צר אותו כרטיס בדיוק
-   נעשה כמעט ריבועי: במחשב עמודת התוכן היא 620px (כרטיס 588px רוחב על 177px
-   גובה, יחס 3.2:1), ובטלפון רק 375px (כרטיס 343px על אותם 177px, יחס 1.9:1).
-   כאן מצמצמים רק את הריפוד האנכי כדי להחזיר את הכרטיס לפרופורציה של מלבן
-   רחב. הצבעים, עובי המסגרות והמבנה נשארים זהים למחשב — אורי ביקש במפורש
-   שזה ייראה כמו במחשב, לא שיהיה עיצוב אחר. הכל תחום ל-max-width כדי
-   שתצוגת המחשב לא תושפע בכלל. */
-@media (max-width: 520px) {
-  .hs-card { padding: 10px 12px; }
-  .hs-kcal-row { margin: 0 0 6px; }
-  .hs-macro-row { padding: 2px 0; }
-  .goal-row { padding: 9px 12px; }
-  .day-chip { padding: 6px 2px; }
-  #screen-home .section-head { margin: 17px 0 8px; }
-}
+/* אין כאן התאמות למסך צר בכוונה: תגית ה-viewport ב-index.html קובעת רוחב
+   קבוע של 620px, ולכן הטלפון מצייר את אותה תצוגה בדיוק כמו המחשב ומקטין
+   אותה. כל כלל שהיה משנה עיצוב לפי רוחב היה יוצר שוב הבדל בין המכשירים —
+   וזה בדיוק מה שאורי ביקש למנוע. */
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
