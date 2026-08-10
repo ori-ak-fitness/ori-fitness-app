@@ -54,24 +54,24 @@ powershell -ExecutionPolicy Bypass -File serve.ps1
 
 ## פריסה ל-GitHub Pages
 
-1. צור ריפו חדש ב-GitHub (למשל `ori-fitness`).
-2. מהתיקייה הזו:
+האפליקציה כבר פרוסה וחיה בכתובת:
+
+**https://ori-ak-fitness.github.io/ori-fitness-app/**
+
+הפריסה אוטומטית לחלוטין — כל דחיפה ל-`main` מריצה את
+`.github/workflows/pages.yml`, שמפרסם מחדש את האתר תוך כדקה:
 
 ```bash
-git init
 git add .
-git commit -m "Ori Fitness App - stage 1"
-git branch -M main
-git remote add origin https://github.com/USERNAME/ori-fitness.git
-git push -u origin main
+git commit -m "תיאור השינוי"
+git push
 ```
 
-3. ב-GitHub: **Settings → Pages → Source: Deploy from a branch → Branch: `main` / `(root)`** → Save.
-4. אחרי דקה-שתיים האפליקציה תהיה זמינה בכתובת:
-   `https://USERNAME.github.io/ori-fitness/`
+אין צורך להדליק Pages ידנית בהגדרות: ה-workflow משתמש ב-`configure-pages`
+עם `enablement: true`, ולכן הוא מפעיל את Pages בעצמו.
 
-GitHub Pages מגיש ב-HTTPS, ולכן גם המצלמה החיה (שלב 2) והתקנת ה-PWA יעבדו.
-כל הנתיבים בפרויקט יחסיים, כך שזה עובד גם בתת-נתיב (`/ori-fitness/`).
+GitHub Pages מגיש ב-HTTPS, ולכן גם המצלמה החיה והתקנת ה-PWA עובדות.
+כל הנתיבים בפרויקט יחסיים, כך שזה עובד גם בתת-נתיב (`/ori-fitness-app/`).
 
 ### התקנה בטלפון
 
