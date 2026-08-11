@@ -26,7 +26,11 @@ let currentScreen = 'home';
 
 /* ---------- ניווט ---------- */
 
-function showScreen(name) {
+/*
+ * fromHistory=true כשההגעה היא מלחיצה על "חזור" של המכשיר — אז אסור לרשום
+ * רשומה חדשה בהיסטוריה, אחרת נוצרת לולאה ואי אפשר לצאת מהמסך.
+ */
+function showScreen(name, fromHistory = false) {
   if (!SCREENS.includes(name)) name = 'home';
   currentScreen = name;
 
@@ -46,7 +50,16 @@ function showScreen(name) {
   if (name === 'progress') { renderProgress(); renderBodyWeight(); }
   if (name === 'settings') { renderSettings(); renderBackupInfo(); }
 
-  history.replaceState(null, '', '#' + name);
+  /*
+   * מסך הבית הוא תמיד הבסיס: הוא מחליף את הרשומה הנוכחית, וכל מסך אחר
+   * נדחף מעליו. כך "חזור" במכשיר מחזיר למסך הקודם ורק מהבית יוצא
+   * מהאפליקציה — בדיוק כמו באפליקציה מותקנת, ולא סוגר אותה מכל מסך.
+   */
+  if (!fromHistory) {
+    const entry = { screen: name };
+    if (name === 'home') history.replaceState(entry, '', '#' + name);
+    else history.pushState(entry, '', '#' + name);
+  }
 }
 
 function initNav() {
@@ -57,6 +70,12 @@ function initNav() {
   $('#liveTimerChip').addEventListener('click', () => showScreen('workout'));
   $('#settingsBtn').addEventListener('click', () =>
     showScreen(currentScreen === 'settings' ? 'home' : 'settings'));
+
+  // כפתור "חזור" של המכשיר — מנווט בין מסכים במקום לסגור את האפליקציה
+  window.addEventListener('popstate', (e) => {
+    const target = (e.state && e.state.screen) || location.hash.replace('#', '') || 'home';
+    showScreen(target, true);
+  });
 
   const fromHash = location.hash.replace('#', '');
   showScreen(SCREENS.includes(fromHash) ? fromHash : 'home');

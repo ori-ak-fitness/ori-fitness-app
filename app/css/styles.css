@@ -154,6 +154,18 @@
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
+/*
+ * לחיצה ארוכה על כפתור או כותרת באפליקציה מותקנת לא אמורה לסמן טקסט
+ * ולפתוח תפריט "העתק" — זו התנהגות של דף אינטרנט והיא מה שהכי מסגיר
+ * שזה לא אפליקציה. שדות קלט וטקסט חופשי שהמשתמש כתב נשארים ניתנים
+ * לבחירה, כי שם זה כן שימושי.
+ */
+body { -webkit-user-select: none; user-select: none; }
+input, textarea, [contenteditable],
+.quote-text, .goal-text, .full-menu-note, .li-sub, .meal-note {
+  -webkit-user-select: text; user-select: text;
+}
+
 html, body {
   margin: 0;
   padding: 0;
