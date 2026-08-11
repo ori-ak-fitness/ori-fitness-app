@@ -532,32 +532,13 @@ function removeSet(exId, setId) {
   renderActive();
 }
 
-/* ---------- נעילת מסך בזמן אימון ---------- */
-
 /*
- * באמצע סט אף אחד לא נוגע במסך, והטלפון מכבה אותו — צריך להעיר ולפתוח
- * שוב כדי לרשום חזרות. נעילת ההשכמה מונעת את זה כל עוד יש אימון פעיל.
- * לא נתמך בכל דפדפן, ולכן הכל עטוף — כישלון כאן לא אמור לשבור אימון.
+ * במכוון אין כאן נעילת מסך (Wake Lock): אורי רוצה לכבות את הטלפון
+ * ושהאימון ימשיך. זה עובד ממילא — elapsedSec מחשב את הזמן מהפרש
+ * מול startedAt השמור, ולא מספירת תקתוקים, והאימון הפעיל נשמר
+ * ב-IndexedDB ומשוחזר ב-initWorkouts. לכן כיבוי המסך, סגירת
+ * האפליקציה או אתחול הטלפון לא פוגעים באימון או בזמן שלו.
  */
-let wakeLock = null;
-
-async function keepScreenAwake() {
-  try {
-    if (!('wakeLock' in navigator) || wakeLock) return;
-    wakeLock = await navigator.wakeLock.request('screen');
-    // המערכת משחררת את הנעילה כשעוברים אפליקציה — צריך לבקש אותה מחדש
-    wakeLock.addEventListener('release', () => { wakeLock = null; });
-  } catch { /* אין תמיכה או שהמשתמש חסם — לא קריטי */ }
-}
-
-async function releaseScreenLock() {
-  try { await wakeLock?.release(); } catch { /* כבר שוחרר */ }
-  wakeLock = null;
-}
-
-document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible' && active) keepScreenAwake();
-});
 
 /* ---------- התחלה / סיום ---------- */
 
@@ -570,7 +551,6 @@ export async function startWorkout(routine = null) {
   await loadReminder();
   renderActive();
   startTimer();
-  keepScreenAwake();
   toast(routine ? `${routine.name} — יאללה! 💪` : 'בהצלחה! הטיימר רץ 💪', 'ok');
 }
 
@@ -581,7 +561,6 @@ async function cancelWorkout() {
   dismissPR();
   await db.delSetting(ACTIVE_KEY);
   stopTimer();
-  releaseScreenLock();
   renderActive();
   await renderHistory();
   toast('האימון בוטל');
@@ -601,7 +580,6 @@ async function finishWorkout() {
     active = null;
     await db.delSetting(ACTIVE_KEY);
     stopTimer();
-    releaseScreenLock();
     renderActive();
     return;
   }
@@ -625,7 +603,6 @@ async function finishWorkout() {
   active = null;
   await db.delSetting(ACTIVE_KEY);
   stopTimer();
-  releaseScreenLock();
   renderActive();
   await renderHistory();
   await refreshSuggestions();
