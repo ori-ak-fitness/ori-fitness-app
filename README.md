@@ -54,15 +54,14 @@ powershell -ExecutionPolicy Bypass -File serve.ps1
 
 ## פריסה ל-GitHub Pages
 
-האתר כבר פרוס וחי:
+האתר כבר פרוס וחי, בכתובת אחת לאתר ולאפליקציה כאחד:
 
-- **דף הבית:** https://ori-ak-fitness.github.io/ori-fitness-app/
-- **האפליקציה:** https://ori-ak-fitness.github.io/ori-fitness-app/app/
+**https://ori-ak-fitness.github.io/ori-fitness-app/**
 
-מבנה: `index.html` בשורש הוא דף הנחיתה השיווקי (עצמאי, בלי תלויות),
-וכל האפליקציה עצמה יושבת תחת `app/` — כולל `css/`, `js/`, `icons/`,
-`sw.js` ו-`manifest.json`. כל הנתיבים באפליקציה יחסיים, ולכן ההעברה
-לתת-תיקייה לא דרשה שינוי קוד.
+מבנה: `index.html` מכיל גם את שער הכניסה (`#welcomeGate`) — דף הנחיתה
+שרואה מי שלא מחובר — וגם את האפליקציה עצמה. `js/gate.js` מחליט מה
+להציג: כל עוד `js/firebase-config.js` ריק השער נסגר מיד והאפליקציה
+נפתחת כרגיל, וברגע שממלאים אותו הכניסה נעשית באישור בלבד.
 
 הפריסה אוטומטית לחלוטין — כל דחיפה ל-`main` מריצה את
 `.github/workflows/pages.yml`, שמפרסם מחדש את האתר תוך כדקה:

@@ -17,11 +17,11 @@ param(
     [int]$Port = 8123
 )
 
-$liveUrl = "https://ori-ak-fitness.github.io/ori-fitness-app/app/"
+$liveUrl = "https://ori-ak-fitness.github.io/ori-fitness-app/"
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
 
 if ($Local) {
-    $url = "http://localhost:$Port/app/"
+    $url = "http://localhost:$Port/"
 } else {
     $url = $liveUrl
 }
