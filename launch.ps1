@@ -2,51 +2,61 @@
   launch.ps1 - Opens Ori Fitness App as a standalone desktop window.
   (ASCII only on purpose: Windows PowerShell 5.1 reads .ps1 files as ANSI.)
 
-  What it does:
-    1. Starts the local server (serve.ps1) if it is not already running.
-    2. Opens the app in Chrome/Edge "app mode" - a clean window with no
-       tabs and no address bar, so it looks and feels like a real app.
+  By default this opens the LIVE published app on GitHub Pages, so the
+  desktop window always shows exactly the same version as the phone and
+  no local server is needed.
 
-  Normally launched by double-clicking "Ori Fitness.cmd".
+  Use -Local to open the working copy from this folder instead (starts
+  serve.ps1 on port 8123). That is for trying out changes before they are
+  pushed. Note that the local copy and the live site keep separate data,
+  because browsers store data per address.
 #>
 
-# Port 8123 belongs to YOUR app window only.
-# Claude's own testing uses 8080, so the two can never show up at the same
-# time or share state - that is what caused the "app opens twice" confusion.
-param([int]$Port = 8123)
+param(
+    [switch]$Local,
+    [int]$Port = 8123
+)
 
+$liveUrl = "https://ori-ak-fitness.github.io/ori-fitness-app/app/"
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
-$url = "http://localhost:$Port/"
+
+if ($Local) {
+    $url = "http://localhost:$Port/app/"
+} else {
+    $url = $liveUrl
+}
 
 function Test-ServerUp {
     try {
-        $r = Invoke-WebRequest -Uri $url -UseBasicParsing -TimeoutSec 2
+        $r = Invoke-WebRequest -Uri "http://localhost:$Port/" -UseBasicParsing -TimeoutSec 2
         return ($r.StatusCode -eq 200)
     } catch { return $false }
 }
 
-# ---- 1. server ----
-if (Test-ServerUp) {
-    Write-Host "Server already running on $url" -ForegroundColor DarkGray
-} else {
-    Write-Host "Starting local server..." -ForegroundColor Green
-    $serve = Join-Path $root "serve.ps1"
-    # The path contains spaces ("Ori Fitness App"), so it must be quoted here -
-    # Start-Process does not quote array arguments for us.
-    Start-Process -FilePath "powershell" `
-        -ArgumentList "-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File `"$serve`" -Port $Port" `
-        -WindowStyle Hidden
+# ---- 1. local server (only needed for -Local) ----
+if ($Local) {
+    if (Test-ServerUp) {
+        Write-Host "Server already running on port $Port" -ForegroundColor DarkGray
+    } else {
+        Write-Host "Starting local server..." -ForegroundColor Green
+        $serve = Join-Path $root "serve.ps1"
+        # The path contains spaces ("Ori Fitness App"), so it must be quoted here -
+        # Start-Process does not quote array arguments for us.
+        Start-Process -FilePath "powershell" `
+            -ArgumentList "-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File `"$serve`" -Port $Port" `
+            -WindowStyle Hidden
 
-    $ready = $false
-    foreach ($i in 1..25) {
-        Start-Sleep -Milliseconds 300
-        if (Test-ServerUp) { $ready = $true; break }
-    }
-    if (-not $ready) {
-        Write-Host "Could not start the server on port $Port." -ForegroundColor Red
-        Write-Host "Another program may be using it. Try:  .\launch.ps1 -Port 8081" -ForegroundColor Yellow
-        if ([Environment]::UserInteractive) { Read-Host "Press Enter to close" | Out-Null }
-        exit 1
+        $ready = $false
+        foreach ($i in 1..25) {
+            Start-Sleep -Milliseconds 300
+            if (Test-ServerUp) { $ready = $true; break }
+        }
+        if (-not $ready) {
+            Write-Host "Could not start the server on port $Port." -ForegroundColor Red
+            Write-Host "Another program may be using it. Try:  .\launch.ps1 -Local -Port 8081" -ForegroundColor Yellow
+            if ([Environment]::UserInteractive) { Read-Host "Press Enter to close" | Out-Null }
+            exit 1
+        }
     }
 }
 
@@ -69,7 +79,7 @@ if ($browser) {
         "--user-data-dir=`"$profileDir`"",
         "--window-size=430,860"
     )
-    Write-Host "Ori Fitness App opened." -ForegroundColor Green
+    Write-Host "Ori Fitness App opened: $url" -ForegroundColor Green
 } else {
     Write-Host "Chrome/Edge not found - opening in your default browser instead." -ForegroundColor Yellow
     Start-Process $url
