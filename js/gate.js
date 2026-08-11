@@ -33,7 +33,14 @@ function setNote(text, state = '') {
 }
 
 /**
- * @returns {Promise<boolean>} האם מותר להמשיך לאפליקציה
+ * מחזיר Promise שנפתר רק כשמותר להיכנס לאפליקציה.
+ *
+ * חשוב: הפונקציה הזו לא יכולה פשוט להחזיר false כשיש התחברות —
+ * main() ממתין לה כדי לדעת מתי לאתחל את האפליקציה. אם היא תסתיים
+ * לפני שהמשתמש אושר, השער אמנם ייסגר אבל שום מסך לא ייטען, והמשתמש
+ * יראה ממשק ריק שלא מגיב. לכן ההבטחה נפתרת בדיוק ברגע האישור.
+ *
+ * @returns {Promise<boolean>}
  */
 export async function initGate() {
   if (!isConfigured()) {
@@ -51,14 +58,23 @@ export async function initGate() {
     btn.textContent = 'טוען…';
   }
 
-  try {
-    const auth = await import('./auth.js');
-    await auth.startAuthFlow({ openGate, closeGate, setNote });
-    return false; // auth.js סוגר את השער בעצמו כשהמשתמש מאושר
-  } catch (err) {
-    console.warn('[Ori Fitness] טעינת ההתחברות נכשלה:', err);
-    setNote('לא הצלחנו לטעון את מסך ההתחברות. נסה לרענן.', 'denied');
-    if (btn) { btn.disabled = false; btn.textContent = 'נסה שוב'; }
-    return false;
-  }
+  return new Promise((resolve) => {
+    let released = false;
+    // נקרא כשהמשתמש מאושר. onAuthStateChanged עשוי לירות יותר מפעם
+    // אחת, ולכן משחררים את האפליקציה רק בפעם הראשונה.
+    const grantAccess = () => {
+      closeGate();
+      if (released) return;
+      released = true;
+      resolve(true);
+    };
+
+    import('./auth.js')
+      .then((auth) => auth.startAuthFlow({ openGate, closeGate: grantAccess, setNote }))
+      .catch((err) => {
+        console.warn('[Ori Fitness] טעינת ההתחברות נכשלה:', err);
+        setNote('לא הצלחנו לטעון את מסך ההתחברות. נסה לרענן.', 'denied');
+        if (btn) { btn.disabled = false; btn.textContent = 'נסה שוב'; }
+      });
+  });
 }
