@@ -11,12 +11,12 @@
    =================================================================== */
 
 export const firebaseConfig = {
-  apiKey: '',
-  authDomain: '',
-  projectId: '',
-  storageBucket: '',
-  messagingSenderId: '',
-  appId: '',
+  apiKey: 'AIzaSyALIV4GUTotmWdaNb6GWF91MJHHZ_ktek0',
+  authDomain: 'ori-ak-fitness.firebaseapp.com',
+  projectId: 'ori-ak-fitness',
+  storageBucket: 'ori-ak-fitness.firebasestorage.app',
+  messagingSenderId: '1068333439061',
+  appId: '1:1068333439061:web:f7dc639e0022276a34dcdc',
 };
 
 /** כתובות המייל שמנהלות את האפליקציה — מאשרות ומסירות משתמשים */
