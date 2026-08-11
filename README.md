@@ -54,9 +54,15 @@ powershell -ExecutionPolicy Bypass -File serve.ps1
 
 ## פריסה ל-GitHub Pages
 
-האפליקציה כבר פרוסה וחיה בכתובת:
+האתר כבר פרוס וחי:
 
-**https://ori-ak-fitness.github.io/ori-fitness-app/**
+- **דף הבית:** https://ori-ak-fitness.github.io/ori-fitness-app/
+- **האפליקציה:** https://ori-ak-fitness.github.io/ori-fitness-app/app/
+
+מבנה: `index.html` בשורש הוא דף הנחיתה השיווקי (עצמאי, בלי תלויות),
+וכל האפליקציה עצמה יושבת תחת `app/` — כולל `css/`, `js/`, `icons/`,
+`sw.js` ו-`manifest.json`. כל הנתיבים באפליקציה יחסיים, ולכן ההעברה
+לתת-תיקייה לא דרשה שינוי קוד.
 
 הפריסה אוטומטית לחלוטין — כל דחיפה ל-`main` מריצה את
 `.github/workflows/pages.yml`, שמפרסם מחדש את האתר תוך כדקה:
