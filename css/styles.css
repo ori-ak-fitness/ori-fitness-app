@@ -1288,6 +1288,59 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
    אותה. כל כלל שהיה משנה עיצוב לפי רוחב היה יוצר שוב הבדל בין המכשירים —
    וזה בדיוק מה שאורי ביקש למנוע. */
 
+/* ---------- שער הכניסה (דף הנחיתה למי שלא מחובר) ----------
+   יושב מעל האפליקציה באותה כתובת, כדי שלא יהיו שתי כתובות נפרדות
+   לאתר ולאפליקציה. body.gate-open מסתיר את ממשק האפליקציה מאחוריו. */
+.gate {
+  position: fixed; inset: 0; z-index: 90;
+  background: var(--bg); overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+body.gate-open { overflow: hidden; }
+/* כל עוד השער פתוח, אין טעם שהסרגלים של האפליקציה יציצו מאחוריו */
+body.gate-open .topbar,
+body.gate-open .tabbar,
+body.gate-open main { display: none !important; }
+
+.gate-scroll {
+  max-width: 620px; margin: 0 auto;
+  padding: calc(var(--safe-top) + 34px) 20px calc(var(--safe-bottom) + 34px);
+}
+.gate-hero { text-align: center; }
+.gate-logo {
+  width: 76px; height: 76px; border-radius: 20px; display: block; margin: 0 auto 18px;
+  box-shadow: 0 14px 30px -10px var(--shadow-strong);
+}
+.gate-eyebrow {
+  display: inline-block; background: var(--bg-elev); border: 2px solid var(--line);
+  padding: 6px 14px; border-radius: 999px;
+  font-size: .8rem; font-weight: 700; color: var(--text-dim); margin-bottom: 18px;
+}
+.gate-title { font-size: 1.9rem; line-height: 1.2; margin-bottom: 14px; text-wrap: balance; }
+.gate-title span { color: var(--gold-deep); }
+.gate-lede { color: var(--text-dim); font-size: 1rem; margin-bottom: 26px; }
+
+.gate-auth { margin-bottom: 34px; }
+.gate-note { font-size: .85rem; color: var(--text-dim); margin-top: 12px; }
+.gate-note.is-pending { color: var(--warn); font-weight: 700; }
+.gate-note.is-denied { color: var(--danger); font-weight: 700; }
+
+.gate-features { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (max-width: 430px) { .gate-features { grid-template-columns: 1fr; } }
+.gate-feature {
+  background: var(--bg-elev); border: 2px solid var(--line); border-radius: var(--r-md);
+  padding: 15px 14px; text-align: start;
+  box-shadow: 0 1px 2px var(--shadow-strong);
+}
+.gate-feature span { font-size: 1.5rem; line-height: 1; display: block; margin-bottom: 7px; }
+.gate-feature b { display: block; font-size: .95rem; margin-bottom: 3px; }
+.gate-feature small { color: var(--text-dim); font-size: .82rem; line-height: 1.45; }
+
+.gate-foot {
+  text-align: center; color: var(--text-faint); font-size: .82rem;
+  margin-top: 30px; padding-top: 18px; border-top: 1px solid var(--line);
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
 }

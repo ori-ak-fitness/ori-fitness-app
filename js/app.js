@@ -20,6 +20,7 @@ import { initMealPlan, invalidatePlanCache } from './mealplan.js';
 import { initBackup, renderBackupInfo } from './backup.js';
 import { initSettingsScreen, renderSettings } from './settings.js';
 import { initOnboarding, shouldRunWizard, openWizard, rerunWizard } from './onboarding.js';
+import { initGate } from './gate.js';
 
 const SCREENS = ['home', 'workout', 'nutrition', 'progress', 'settings'];
 let currentScreen = 'home';
@@ -187,6 +188,11 @@ async function registerSW() {
 /* ---------- אתחול ---------- */
 
 async function main() {
+  // שער הכניסה נבדק לפני הכל: אין טעם לפתוח מסד נתונים ולצייר מסכים
+  // למי שעדיין לא אושר. כשאין הגדרות Firebase הוא נסגר מיד ומחזיר true.
+  const mayEnter = await initGate();
+  if (!mayEnter) return;
+
   try {
     await db.openDB();
   } catch (err) {

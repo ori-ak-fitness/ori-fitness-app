@@ -2,425 +2,626 @@
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#f4efe4">
-  <title>אורי פיטנס | Ori Fitness — אפליקציית מעקב אימונים ותזונה בעברית</title>
-  <meta name="description" content="אורי פיטנס (Ori Fitness) — אפליקציית כושר אישית בעברית: מעקב אימונים וסטים, יומן תזונה וקלוריות, שקילות וגרפים, אתגרים אישיים ומדליות. חינם, עובדת גם בלי אינטרנט, והנתונים נשארים רק אצלך במכשיר.">
-  <meta name="keywords" content="אורי פיטנס, Ori Fitness, אפליקציית כושר, מעקב אימונים, יומן אימונים, ספירת קלוריות, מעקב תזונה, אפליקציית כושר בעברית, יומן שקילות">
-  <link rel="canonical" href="https://ori-ak-fitness.github.io/ori-fitness-app/">
-
-  <!-- כרטיס ביקור לגוגל: מסביר שזו אפליקציה, ושהשם העברי והאנגלי הם אותו דבר -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "WebApplication",
-    "name": "אורי פיטנס",
-    "alternateName": ["Ori Fitness", "Ori Fitness App", "אורי פיטנס אפליקציה"],
-    "url": "https://ori-ak-fitness.github.io/ori-fitness-app/",
-    "applicationCategory": "HealthApplication",
-    "operatingSystem": "Any",
-    "inLanguage": "he",
-    "description": "אפליקציית כושר אישית בעברית למעקב אימונים, תזונה, משקל והתקדמות. עובדת גם בלי אינטרנט והנתונים נשמרים במכשיר בלבד.",
-    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "ILS" }
-  }
-  </script>
-  <link rel="icon" href="app/icons/icon-192.png">
-  <link rel="apple-touch-icon" href="app/icons/icon-192.png">
-
-  <!-- Open Graph — כך זה נראה כששולחים את הקישור בוואטסאפ או בפייסבוק -->
-  <meta property="og:type" content="website">
-  <meta property="og:title" content="Ori Fitness — אפליקציית הכושר האישית שלך">
-  <meta property="og:description" content="מעקב אימונים, תזונה, משקל והתקדמות — הכל במקום אחד, בעברית, וגם בלי אינטרנט.">
-  <meta property="og:image" content="app/icons/icon-512.png">
-  <meta property="og:locale" content="he_IL">
-
-  <style>
-    :root {
-      --bg:        #f4efe4;
-      --bg-elev:   #fffdf7;
-      --bg-elev-2: #eae3d4;
-      --line:      rgba(20, 18, 14, .5);
-      --text:      #221e18;
-      --text-dim:  #6b6253;
-      --accent:    #2f2a22;
-      --gold:      #2f9298;
-      --gold-deep: #1d6b6f;
-      --gold-ink:  #eaf6f6;
-      --shadow:    rgba(90, 75, 45, .16);
-      --r-md: 16px;
-      --r-lg: 22px;
-    }
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --bg:        #0f1115;
-        --bg-elev:   #171a21;
-        --bg-elev-2: #1e222b;
-        --line:      rgba(240, 227, 200, .38);
-        --text:      #eef1f6;
-        --text-dim:  #9aa3b2;
-        --accent:    #f0e3c8;
-        --shadow:    rgba(0, 0, 0, .45);
+  <!-- רוחב קבוע של 620px במקום רוחב המכשיר: הטלפון מצייר בדיוק את אותה
+       תצוגה כמו המחשב (620px היא רוחב עמודת התוכן ב-main) ומקטין אותה
+       להתאמה למסך. כך אין שום הבדל בפריסה בין מחשב לטלפון — רק קנה מידה.
+       דפדפני מחשב מתעלמים מתגית זו, ולכן המחשב לא מושפע. -->
+  <meta name="viewport" content="width=620, viewport-fit=cover, maximum-scale=1.0">
+  <script>
+    /* משלים את תגית ה-viewport שמעליי. כשהאפליקציה היא הדף הראשי (GitHub
+       Pages, או קיצור דרך במסך הבית) הדפדפן מכבד את width=620 לבדו והסקריפט
+       הזה לא עושה כלום. אבל בתוך iframe — כמו התצוגה ב-claude.ai — דפדפנים
+       מתעלמים לגמרי מתגית viewport, ואז המסגרת צרה מ-620 והפריסה הייתה
+       נדחסת ונראית שונה מהמחשב. במקרה כזה מקטינים את כל העמוד ביחס אחיד
+       כדי לקבל בדיוק את אותה תצוגה, רק בקנה מידה קטן יותר. */
+    (function () {
+      var BASE = 620;
+      function fitToDesktopWidth() {
+        var el = document.documentElement;
+        el.style.zoom = '';                 // איפוס לפני מדידה, אחרת המדידה
+        var w = el.clientWidth;             // מושפעת מהערך הקודם ונוצר לולאה
+        if (w && w < BASE) el.style.zoom = w / BASE;
       }
-    }
-
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    html, body {
-      margin: 0; padding: 0;
-      background: var(--bg); color: var(--text);
-      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      font-size: 16px; line-height: 1.6;
-      overflow-x: hidden;
-    }
-    h1, h2, h3 { margin: 0; font-weight: 800; letter-spacing: -.02em; line-height: 1.2; }
-    p { margin: 0; }
-    a { text-decoration: none; color: inherit; }
-    .wrap { max-width: 1080px; margin: 0 auto; padding: 0 20px; }
-
-    /* ---------- סרגל עליון ---------- */
-    .nav {
-      position: sticky; top: 0; z-index: 50;
-      background: color-mix(in srgb, var(--bg) 88%, transparent);
-      backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
-      border-bottom: 1px solid var(--line);
-    }
-    .nav-inner {
-      display: flex; align-items: center; justify-content: space-between;
-      gap: 12px; height: 64px;
-    }
-    .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 1.05rem; }
-    .brand img { width: 34px; height: 34px; border-radius: 9px; display: block; }
-    .nav-links { display: flex; align-items: center; gap: 22px; font-size: .93rem; font-weight: 600; color: var(--text-dim); }
-    .nav-links a:hover { color: var(--text); }
-    @media (max-width: 700px) { .nav-links { display: none; } }
-
-    .btn {
-      display: inline-flex; align-items: center; justify-content: center; gap: 9px;
-      border: none; border-radius: var(--r-md); cursor: pointer;
-      font-family: inherit; font-weight: 800; font-size: 1rem;
-      padding: 13px 24px; transition: transform .08s ease, filter .15s ease;
-    }
-    .btn:active { transform: scale(.97); }
-    .btn-primary {
-      background: linear-gradient(155deg, rgba(255,255,255,.3), rgba(0,0,0,.08)),
-                  linear-gradient(150deg, var(--gold), var(--gold-deep));
-      color: var(--gold-ink);
-      box-shadow: 0 10px 22px -8px rgba(29, 107, 111, .55), 0 2px 4px rgba(29, 107, 111, .3);
-    }
-    .btn-sm { padding: 10px 18px; font-size: .9rem; }
-    .btn-ghost { background: transparent; border: 2px solid var(--line); color: var(--text); }
-
-    /* ---------- Hero ---------- */
-    .hero { padding: 74px 0 64px; position: relative; overflow: hidden; }
-    .hero::before {
-      content: ''; position: absolute; inset-block-start: -180px; inset-inline-end: -140px;
-      width: 520px; height: 520px; border-radius: 50%;
-      background: radial-gradient(circle, rgba(47,146,152,.22), transparent 68%);
-      pointer-events: none;
-    }
-    .hero-grid { display: grid; grid-template-columns: 1.15fr .85fr; gap: 52px; align-items: center; }
-    @media (max-width: 860px) { .hero-grid { grid-template-columns: 1fr; gap: 40px; } }
-
-    .eyebrow {
-      display: inline-flex; align-items: center; gap: 7px;
-      background: var(--bg-elev); border: 2px solid var(--line);
-      padding: 7px 14px; border-radius: 999px;
-      font-size: .82rem; font-weight: 700; color: var(--text-dim);
-      margin-bottom: 20px;
-    }
-    .hero h1 { font-size: clamp(2.1rem, 5.4vw, 3.35rem); margin-bottom: 18px; text-wrap: balance; }
-    .hero h1 .hl { color: var(--gold-deep); }
-    .hero .lede { font-size: clamp(1.02rem, 2.2vw, 1.18rem); color: var(--text-dim); max-width: 46ch; margin-bottom: 30px; }
-    .hero-cta { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
-    .hero-note { font-size: .85rem; color: var(--text-dim); margin-top: 16px; }
-
-    /* מסגרת טלפון עם הצצה לאפליקציה */
-    .phone {
-      justify-self: center;
-      width: 268px; aspect-ratio: 9 / 18.5;
-      background: var(--bg-elev); border: 2px solid var(--line);
-      border-radius: 34px; padding: 11px;
-      box-shadow: 0 26px 60px -18px var(--shadow), 0 3px 8px var(--shadow);
-      position: relative;
-    }
-    .phone::before {
-      content: ''; position: absolute; inset-block-start: 17px; inset-inline: 0;
-      width: 84px; height: 5px; margin: 0 auto;
-      background: var(--line); border-radius: 999px; opacity: .55;
-    }
-    .phone-screen {
-      width: 100%; height: 100%; border-radius: 25px; overflow: hidden;
-      background: var(--bg); border: 1px solid var(--line);
-      padding: 30px 13px 13px; display: flex; flex-direction: column; gap: 9px;
-    }
-    .ph-greet { font-size: .82rem; font-weight: 800; }
-    .ph-date { font-size: .62rem; color: var(--text-dim); margin-bottom: 3px; }
-    .ph-card {
-      background: var(--bg-elev); border: 2px solid var(--line);
-      border-radius: 11px; padding: 9px 10px;
-      box-shadow: 0 1px 2px var(--shadow);
-    }
-    .ph-head { display: flex; align-items: center; gap: 6px; font-size: .66rem; font-weight: 800; margin-bottom: 5px; }
-    .ph-row { display: flex; justify-content: space-between; font-size: .6rem; color: var(--text-dim); padding: 2px 0; }
-    .ph-row b { color: var(--text); }
-    .ph-bar { height: 6px; border-radius: 999px; background: var(--bg-elev-2); overflow: hidden; margin-top: 5px; }
-    .ph-bar span { display: block; height: 100%; width: 62%; border-radius: 999px; background: linear-gradient(90deg, var(--gold-deep), var(--gold)); }
-    .ph-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; margin-top: 4px; }
-    .ph-day {
-      aspect-ratio: 1; border-radius: 6px; display: grid; place-items: center;
-      font-size: .55rem; font-weight: 800;
-      background: var(--bg-elev-2); color: var(--text-dim); border: 1px solid var(--line);
-    }
-    .ph-day.on {
-      background: linear-gradient(150deg, var(--gold), var(--gold-deep));
-      color: var(--gold-ink); border-color: transparent;
-    }
-
-    /* ---------- מקטעים ---------- */
-    section { padding: 66px 0; }
-    .sec-head { text-align: center; max-width: 640px; margin: 0 auto 42px; }
-    .sec-head h2 { font-size: clamp(1.6rem, 3.6vw, 2.2rem); margin-bottom: 12px; }
-    .sec-head p { color: var(--text-dim); }
-
-    .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
-    @media (max-width: 900px) { .features { grid-template-columns: repeat(2, 1fr); } }
-    @media (max-width: 600px) { .features { grid-template-columns: 1fr; } }
-    .feature {
-      background: var(--bg-elev); border: 2px solid var(--line);
-      border-radius: var(--r-lg); padding: 24px 22px;
-      box-shadow: 0 1px 2px var(--shadow), 0 10px 22px -12px var(--shadow);
-    }
-    .feature-ico {
-      width: 46px; height: 46px; border-radius: 13px;
-      display: grid; place-items: center; font-size: 1.5rem; margin-bottom: 14px;
-      background: linear-gradient(155deg, rgba(255,255,255,.32), rgba(0,0,0,.06)),
-                  linear-gradient(150deg, var(--gold), var(--gold-deep));
-      box-shadow: 0 4px 10px rgba(29, 107, 111, .32);
-    }
-    .feature h3 { font-size: 1.06rem; margin-bottom: 7px; }
-    .feature p { font-size: .92rem; color: var(--text-dim); }
-
-    .steps-band { background: var(--bg-elev-2); border-block: 1px solid var(--line); }
-    .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 26px; }
-    @media (max-width: 780px) { .steps { grid-template-columns: 1fr; gap: 22px; } }
-    .step { text-align: center; }
-    .step-num {
-      width: 44px; height: 44px; border-radius: 13px; margin: 0 auto 14px;
-      display: grid; place-items: center; font-weight: 800; font-size: 1.05rem;
-      background: linear-gradient(155deg, rgba(255,255,255,.32), rgba(0,0,0,.06)),
-                  linear-gradient(150deg, var(--gold), var(--gold-deep));
-      color: var(--gold-ink); box-shadow: 0 4px 10px rgba(29, 107, 111, .32);
-    }
-    .step h3 { font-size: 1.02rem; margin-bottom: 6px; }
-    .step p { font-size: .9rem; color: var(--text-dim); }
-
-    .privacy { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
-    @media (max-width: 780px) { .privacy { grid-template-columns: 1fr; } }
-    .pill {
-      display: flex; align-items: flex-start; gap: 12px;
-      background: var(--bg-elev); border: 2px solid var(--line);
-      border-radius: var(--r-md); padding: 18px 18px;
-    }
-    .pill .ic { font-size: 1.35rem; line-height: 1; flex: none; }
-    .pill b { display: block; margin-bottom: 3px; }
-    .pill span { font-size: .88rem; color: var(--text-dim); }
-
-    /* ---------- קריאה לפעולה ---------- */
-    .cta {
-      text-align: center;
-      background: linear-gradient(150deg, var(--gold), var(--gold-deep));
-      border-radius: 28px; padding: 54px 26px; color: var(--gold-ink);
-      box-shadow: 0 22px 50px -20px rgba(29, 107, 111, .6);
-    }
-    .cta h2 { font-size: clamp(1.5rem, 3.4vw, 2.05rem); margin-bottom: 12px; color: #fff; }
-    .cta p { opacity: .92; margin-bottom: 26px; }
-    .cta .btn {
-      background: #fff; color: var(--gold-deep);
-      box-shadow: 0 8px 20px rgba(0,0,0,.18);
-    }
-
-    footer {
-      border-top: 1px solid var(--line); padding: 30px 0; margin-top: 66px;
-      color: var(--text-dim); font-size: .88rem;
-    }
-    .foot-inner { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
-  </style>
+      fitToDesktopWidth();
+      addEventListener('resize', fitToDesktopWidth);
+      addEventListener('DOMContentLoaded', fitToDesktopWidth);
+    })();
+  </script>
+  <meta name="theme-color" content="#f4efe4">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Ori Fitness">
+  <title>אורי פיטנס | Ori Fitness — אפליקציית מעקב אימונים ותזונה בעברית</title>
+  <meta name="description" content="אורי פיטנס (Ori Fitness) — אפליקציית כושר אישית בעברית: מעקב אימונים וסטים, יומן תזונה וקלוריות, שקילות וגרפים, אתגרים אישיים ומדליות. הכניסה באישור בלבד.">
+  <link rel="canonical" href="https://ori-ak-fitness.github.io/ori-fitness-app/">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="אורי פיטנס — אפליקציית הכושר האישית">
+  <meta property="og:description" content="מעקב אימונים, תזונה, משקל והתקדמות — הכל במקום אחד, בעברית.">
+  <meta property="og:image" content="icons/icon-512.png">
+  <meta property="og:locale" content="he_IL">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
 
-  <nav class="nav">
-    <div class="wrap nav-inner">
-      <div class="brand">
-        <img src="app/icons/icon-192.png" alt="">
-        <span>Ori Fitness</span>
-      </div>
-      <div class="nav-links">
-        <a href="#features">מה יש בפנים</a>
-        <a href="#how">איך מתחילים</a>
-        <a href="#privacy">פרטיות</a>
-      </div>
-      <a class="btn btn-primary btn-sm" href="app/">כניסה לאפליקציה</a>
-    </div>
-  </nav>
-
-  <header class="hero">
-    <div class="wrap hero-grid">
-      <div>
-        <div class="eyebrow">🏋️ אורי פיטנס · אפליקציית כושר אישית בעברית</div>
-        <h1>כל האימונים, התזונה <br>וההתקדמות שלך — <span class="hl">במקום אחד</span></h1>
-        <p class="lede">
-          תכנן אימונים, תעד כל סט, עקוב אחרי קלוריות ומאקרו, שקול את עצמך
-          וראה גרפים אמיתיים של ההתקדמות. בלי פרסומות, בלי מנוי, בלי הרשמה.
+  <!-- =====================================================================
+       שער הכניסה — מה שרואה מי שעדיין לא מחובר או שטרם אושר.
+       זה גם דף הנחיתה של האתר, ולכן יש כתובת אחת בלבד לאתר ולאפליקציה.
+       app.js מסיר את .gate-open מה-body ברגע שהמשתמש מחובר ומאושר.
+       ===================================================================== -->
+  <div class="gate" id="welcomeGate">
+    <div class="gate-scroll">
+      <header class="gate-hero">
+        <img src="icons/icon-192.png" alt="" class="gate-logo">
+        <div class="gate-eyebrow">🏋️ אורי פיטנס · אפליקציית כושר אישית</div>
+        <h1 class="gate-title">כל האימונים, התזונה<br>וההתקדמות שלך <span>במקום אחד</span></h1>
+        <p class="gate-lede">
+          תכנן אימונים, תעד כל סט, עקוב אחרי קלוריות ומאקרו,
+          שקול את עצמך וראה גרפים אמיתיים של ההתקדמות.
         </p>
-        <div class="hero-cta">
-          <a class="btn btn-primary" href="app/">כניסה לאפליקציה ←</a>
-          <a class="btn btn-ghost" href="#features">מה יש בפנים</a>
-        </div>
-        <p class="hero-note">חינם לגמרי · עובד גם בלי אינטרנט · הנתונים נשארים במכשיר שלך</p>
-      </div>
 
-      <div class="phone" aria-hidden="true">
-        <div class="phone-screen">
-          <div>
-            <div class="ph-greet">בוקר טוב, אורי</div>
-            <div class="ph-date">יום שלישי, 11 באוגוסט</div>
-          </div>
-          <div class="ph-card">
-            <div class="ph-head">🍎 תזונה היום</div>
-            <div class="ph-row"><span>נאכלו</span><b>1,420 / 2,200</b></div>
-            <div class="ph-row"><span>🥩 חלבון</span><b>96 / 150 ג'</b></div>
-            <div class="ph-row"><span>🍞 פחמימות</span><b>140 / 220 ג'</b></div>
-            <div class="ph-bar"><span></span></div>
-          </div>
-          <div class="ph-card">
-            <div class="ph-head">🏋️ אימונים השבוע · 3 מתוך 4</div>
-            <div class="ph-days">
-              <div class="ph-day on">א</div><div class="ph-day">ב</div>
-              <div class="ph-day on">ג</div><div class="ph-day">ד</div>
-              <div class="ph-day on">ה</div><div class="ph-day">ו</div>
-              <div class="ph-day">ש</div>
-            </div>
-          </div>
-          <div class="ph-card">
-            <div class="ph-head">🥊 90 יום להתאמן ולאכול בריא</div>
-            <div class="ph-row"><span>יום 34 מתוך 90</span><b>✓</b></div>
-            <div class="ph-bar"><span style="width:38%"></span></div>
-          </div>
+        <div class="gate-auth" id="gateAuth">
+          <button class="btn btn-primary btn-xl" id="gateSignInBtn">התחברות</button>
+          <p class="gate-note" id="gateNote">הכניסה באישור בעלי האפליקציה בלבד.</p>
         </div>
+      </header>
+
+      <section class="gate-features">
+        <div class="gate-feature"><span>💪</span><b>אימוני כוח</b><small>תוכניות קבועות, תיעוד סטים וטיימר חי</small></div>
+        <div class="gate-feature"><span>🍎</span><b>תזונה וקלוריות</b><small>תפריט קבוע ומעקב חלבון, פחמימות ושומן</small></div>
+        <div class="gate-feature"><span>📈</span><b>גרפים והתקדמות</b><small>גרף לכל תרגיל, נפח אימונים ויומן שקילות</small></div>
+        <div class="gate-feature"><span>🏆</span><b>שיאים אישיים</b><small>זיהוי אוטומטי של שיא חדש, בזמן אמת</small></div>
+        <div class="gate-feature"><span>🥊</span><b>אתגרים ומדליות</b><small>אתגר אישי לתקופה ו-12 מדליות הישג</small></div>
+        <div class="gate-feature"><span>🏃</span><b>אירובי</b><small>יעד שבועי וסימון מפגש בלחיצה אחת</small></div>
+      </section>
+
+      <footer class="gate-foot">אורי פיטנס · Ori Fitness</footer>
+    </div>
+  </div>
+
+  <!-- ===== סרגל עליון ===== -->
+  <header class="topbar" id="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <!-- PLACEHOLDER לוגו: להחליף את הקובץ icons/logo.svg בלוגו שלך (שלב 2) -->
+        <img src="icons/logo.svg" alt="" class="brand-logo" id="brandLogo">
+        <span class="brand-name">Ori Fitness</span>
+      </div>
+      <div class="topbar-actions">
+        <div class="live-timer hidden" id="liveTimerChip">
+          <span class="pulse-dot"></span>
+          <span id="liveTimerText">00:00</span>
+        </div>
+        <button class="icon-btn" id="settingsBtn" aria-label="הגדרות">⚙️</button>
       </div>
     </div>
   </header>
 
-  <section id="features">
-    <div class="wrap">
-      <div class="sec-head">
-        <h2>כל מה שצריך כדי להתמיד</h2>
-        <p>לא עוד אפליקציה שמודדת צעדים. זו מערכת שלמה לניהול האימון והתזונה שלך.</p>
-      </div>
-      <div class="features">
-        <div class="feature">
-          <div class="feature-ico">💪</div>
-          <h3>אימוני כוח</h3>
-          <p>בנה תוכניות אימון קבועות, שבץ אותן לימי השבוע, ותעד כל סט — משקל, חזרות וטיימר חי שרץ לאורך האימון.</p>
-        </div>
-        <div class="feature">
-          <div class="feature-ico">🍎</div>
-          <h3>תזונה וקלוריות</h3>
-          <p>תפריט קבוע שמוזן פעם אחת, מעקב יומי אחרי קלוריות, חלבון, פחמימות ושומן, והזנה מהירה לרגעים עמוסים.</p>
-        </div>
-        <div class="feature">
-          <div class="feature-ico">📈</div>
-          <h3>גרפים והתקדמות</h3>
-          <p>גרף לכל תרגיל, נפח אימונים לאורך זמן, ויומן שקילות עם מגמה — כדי לראות שחור על גבי לבן שאתה מתקדם.</p>
-        </div>
-        <div class="feature">
-          <div class="feature-ico">🏆</div>
-          <h3>שיאים אישיים</h3>
-          <p>האפליקציה מזהה לבד מתי שברת שיא — במשקל או בחזרות — וחוגגת איתך בזמן אמת.</p>
-        </div>
-        <div class="feature">
-          <div class="feature-ico">🥊</div>
-          <h3>אתגרים ומדליות</h3>
-          <p>הגדר אתגר אישי לתקופה, סמן כל יום שעמדת בו, ואסוף 12 מדליות הישג לאורך הדרך.</p>
-        </div>
-        <div class="feature">
-          <div class="feature-ico">🏃</div>
-          <h3>אירובי</h3>
-          <p>הגדר את סוגי האירובי שלך, קבע יעד שבועי, וסמן כל מפגש בלחיצה אחת.</p>
-        </div>
-      </div>
-    </div>
-  </section>
+  <!-- ===== תוכן ===== -->
+  <main id="main">
 
-  <div class="steps-band">
-    <section id="how">
-      <div class="wrap">
-        <div class="sec-head">
-          <h2>מתחילים תוך דקה</h2>
-          <p>בלי הרשמה, בלי סיסמה, בלי כרטיס אשראי.</p>
+    <!-- ---------- בית ---------- -->
+    <section class="screen" id="screen-home">
+      <div class="home-heading">
+        <h1 class="greeting" id="greetingText">בוקר טוב</h1>
+        <p class="home-date" id="homeDateText"></p>
+      </div>
+
+      <div class="quote-card" id="quoteCard">
+        <div class="quote-photo" id="quotePhoto"></div>
+        <div class="quote-body">
+          <p class="quote-text" id="quoteText">—</p>
         </div>
-        <div class="steps">
-          <div class="step">
-            <div class="step-num">1</div>
-            <h3>נכנסים לאפליקציה</h3>
-            <p>לוחצים על הכפתור ונפתחים ישר. אין טופס הרשמה ואין מייל לאמת.</p>
+        <div class="quote-by">
+          <span class="quote-badge" id="quoteBadge"></span>
+          <span class="quote-author" id="quoteAuthor"></span>
+        </div>
+        <button class="quote-photo-btn" id="quotePhotoBtn" aria-label="הוסף תמונת מוטיבציה">📷</button>
+      </div>
+      <input type="file" id="galleryInput" accept="image/*" multiple hidden>
+
+      <div id="homeGoalsSection">
+        <div class="section-head">
+          <span class="head-icon" aria-hidden="true">🎯</span>
+          <h2>מטרות</h2>
+        </div>
+        <div class="goals-card" id="goalsCard"></div>
+      </div>
+
+      <div id="homeNutritionSection">
+        <div class="section-head">
+          <span class="head-icon" aria-hidden="true">🍎</span>
+          <h2>תזונה היום</h2>
+        </div>
+        <div class="hs-card">
+          <div class="hs-kcal-row">נאכלו <b id="hsKcalEaten">0</b> מתוך <span id="hsKcalGoal">0</span> קק"ל</div>
+          <div class="hs-macros">
+            <span class="hs-macro-row"><span class="hs-macro-label"><span class="hs-macro-ico">🥩</span> חלבון</span><span class="hs-macro-val"><b id="hsProtein">0</b>/<span id="hsProteinGoal">0</span> ג'</span></span>
+            <span class="hs-macro-row"><span class="hs-macro-label"><span class="hs-macro-ico">🍞</span> פחמימות</span><span class="hs-macro-val"><b id="hsCarbs">0</b>/<span id="hsCarbsGoal">0</span> ג'</span></span>
+            <span class="hs-macro-row"><span class="hs-macro-label"><span class="hs-macro-ico">🥑</span> שומן</span><span class="hs-macro-val"><b id="hsFat">0</b>/<span id="hsFatGoal">0</span> ג'</span></span>
           </div>
-          <div class="step">
-            <div class="step-num">2</div>
-            <h3>מגדירים פעם אחת</h3>
-            <p>אשף קצר שואל אילו אימונים אתה עושה, באילו ימים, ומה התפריט שלך.</p>
+        </div>
+      </div>
+
+      <div id="homeWorkoutsSection">
+        <div class="section-head">
+          <span class="head-icon" aria-hidden="true">🏋️</span>
+          <h2>אימונים השבוע</h2>
+          <span class="hs-value"><b id="hsWorkoutsCount">0</b> מתוך <span id="hsWorkoutsGoal">0</span></span>
+        </div>
+        <div class="hs-card">
+          <div class="bar"><div class="bar-fill" id="hsWorkoutsBar"></div></div>
+          <div class="hs-cardio-list" id="hsCardioList"></div>
+        </div>
+        <div class="week-strip" id="hsWeekStrip"></div>
+      </div>
+
+      <button class="btn btn-primary btn-xl" id="homeWorkoutBtn">התחל אימון</button>
+
+      <div class="hidden" id="challengeSection">
+        <div class="section-head">
+          <span class="head-icon" aria-hidden="true">🥊</span>
+          <h2 id="challengeTitle"></h2>
+          <span class="hs-value" id="challengeDay"></span>
+        </div>
+        <div class="challenge-card" id="challengeCard"></div>
+      </div>
+
+    </section>
+
+    <!-- ---------- הגדרות ---------- -->
+    <section class="screen hidden" id="screen-settings">
+      <div class="settings-intro">
+        <h2>הגדרות</h2>
+        <p class="muted">
+          כאן משנים את הדברים הקבועים — התוכנית והתפריט.
+          בשאר המסכים רק מבצעים, כדי שלא תזיז משהו בטעות באמצע אימון.
+        </p>
+      </div>
+
+      <div class="section-head"><h2>פרופיל</h2></div>
+      <div class="settings-group">
+        <button class="settings-item" id="setNameBtn">
+          <span class="si-ico">👤</span>
+          <span class="si-main"><b>השם שלי</b><small id="setNameSub">—</small></span>
+          <span class="si-arrow">‹</span>
+        </button>
+        <button class="settings-item" id="setHeightBtn">
+          <span class="si-ico">📏</span>
+          <span class="si-main"><b>גובה</b><small id="setHeightSub">—</small></span>
+          <span class="si-arrow">‹</span>
+        </button>
+      </div>
+
+      <div class="section-head"><h2>מסך בית</h2></div>
+      <div class="settings-group">
+        <button class="settings-item" id="setHomeScreenBtn">
+          <span class="si-ico">🏠</span>
+          <span class="si-main"><b>מקטעים מוצגים</b><small id="setHomeScreenSub">—</small></span>
+          <span class="si-arrow">‹</span>
+        </button>
+      </div>
+
+      <div class="section-head"><h2>מוטיבציה</h2></div>
+      <div class="settings-group">
+        <button class="settings-item" id="setQuotesBtn">
+          <span class="si-ico">🧠</span>
+          <span class="si-main"><b>דף מנטלי</b><small id="setQuotesSub">—</small></span>
+          <span class="si-arrow">‹</span>
+        </button>
+        <button class="settings-item" id="setGoalsBtn">
+          <span class="si-ico">🎯</span>
+          <span class="si-main"><b>מטרות</b><small id="setGoalsSub">—</small></span>
+          <span class="si-arrow">‹</span>
+        </button>
+        <button class="settings-item" id="setChallengeBtn">
+          <span class="si-ico">🥊</span>
+          <span class="si-main"><b>אתגר</b><small id="setChallengeSub">—</small></span>
+          <span class="si-arrow">‹</span>
+        </button>
+        <button class="settings-item" id="setBadgesBtn">
+          <span class="si-ico">🏅</span>
+          <span class="si-main"><b>מדליות</b><small id="setBadgesSub">—</small></span>
+          <span class="si-arrow">‹</span>
+        </button>
+      </div>
+
+      <div class="section-head"><h2>אימונים</h2></div>
+      <div class="settings-group">
+        <button class="settings-item" id="setRoutinesBtn">
+          <span class="si-ico">📋</span>
+          <span class="si-main"><b>תוכניות אימון</b><small id="setRoutinesSub">—</small></span>
+          <span class="si-arrow">‹</span>
+        </button>
+        <button class="settings-item" id="setWeeklyGoalBtn">
+          <span class="si-ico">🎯</span>
+          <span class="si-main"><b>יעד אימונים שבועי</b><small id="setWeeklyGoalSub">—</small></span>
+          <span class="si-arrow">‹</span>
+        </button>
+        <button class="settings-item" id="setScheduleBtn">
+          <span class="si-ico">📅</span>
+          <span class="si-main"><b>שיבוץ לימי השבוע</b><small id="setScheduleSub">—</small></span>
+          <span class="si-arrow">‹</span>
+        </button>
+        <button class="settings-item" id="setCardioBtn">
+          <span class="si-ico">🏃</span>
+          <span class="si-main"><b>סוגי אירובי</b><small id="setCardioSub">—</small></span>
+          <span class="si-arrow">‹</span>
+        </button>
+        <button class="settings-item" id="setCardioScheduleBtn">
+          <span class="si-ico">📅</span>
+          <span class="si-main"><b>שיבוץ אירובי</b><small id="setCardioScheduleSub">—</small></span>
+          <span class="si-arrow">‹</span>
+        </button>
+      </div>
+
+      <div class="section-head"><h2>תזונה</h2></div>
+      <div class="settings-group">
+        <button class="settings-item" id="setMealPlanBtn">
+          <span class="si-ico">🍽️</span>
+          <span class="si-main"><b>התפריט הקבוע</b><small id="setMealPlanSub">—</small></span>
+          <span class="si-arrow">‹</span>
+        </button>
+        <button class="settings-item" id="setGoalBtn">
+          <span class="si-ico">🎯</span>
+          <span class="si-main"><b>יעד קלוריות ומאקרו</b><small id="setGoalSub">—</small></span>
+          <span class="si-arrow">‹</span>
+        </button>
+        <button class="settings-item" id="setCalcBtn">
+          <span class="si-ico">🧮</span>
+          <span class="si-main"><b>מחשבון קלוריות</b><small id="setCalcSub">BMI + קלוריות מומלצות</small></span>
+          <span class="si-arrow">‹</span>
+        </button>
+      </div>
+
+      <div class="section-head"><h2>מראה</h2></div>
+      <div class="card">
+        <label class="setting-row" for="themeSelect">
+          <span>
+            <b>ערכת צבעים</b>
+            <small>קרם בהיר, או שחור למקרה שאתה מתאמן בלילה</small>
+          </span>
+          <select id="themeSelect">
+            <option value="light">קרם (בהיר)</option>
+            <option value="dark">שחור (לילה)</option>
+            <option value="system">לפי המכשיר</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="section-head"><h2>התנהגות</h2></div>
+      <div class="card">
+        <label class="setting-row" for="autoAdvanceSelect">
+          <span>
+            <b>קפיצה אוטומטית בין שדות</b>
+            <small>אחרי הפסקה בהקלדה, המסך עובר לשדה הבא לבד</small>
+          </span>
+          <select id="autoAdvanceSelect">
+            <option value="0">כבוי</option>
+            <option value="700">מהיר (0.7 שנ')</option>
+            <option value="1000">רגיל (1 שנ')</option>
+            <option value="1400">איטי (1.4 שנ')</option>
+            <option value="2000">איטי מאוד (2 שנ')</option>
+          </select>
+        </label>
+        <p class="muted" style="font-size:.78rem;margin-top:10px">
+          גם כשזה כבוי, כפתור "הבא" במקלדת עדיין מעביר לשדה הבא.
+        </p>
+      </div>
+
+      <div class="section-head"><h2>גיבוי הנתונים</h2></div>
+      <div class="settings-group">
+        <button class="settings-item" id="exportBackupBtn">
+          <span class="si-ico">⬇️</span>
+          <span class="si-main"><b>ייצוא גיבוי</b><small id="backupInfo">—</small></span>
+          <span class="si-arrow">‹</span>
+        </button>
+        <button class="settings-item" id="importBackupBtn">
+          <span class="si-ico">⬆️</span>
+          <span class="si-main"><b>ייבוא גיבוי</b><small>שחזור מקובץ או מטקסט שהעתקת</small></span>
+          <span class="si-arrow">‹</span>
+        </button>
+      </div>
+      <p class="muted" style="font-size:.8rem;margin-top:10px;padding:0 4px">
+        הנתונים נשמרים במכשיר הזה בלבד. גיבוי מדי פעם שומר עליהם.
+      </p>
+
+      <button class="btn btn-ghost btn-block" id="rerunSetupBtn" style="margin-top:22px">
+        הפעל מחדש את אשף ההגדרה
+      </button>
+
+      <!-- אזור מסוכן — בכוונה לא בולט ורחוק משאר הפעולות -->
+      <div class="danger-zone">
+        <button class="danger-zone-link" id="resetDataLink">איפוס נתונים</button>
+      </div>
+    </section>
+
+    <!-- ---------- אימון ---------- -->
+    <section class="screen hidden" id="screen-workout">
+
+      <!-- מצב: אין אימון פעיל -->
+      <div id="workoutIdle">
+        <div class="week-plan-card">
+          <div class="week-strip" id="weekStrip"></div>
+          <div class="today-card" id="todayCard"></div>
+        </div>
+
+        <div class="section-head">
+          <h2>🏋️ אימונים</h2>
+        </div>
+        <div class="workout-categories">
+          <div class="workout-category">
+            <h3>💪 אימוני כוח</h3>
+            <div id="routineList" class="list"></div>
           </div>
-          <div class="step">
-            <div class="step-num">3</div>
-            <h3>מוסיפים למסך הבית</h3>
-            <p>מתפריט הדפדפן בוחרים "הוסף למסך הבית", ומקבלים אייקון כמו כל אפליקציה.</p>
+          <div class="workout-category">
+            <h3>🏃 אימוני אירובי</h3>
+            <div id="cardioList" class="list"></div>
           </div>
+        </div>
+
+        <div class="section-head">
+          <span class="head-icon" aria-hidden="true">🕒</span>
+          <h2>אימונים אחרונים</h2>
+        </div>
+        <div id="workoutHistory" class="list"></div>
+      </div>
+
+      <!-- מצב: אימון פעיל -->
+      <div id="workoutActive" class="hidden">
+        <div class="timer-card">
+          <div class="timer-label" id="activeRoutineName">אימון פעיל</div>
+          <div class="timer-value" id="bigTimer">00:00</div>
+          <div class="timer-sub">
+            <span id="activeSets">0</span> סטים
+          </div>
+        </div>
+
+        <p class="workout-reminder hidden" id="workoutReminder"></p>
+
+        <p class="session-note">
+          שינויים כאן — הוספה או מחיקה של סטים ותרגילים — תקפים לאימון הזה בלבד.
+          התוכנית הקבועה שלך לא משתנה.
+        </p>
+
+        <div id="exerciseList"></div>
+        <datalist id="exerciseSuggestions"></datalist>
+
+        <button class="btn btn-ghost btn-block" id="cancelWorkoutBtn" style="margin-top:22px">בטל אימון</button>
+
+        <!-- סרגל פעולות דביק — תמיד בהישג יד, בלי לגלול -->
+        <div class="action-bar" id="workoutActionBar">
+          <button class="btn btn-secondary" id="addExerciseBtn">+ תרגיל</button>
+          <button class="btn btn-primary" id="finishWorkoutBtn">סיים אימון</button>
         </div>
       </div>
     </section>
+
+    <!-- ---------- תזונה ---------- -->
+    <section class="screen hidden" id="screen-nutrition">
+      <div class="date-nav">
+        <button class="icon-btn" id="nutPrevDay" aria-label="יום קודם">›</button>
+        <button class="date-label" id="nutDateLabel">היום</button>
+        <button class="icon-btn" id="nutNextDay" aria-label="יום הבא">‹</button>
+      </div>
+      <input type="date" id="nutDatePicker" class="hidden-date">
+
+      <div class="kcal-card" id="kcalCard">
+        <div class="kcal-ring-wrap">
+          <svg class="kcal-ring" viewBox="0 0 120 120">
+            <circle class="ring-bg" cx="60" cy="60" r="52"></circle>
+            <circle class="ring-fg" id="kcalRing" cx="60" cy="60" r="52"></circle>
+          </svg>
+          <div class="kcal-center">
+            <div class="kcal-num" id="kcalRemaining">0</div>
+            <div class="kcal-cap" id="kcalCaption">נותרו</div>
+          </div>
+        </div>
+        <div class="macros" id="macros">
+          <div class="macro" data-macro="protein">
+            <div class="macro-top">
+              <span>🥩 חלבון</span>
+              <b><span class="m-cur">0</span>/<span class="m-goal">0</span> ג'</b>
+            </div>
+            <div class="bar"><div class="bar-fill"></div></div>
+            <div class="macro-left">נותרו <span class="m-left">0</span> ג'</div>
+          </div>
+          <div class="macro" data-macro="carbs">
+            <div class="macro-top">
+              <span>🍞 פחמימות</span>
+              <b><span class="m-cur">0</span>/<span class="m-goal">0</span> ג'</b>
+            </div>
+            <div class="bar"><div class="bar-fill"></div></div>
+            <div class="macro-left">נותרו <span class="m-left">0</span> ג'</div>
+          </div>
+          <div class="macro" data-macro="fat">
+            <div class="macro-top">
+              <span>🥑 שומן</span>
+              <b><span class="m-cur">0</span>/<span class="m-goal">0</span> ג'</b>
+            </div>
+            <div class="bar"><div class="bar-fill"></div></div>
+            <div class="macro-left">נותרו <span class="m-left">0</span> ג'</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-head">
+        <span class="head-icon" aria-hidden="true">🍎</span>
+        <h2>התפריט של היום</h2>
+        <div class="head-actions">
+          <span class="head-badge" id="kcalTodayBadge"></span>
+          <span class="head-badge" id="mealProgress"></span>
+        </div>
+      </div>
+      <div id="mealPlanList" class="list list-lg"></div>
+
+      <div class="section-head">
+        <span class="head-icon" aria-hidden="true">📋</span>
+        <h2>התפריט המלא שלי</h2>
+        <div class="head-actions">
+          <button class="btn btn-ghost btn-sm" id="editFullMenuBtn">ערוך</button>
+        </div>
+      </div>
+      <div class="full-menu-card" id="fullMenuCard"></div>
+
+      <div class="section-head">
+        <span class="head-icon" aria-hidden="true">🍴</span>
+        <h2>מה עוד אכלתי היום</h2>
+        <div class="head-actions">
+          <button class="btn btn-ghost btn-sm" id="quickKcalBtn">⚡ מהיר</button>
+          <button class="btn btn-ghost btn-sm" id="addMealBtn">חדש</button>
+          <button class="btn btn-primary btn-sm" id="addFromLibraryBtn">+ מהמאגר</button>
+        </div>
+      </div>
+      <div id="mealList" class="list"></div>
+    </section>
+
+    <!-- ---------- התקדמות ---------- -->
+    <section class="screen hidden" id="screen-progress">
+      <div class="section-head">
+        <span class="head-icon" aria-hidden="true">📊</span>
+        <h2>סיכום השבוע</h2>
+      </div>
+      <div class="chart-card" id="weeklySummaryCard"></div>
+
+      <div class="section-head">
+        <span class="head-icon" aria-hidden="true">🏋️</span>
+        <h2>יומן שקילות</h2>
+        <span class="head-badge" id="lastWeightBadge"></span>
+      </div>
+      <div class="weight-log-row">
+        <input type="number" id="weightInput" inputmode="decimal" placeholder="0" step="0.1" min="0">
+        <span class="weight-log-unit">ק"ג</span>
+        <button class="btn btn-primary" id="weightSaveBtn">שמור שקילה</button>
+      </div>
+      <div class="chart-card" style="margin-top:14px">
+        <div class="chart-title">משקל גוף לאורך זמן</div>
+        <div id="weightChart" class="chart-host"></div>
+        <div class="chart-legend" id="weightStats"></div>
+      </div>
+      <div id="weightHistory" class="list" style="margin-top:12px"></div>
+
+      <div class="section-head">
+        <span class="head-icon" aria-hidden="true">💪</span>
+        <h2>התקדמות בתרגילים</h2>
+      </div>
+      <div class="field">
+        <label for="progressWorkoutSelect">בחר אימון</label>
+        <select id="progressWorkoutSelect"></select>
+      </div>
+      <div class="field">
+        <label for="progressExercise">בחר תרגיל</label>
+        <select id="progressExercise"></select>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title" id="chartTitle">משקל מקסימלי לאורך זמן</div>
+        <div class="chart-subtitle" id="chartSubtitle"></div>
+        <div class="chart-nav">
+          <button class="chart-nav-btn" id="progressOlderBtn" aria-label="ישן יותר">›</button>
+          <span class="chart-nav-range" id="progressRange"></span>
+          <button class="chart-nav-btn" id="progressNewerBtn" aria-label="חדש יותר">‹</button>
+        </div>
+        <div id="progressChart" class="chart-host"></div>
+        <div class="chart-legend" id="chartStats"></div>
+      </div>
+      <div id="progressHistory" class="list" style="margin-top:12px"></div>
+
+      <div class="section-head">
+        <span class="head-icon" aria-hidden="true">📈</span>
+        <h2>נפח אימונים</h2>
+      </div>
+      <div class="field">
+        <label for="volumeTypeSelect">סוג אימון</label>
+        <select id="volumeTypeSelect"></select>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">נפח כולל לכל אימון (ק"ג)</div>
+        <div class="chart-nav">
+          <button class="chart-nav-btn" id="volumeOlderBtn" aria-label="ישן יותר">›</button>
+          <span class="chart-nav-range" id="volumeRange"></span>
+          <button class="chart-nav-btn" id="volumeNewerBtn" aria-label="חדש יותר">‹</button>
+        </div>
+        <div id="volumeChart" class="chart-host"></div>
+      </div>
+      <div id="volumeHistory" class="list" style="margin-top:12px"></div>
+    </section>
+
+  </main>
+
+  <!-- ===== ניווט תחתון ===== -->
+  <nav class="tabbar" id="tabbar">
+    <button class="tab active" data-screen="home">
+      <span class="tab-ico">🏠</span><span class="tab-txt">בית</span>
+    </button>
+    <button class="tab" data-screen="nutrition">
+      <span class="tab-ico">🍽️</span><span class="tab-txt">תזונה</span>
+    </button>
+    <button class="tab" data-screen="workout">
+      <span class="tab-ico">🏋️</span><span class="tab-txt">אימון</span>
+    </button>
+    <button class="tab" data-screen="progress">
+      <span class="tab-ico">📈</span><span class="tab-txt">התקדמות</span>
+    </button>
+  </nav>
+
+  <!-- ===== שכבות-על ===== -->
+  <div class="sheet-backdrop hidden" id="sheetBackdrop"></div>
+  <div class="sheet hidden" id="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head">
+      <h3 id="sheetTitle"></h3>
+      <button class="icon-btn" id="sheetClose" aria-label="סגור">✕</button>
+    </div>
+    <div class="sheet-body" id="sheetBody"></div>
   </div>
 
-  <section id="privacy">
-    <div class="wrap">
-      <div class="sec-head">
-        <h2>הנתונים שלך נשארים שלך</h2>
-        <p>בלי חשבון, בלי שרת, בלי מעקב.</p>
-      </div>
-      <div class="privacy">
-        <div class="pill">
-          <div class="ic">🔒</div>
-          <div><b>נשמר רק אצלך</b><span>האימונים, התזונה והמשקל נשמרים במכשיר עצמו ולא נשלחים לשום שרת.</span></div>
-        </div>
-        <div class="pill">
-          <div class="ic">📴</div>
-          <div><b>עובד בלי אינטרנט</b><span>אחרי הכניסה הראשונה האפליקציה נשמרת במכשיר ופועלת גם במצב טיסה.</span></div>
-        </div>
-        <div class="pill">
-          <div class="ic">💾</div>
-          <div><b>גיבוי בלחיצה</b><span>אפשר לייצא את כל הנתונים לקובץ ולשחזר אותם בכל מכשיר אחר.</span></div>
-        </div>
+  <div class="lightbox hidden" id="lightbox">
+    <button class="icon-btn lightbox-close" id="lightboxClose" aria-label="סגור">✕</button>
+    <img id="lightboxImg" alt="">
+    <button class="btn btn-danger btn-sm lightbox-delete" id="lightboxDelete">מחק תמונה</button>
+  </div>
+
+  <div class="celebration hidden" id="celebration">
+    <div class="confetti-host" id="confettiHost"></div>
+    <div class="celebration-card">
+      <div class="celebration-emoji">🎉</div>
+      <h2 id="celebrationHeading">אימון הושלם!</h2>
+      <div class="summary-grid" id="summaryGrid"></div>
+      <button class="btn btn-primary btn-block" id="celebrationClose">מעולה</button>
+    </div>
+  </div>
+
+  <!-- התראת שיא אישי — קופצת באמצע האימון ונעלמת לבד -->
+  <div class="pr-pop hidden" id="prPop">
+    <div class="confetti-host" id="prConfetti"></div>
+    <div class="pr-card" id="prCard" role="status" aria-live="polite">
+      <div class="pr-trophy">🏆</div>
+      <div class="pr-text">
+        <div class="pr-kicker" id="prKicker">שיא אישי חדש</div>
+        <div class="pr-ex" id="prExercise"></div>
+        <div class="pr-weight" id="prWeight"></div>
+        <div class="pr-prev" id="prPrev"></div>
       </div>
     </div>
-  </section>
+  </div>
 
-  <section>
-    <div class="wrap">
-      <div class="cta">
-        <h2>מוכן להתחיל?</h2>
-        <p>האימון הבא שלך מתחיל בלחיצה אחת.</p>
-        <a class="btn" href="app/">כניסה לאפליקציה ←</a>
+  <!-- אשף הגדרה ראשונית -->
+  <div class="wizard hidden" id="wizard">
+    <div class="wizard-card">
+      <div class="wizard-steps" id="wizardSteps"></div>
+      <div class="wizard-body" id="wizardBody"></div>
+      <div class="wizard-actions">
+        <button class="btn btn-ghost btn-sm" id="wizardBack">חזור</button>
+        <button class="btn btn-ghost btn-sm" id="wizardSkip">דלג</button>
+        <button class="btn btn-primary" id="wizardNext">המשך</button>
       </div>
     </div>
-  </section>
+  </div>
 
-  <footer>
-    <div class="wrap foot-inner">
-      <div class="brand">
-        <img src="app/icons/icon-192.png" alt="הלוגו של אורי פיטנס" style="width:26px;height:26px">
-        <span>אורי פיטנס · Ori Fitness</span>
-      </div>
-      <span>נבנה באהבה לאימונים · <a href="app/" style="color:var(--gold-deep);font-weight:700">כניסה לאפליקציה</a></span>
-    </div>
-  </footer>
+  <div class="toast-host" id="toastHost"></div>
 
+  <script type="module" src="js/app.js"></script>
 </body>
 </html>
