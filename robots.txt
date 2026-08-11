@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://ori-ak-fitness.github.io/ori-fitness-app/sitemap.xml
