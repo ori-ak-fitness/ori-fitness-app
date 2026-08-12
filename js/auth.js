@@ -187,7 +187,12 @@ export async function startAuthFlow({ openGate, closeGate, setNote }) {
   // התחברות שחזרה מ-redirect (הדרך שעובדת באפליקציה מותקנת, שבה
   // חלון קופץ נחסם) — צריך לקלוט אותה לפני שמאזינים למצב.
   try { await s.getRedirectResult(s.auth); } catch (err) {
-    if (err?.code !== 'auth/no-auth-event') console.warn('[Ori Fitness] redirect:', err);
+    if (err?.code !== 'auth/no-auth-event') {
+      console.warn('[Ori Fitness] redirect:', err);
+      // חשוב במיוחד בטלפון: כשההתחברות מתבצעת ב-redirect, כישלון בחזרה
+      // ממנו הוא בדיוק המקרה שבו נראה כאילו "לחצתי ולא קרה כלום"
+      setNote(`החזרה מההתחברות נכשלה: ${err?.code || 'שגיאה'}`, 'denied');
+    }
   }
 
   s.onAuthStateChanged(s.auth, (user) => { handleUser(user); });
@@ -206,12 +211,20 @@ export async function startAuthFlow({ openGate, closeGate, setNote }) {
              'auth/cancelled-popup-request', 'auth/operation-not-supported-in-this-environment']
             .includes(err?.code)) {
           try { await s.signInWithRedirect(s.auth, provider); return; }
-          catch (e2) { console.warn('[Ori Fitness] redirect נכשל:', e2); }
+          catch (e2) {
+            console.warn('[Ori Fitness] redirect נכשל:', e2);
+            setNote(`ההפניה נכשלה: ${e2?.code || e2?.message || 'שגיאה'}`, 'denied');
+            btn.disabled = false;
+            btn.textContent = 'נסה שוב';
+            return;
+          }
         }
         console.warn('[Ori Fitness] התחברות נכשלה:', err);
-        setNote('ההתחברות נכשלה. נסה שוב.', 'denied');
+        // מציגים את קוד השגיאה על המסך ולא רק בקונסול: בטלפון אין דרך
+        // לפתוח קונסול, ובלי זה כל תקלה נראית פשוט כמו "לא עובד"
+        setNote(`ההתחברות נכשלה: ${err?.code || err?.message || 'שגיאה לא ידועה'}`, 'denied');
         btn.disabled = false;
-        btn.textContent = 'התחברות עם Google';
+        btn.textContent = 'נסה שוב';
       }
     };
   }
