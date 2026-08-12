@@ -7,7 +7,7 @@
 import * as db from './db.js';
 import {
   $, el, guard, heCount, fmtNum, num, toast,
-  openSheet, closeSheet, dateKey, blobUrl, pickFileOnce,
+  openSheet, closeSheet, confirmSheet, dateKey, blobUrl, pickFileOnce,
 } from './ui.js';
 import { getRoutines, getSchedule, openRoutinesListSheet, openScheduleSheet, DAY_SHORT } from './routines.js';
 import { getCardioTemplates, openCardioEditor, openCardioScheduleSheet, getCardioSchedule } from './cardio.js';
@@ -23,6 +23,7 @@ import {
 import { getChallenge, challengeStatus, openChallengeSettings } from './challenge.js';
 import { getBadgeStatus, openBadgesSheet } from './badges.js';
 import { getUserHeightCm, setUserHeightCm, renderBodyWeight } from './bodyweight.js';
+import { isConfigured } from './firebase-config.js';
 
 let onRerunSetup = null;
 
@@ -199,12 +200,40 @@ async function openQuotesSheet() {
 }
 
 /** שורות התקציר מתחת לכל פריט בהגדרות */
+/* ---------- חשבון ---------- */
+
+/*
+ * מוצג רק כשיש התחברות בפועל. בלי המקטע הזה אין שום דרך לראות עם איזה
+ * חשבון נכנסת או להתנתק — וזה בדיוק מה שגרם לתחושה ש"הוא לא שואל כלום":
+ * Firebase זוכר את ההתחברות, ובלי כפתור יציאה אי אפשר היה לראות זאת.
+ */
+function renderAccount() {
+  const section = $('#accountSection');
+  if (!section) return;
+
+  if (!isConfigured()) { section.classList.add('hidden'); return; }
+
+  let state = null;
+  try { state = JSON.parse(localStorage.getItem('oriFitnessAuthState') || 'null'); }
+  catch { state = null; }
+
+  if (!state) { section.classList.add('hidden'); return; }
+
+  section.classList.remove('hidden');
+  $('#accountName').textContent = state.name || state.email || 'מחובר';
+  const role = state.isAdmin ? 'מנהל' : ({
+    approved: 'מאושר', pending: 'ממתין לאישור', blocked: 'הגישה הוסרה',
+  }[state.status] || state.status);
+  $('#accountSub').textContent = `${state.email || ''} · ${role}`;
+}
+
 export async function renderSettings() {
   const [name, routines, schedule, cardio, plan, goal, weeklyGoal, personalGoals] = await Promise.all([
     db.getSetting(NAME_SETTING_KEY, ''), getRoutines(), getSchedule(), getCardioTemplates(), getPlan(), goalForDate(dateKey()),
     getWeeklyWorkoutGoal(), getGoals(),
   ]);
 
+  renderAccount();
   $('#setNameSub').textContent = name ? name : 'לא הוגדר — לחץ כדי להוסיף';
   const height = await getUserHeightCm();
   $('#setHeightSub').textContent = height ? `${height} ס"מ` : 'לא הוגדר — לחץ כדי להוסיף';
@@ -318,6 +347,15 @@ async function performReset() {
 
 export function initSettingsScreen({ onRerun } = {}) {
   onRerunSetup = onRerun;
+
+  $('#signOutBtn').addEventListener('click', guard(async () => {
+    const ok = await confirmSheet('התנתקות',
+      'תצא מהחשבון במכשיר הזה ותחזור למסך ההתחברות. הנתונים שלך נשארים שמורים.',
+      'התנתק');
+    if (!ok) return;
+    const auth = await import('./auth.js');
+    await auth.signOutUser();
+  }));
 
   $('#setNameBtn').addEventListener('click', guard(openNameSheet));
   $('#setHeightBtn').addEventListener('click', guard(openHeightSheet));

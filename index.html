@@ -181,6 +181,22 @@
         </p>
       </div>
 
+      <!-- החשבון המחובר. מוסתר כשאין התחברות (Firebase לא מוגדר) -->
+      <div class="hidden" id="accountSection">
+        <div class="section-head"><h2>חשבון</h2></div>
+        <div class="settings-group">
+          <div class="settings-item is-static" id="accountRow">
+            <span class="si-ico">🔑</span>
+            <span class="si-main"><b id="accountName">—</b><small id="accountSub">—</small></span>
+          </div>
+          <button class="settings-item" id="signOutBtn">
+            <span class="si-ico">🚪</span>
+            <span class="si-main"><b>התנתקות</b><small>יציאה מהחשבון במכשיר הזה</small></span>
+            <span class="si-arrow">‹</span>
+          </button>
+        </div>
+      </div>
+
       <div class="section-head"><h2>פרופיל</h2></div>
       <div class="settings-group">
         <button class="settings-item" id="setNameBtn">
