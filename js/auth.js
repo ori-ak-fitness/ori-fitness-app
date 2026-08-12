@@ -129,6 +129,17 @@ export async function startAuthFlow({ openGate, closeGate, setNote }) {
 
   const provider = new s.GoogleAuthProvider();
 
+  /*
+   * בטלפון ובאפליקציה מותקנת חלון קופץ כמעט תמיד נחסם, וגם כשהוא נפתח
+   * הוא מתנהג רע. הניסיון-ואז-נפילה-להפניה יוצר עיכוב שנראה למשתמש
+   * כאילו הכפתור לא הגיב. לכן שם הולכים ישר להפניה, ורק במחשב
+   * משתמשים בחלון קופץ — שם הוא נוח יותר ולא עוזב את הדף.
+   */
+  const preferRedirect =
+    window.matchMedia?.('(display-mode: standalone)').matches ||
+    window.navigator.standalone === true ||
+    /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+
   async function handleUser(user) {
     if (!user) {
       writeLocalState(null);
@@ -203,6 +214,18 @@ export async function startAuthFlow({ openGate, closeGate, setNote }) {
     btn.onclick = async () => {
       btn.disabled = true;
       btn.textContent = 'מתחבר…';
+
+      if (preferRedirect) {
+        try { await s.signInWithRedirect(s.auth, provider); return; }
+        catch (err) {
+          console.warn('[Ori Fitness] redirect נכשל:', err);
+          setNote(`ההתחברות נכשלה: ${err?.code || err?.message || 'שגיאה'}`, 'denied');
+          btn.disabled = false;
+          btn.textContent = 'נסה שוב';
+          return;
+        }
+      }
+
       try {
         await s.signInWithPopup(s.auth, provider);
       } catch (err) {
