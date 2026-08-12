@@ -188,6 +188,10 @@ async function registerSW() {
 /* ---------- אתחול ---------- */
 
 async function main() {
+  // נרשם לפני השער ולא בסוף: כך גם מסך הכניסה עצמו נשמר לאופליין.
+  // אחרת משתמש שנתקע בלי רשת לפני שהתחבר לא היה מקבל כלום.
+  registerSW();
+
   // שער הכניסה נבדק לפני הכל: אין טעם לפתוח מסד נתונים ולצייר מסכים
   // למי שעדיין לא אושר. כשאין הגדרות Firebase הוא נסגר מיד ומחזיר true.
   const mayEnter = await initGate();
@@ -298,8 +302,6 @@ async function main() {
   initDayWatcher();
 
   if (await shouldRunWizard()) openWizard();
-
-  registerSW();
 }
 
 document.addEventListener('DOMContentLoaded', main);
