@@ -152,15 +152,16 @@ export async function startAuthFlow({ openGate, closeGate, setNote }) {
   const provider = new s.GoogleAuthProvider();
 
   /*
-   * בטלפון ובאפליקציה מותקנת חלון קופץ כמעט תמיד נחסם, וגם כשהוא נפתח
-   * הוא מתנהג רע. הניסיון-ואז-נפילה-להפניה יוצר עיכוב שנראה למשתמש
-   * כאילו הכפתור לא הגיב. לכן שם הולכים ישר להפניה, ורק במחשב
-   * משתמשים בחלון קופץ — שם הוא נוח יותר ולא עוזב את הדף.
+   * חלון קופץ בכל מכשיר, כולל טלפון — למרות שקודם העדפנו כאן הפניה.
+   *
+   * הסיבה להיפוך: האפליקציה יושבת על ori-ak-fitness.github.io, בעוד דף
+   * הביניים של ההתחברות יושב על ori-ak-fitness.firebaseapp.com. דפדפנים
+   * חוסמים היום אחסון של אתר צד-שלישי, ולכן דף הביניים הזה כבר לא מצליח
+   * להחזיר את התשובה לאפליקציה — הוא נטען לבן ונתקע, וזה בדיוק מה שקרה
+   * בטלפון. חלון קופץ לא סובל מזה: הוא מדבר עם הדף שפתח אותו ישירות.
+   *
+   * הפניה נשארת רק כגיבוי, אם החלון הקופץ נחסם בפועל (למטה).
    */
-  const preferRedirect =
-    window.matchMedia?.('(display-mode: standalone)').matches ||
-    window.navigator.standalone === true ||
-    /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
 
   async function handleUser(user) {
     if (!user) {
@@ -217,8 +218,8 @@ export async function startAuthFlow({ openGate, closeGate, setNote }) {
     if (btn) { btn.disabled = false; btn.textContent = 'התנתק'; btn.onclick = () => signOutUser(); }
   }
 
-  // התחברות שחזרה מ-redirect (הדרך שעובדת באפליקציה מותקנת, שבה
-  // חלון קופץ נחסם) — צריך לקלוט אותה לפני שמאזינים למצב.
+  // קליטת חזרה מהפניה. ההפניה היא רק מסלול גיבוי היום, אבל מי שנתקע
+  // באמצע כזו קודם עדיין צריך שהתשובה תיקלט — לפני שמאזינים למצב.
   try { await s.getRedirectResult(s.auth); } catch (err) {
     if (err?.code !== 'auth/no-auth-event') {
       console.warn('[Ori Fitness] redirect:', err);
@@ -237,23 +238,19 @@ export async function startAuthFlow({ openGate, closeGate, setNote }) {
       btn.disabled = true;
       btn.textContent = 'מתחבר…';
 
-      if (preferRedirect) {
-        try { await s.signInWithRedirect(s.auth, provider); return; }
-        catch (err) {
-          console.warn('[Ori Fitness] redirect נכשל:', err);
-          setNote(`ההתחברות נכשלה: ${err?.code || err?.message || 'שגיאה'}`, 'denied');
-          btn.disabled = false;
-          btn.textContent = 'נסה שוב';
-          return;
-        }
-      }
-
       try {
         await s.signInWithPopup(s.auth, provider);
       } catch (err) {
-        // חלון קופץ נחסם (נפוץ באפליקציה מותקנת) — עוברים ל-redirect
-        if (['auth/popup-blocked', 'auth/popup-closed-by-user',
-             'auth/cancelled-popup-request', 'auth/operation-not-supported-in-this-environment']
+        // ביטול יזום של המשתמש — לא שגיאה, ואסור להמשיך ממנו להפניה,
+        // אחרת סגירת החלון הייתה זורקת אותו החוצה מהאפליקציה
+        if (err?.code === 'auth/popup-closed-by-user' || err?.code === 'auth/cancelled-popup-request') {
+          btn.disabled = false;
+          btn.textContent = 'התחברות עם Google';
+          return;
+        }
+        // חלון קופץ נחסם ממש — רק אז נופלים להפניה
+        if (['auth/popup-blocked',
+             'auth/operation-not-supported-in-this-environment']
             .includes(err?.code)) {
           try { await s.signInWithRedirect(s.auth, provider); return; }
           catch (e2) {
