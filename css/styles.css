@@ -1388,6 +1388,22 @@ body.gate-open main { display: none !important; }
   margin-top: 30px; padding-top: 18px; border-top: 1px solid var(--line);
 }
 
+/* ---------- ניהול משתמשים ---------- */
+
+.user-group + .user-group { margin-top: 20px; }
+.user-group-head {
+  font-size: .82rem; font-weight: 700; color: var(--text-dim);
+  margin-bottom: 8px;
+}
+.user-row { align-items: center; gap: 11px; }
+.user-avatar { width: 40px; height: 40px; border-radius: 50%; }
+.user-avatar-blank {
+  display: grid; place-items: center; font-size: 1.1rem;
+  border: 1px solid var(--line);
+}
+/* הכפתורים יורדים לשורה משלהם כשאין מקום, במקום למעוך את השם */
+.user-actions { display: flex; flex-wrap: wrap; gap: 7px; flex: none; }
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
 }

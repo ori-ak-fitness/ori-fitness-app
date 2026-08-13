@@ -3,7 +3,7 @@
    העלה את CACHE_VERSION בכל שחרור גרסה כדי לרענן קבצים.
    =================================================================== */
 
-const CACHE_VERSION = 'ori-fitness-v24';
+const CACHE_VERSION = 'ori-fitness-v25';
 
 const APP_SHELL = [
   './',
@@ -31,6 +31,7 @@ const APP_SHELL = [
   './js/gate.js',
   './js/firebase-config.js',
   './js/auth.js',
+  './js/admin.js',
   './js/barcode.js',
   './icons/logo.svg',
   './icons/icon-192.png',

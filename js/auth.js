@@ -83,6 +83,28 @@ async function resolveStatus(user) {
   return status;
 }
 
+/* ---------- ניהול משתמשים (למנהל בלבד) ---------- */
+
+/*
+ * קריאה וכתיבה של רשומות משתמשים אחרים יושבות כאן, ולא ב-admin.js,
+ * כי auth.js הוא הקובץ היחיד שמחזיק את החיבור ל-Firebase. admin.js
+ * אחראי רק על המסך. מי באמת רשאי לעשות את זה נקבע בחוקי האבטחה
+ * בצד Firebase (firestore.rules) — לא בקוד שרץ בדפדפן.
+ */
+
+/** @returns {Promise<Array<{uid:string,email:string,name:string,photo:string,status:string}>>} */
+export async function fetchUsers() {
+  const s = await loadSdk();
+  const snap = await s.getDocs(s.collection(s.db, 'users'));
+  return snap.docs.map((d) => ({ uid: d.id, ...d.data() }));
+}
+
+/** @param {'approved'|'pending'|'blocked'} status */
+export async function setUserStatus(uid, status) {
+  const s = await loadSdk();
+  await s.setDoc(s.doc(s.db, 'users', uid), { status }, { merge: true });
+}
+
 export async function signOutUser() {
   try {
     const s = await loadSdk();

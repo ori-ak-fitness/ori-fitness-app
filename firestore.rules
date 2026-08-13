@@ -1,0 +1,51 @@
+// ===================================================================
+// firestore.rules — מי רשאי לקרוא ולשנות את רשומות המשתמשים.
+//
+// זה מה שבאמת מגן על האפליקציה. הסתרת כפתור "ניהול משתמשים" מכל מי
+// שאינו מנהל היא נוחות בלבד — כל אחד יכול לפתוח קונסולה בדפדפן
+// ולקרוא ל-Firestore ישירות. רק החוקים כאן עוצרים אותו.
+//
+// איך מעדכנים (אין firebase CLI במכונה הזו — עושים את זה בדפדפן):
+//   Firebase Console > Firestore Database > Rules > מדביקים > Publish
+//
+// חשוב: הרשימה ב-ADMIN_EMAILS שבקוד וברשימה כאן חייבות להיות זהות.
+// הקוד מחליט מה להציג, החוקים מחליטים מה מותר.
+// ===================================================================
+
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.token.email != null
+        && request.auth.token.email.lower() in ['oritikshuv2007@gmail.com'];
+    }
+
+    function isSelf(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    match /users/{uid} {
+      // משתמש רואה רק את עצמו; המנהל רואה את כולם כדי לאשר
+      allow read: if isAdmin() || isSelf(uid);
+
+      // הרשמה ראשונה מותרת רק על עצמך, ורק כממתין לאישור —
+      // אחרת כל אחד היה נרשם ישר כמאושר ונכנס
+      allow create: if isAdmin()
+        || (isSelf(uid) && request.resource.data.status == 'pending');
+
+      // המשתמש מעדכן lastSeen בכל כניסה, אבל אסור לו לגעת בסטטוס שלו
+      allow update: if isAdmin()
+        || (isSelf(uid) && request.resource.data.status == resource.data.status);
+
+      allow delete: if isAdmin();
+    }
+
+    // כל השאר סגור. פיצ'ר חדש בענן מוסיף כאן match משלו במפורש.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

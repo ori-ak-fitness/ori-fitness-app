@@ -24,6 +24,7 @@ import { getChallenge, challengeStatus, openChallengeSettings } from './challeng
 import { getBadgeStatus, openBadgesSheet } from './badges.js';
 import { getUserHeightCm, setUserHeightCm, renderBodyWeight } from './bodyweight.js';
 import { isConfigured } from './firebase-config.js';
+import { isAdminUser, openUsersSheet, usersSummary } from './admin.js';
 
 let onRerunSetup = null;
 
@@ -225,6 +226,13 @@ function renderAccount() {
     approved: 'מאושר', pending: 'ממתין לאישור', blocked: 'הגישה הוסרה',
   }[state.status] || state.status);
   $('#accountSub').textContent = `${state.email || ''} · ${role}`;
+
+  // רשימת המשתמשים נטענת מהרשת, ולכן התקציר מתעדכן אחרי שהמסך כבר מוצג
+  const usersBtn = $('#setUsersBtn');
+  if (!usersBtn) return;
+  if (!isAdminUser()) { usersBtn.classList.add('hidden'); return; }
+  usersBtn.classList.remove('hidden');
+  usersSummary().then((text) => { $('#setUsersSub').textContent = text; });
 }
 
 export async function renderSettings() {
@@ -356,6 +364,8 @@ export function initSettingsScreen({ onRerun } = {}) {
     const auth = await import('./auth.js');
     await auth.signOutUser();
   }));
+
+  $('#setUsersBtn').addEventListener('click', guard(openUsersSheet));
 
   $('#setNameBtn').addEventListener('click', guard(openNameSheet));
   $('#setHeightBtn').addEventListener('click', guard(openHeightSheet));
