@@ -34,11 +34,39 @@
   <title>אורי פיטנס | Ori Fitness — אפליקציית מעקב אימונים ותזונה בעברית</title>
   <meta name="description" content="אורי פיטנס (Ori Fitness) — אפליקציית כושר אישית בעברית: מעקב אימונים וסטים, יומן תזונה וקלוריות, שקילות וגרפים, אתגרים אישיים ומדליות. הכניסה באישור בלבד.">
   <link rel="canonical" href="https://ori-ak-fitness.github.io/ori-fitness-app/">
+  <!-- תצוגה מקדימה בוואטסאפ/פייסבוק. הכתובות כאן חייבות להיות מלאות
+       ולא יחסיות — הסורקים של הרשתות החברתיות לא פותרים נתיב יחסי,
+       וקישור בלי תמונה נראה כמו שורת טקסט אפורה ונלחץ הרבה פחות. -->
   <meta property="og:type" content="website">
+  <meta property="og:site_name" content="אורי פיטנס">
+  <meta property="og:url" content="https://ori-ak-fitness.github.io/ori-fitness-app/">
   <meta property="og:title" content="אורי פיטנס — אפליקציית הכושר האישית">
   <meta property="og:description" content="מעקב אימונים, תזונה, משקל והתקדמות — הכל במקום אחד, בעברית.">
-  <meta property="og:image" content="icons/icon-512.png">
+  <meta property="og:image" content="https://ori-ak-fitness.github.io/ori-fitness-app/icons/share.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="אורי פיטנס — אפליקציית כושר בעברית">
   <meta property="og:locale" content="he_IL">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="אורי פיטנס — אפליקציית הכושר האישית">
+  <meta name="twitter:description" content="מעקב אימונים, תזונה, משקל והתקדמות — הכל במקום אחד, בעברית.">
+  <meta name="twitter:image" content="https://ori-ak-fitness.github.io/ori-fitness-app/icons/share.png">
+  <!-- מסביר לגוגל מה האתר הזה, כדי שיוצג כאפליקציה ולא כדף סתמי -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "אורי פיטנס",
+    "alternateName": "Ori Fitness",
+    "url": "https://ori-ak-fitness.github.io/ori-fitness-app/",
+    "applicationCategory": "HealthApplication",
+    "operatingSystem": "Any",
+    "inLanguage": "he",
+    "description": "אפליקציית כושר אישית בעברית: מעקב אימונים וסטים, יומן תזונה וקלוריות, שקילות וגרפים, אתגרים אישיים ומדליות.",
+    "screenshot": "https://ori-ak-fitness.github.io/ori-fitness-app/icons/share.png",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "ILS" }
+  }
+  </script>
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icons/icon-192.png">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
@@ -200,6 +228,15 @@
             <span class="si-arrow">‹</span>
           </button>
         </div>
+      </div>
+
+      <div class="section-head"><h2>שיתוף</h2></div>
+      <div class="settings-group">
+        <button class="settings-item" id="shareAppBtn">
+          <span class="si-ico">📤</span>
+          <span class="si-main"><b>שתף את האפליקציה</b><small id="shareAppSub">שלח את הקישור לחבר</small></span>
+          <span class="si-arrow">‹</span>
+        </button>
       </div>
 
       <div class="section-head"><h2>פרופיל</h2></div>

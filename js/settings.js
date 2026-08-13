@@ -85,6 +85,44 @@ async function openHeightSheet() {
   setTimeout(() => input.focus(), 120);
 }
 
+/* ---------- שיתוף האפליקציה ---------- */
+
+/* הכתובת נלקחת מתגית canonical ולא נכתבת כאן פעמיים — כך שינוי כתובת
+   בעתיד נעשה במקום אחד, ובבדיקה מקומית לא משתפים בטעות localhost */
+function appUrl() {
+  return document.querySelector('link[rel="canonical"]')?.href || location.href;
+}
+
+const SHARE_TEXT = 'אורי פיטנס — אפליקציית כושר בעברית: אימונים, תזונה והתקדמות במקום אחד.';
+
+async function shareApp() {
+  const url = appUrl();
+
+  // בטלפון זה פותח את תפריט השיתוף של המערכת (וואטסאפ וכו') —
+  // הדרך היחידה לשלוח קישור בלחיצה אחת מאפליקציה מותקנת
+  if (navigator.share) {
+    try {
+      await navigator.share({ title: 'אורי פיטנס', text: SHARE_TEXT, url });
+      return;
+    } catch (err) {
+      if (err?.name === 'AbortError') return;   // המשתמש ביטל — לא שגיאה
+    }
+  }
+
+  try {
+    await navigator.clipboard.writeText(url);
+    toast('הקישור הועתק — אפשר להדביק בוואטסאפ', 'ok');
+    return;
+  } catch { /* לוח העתקה חסום — נופלים להצגה ידנית למטה */ }
+
+  const input = el('input', { type: 'text', value: url, readonly: true });
+  openSheet('שיתוף', el('div', {},
+    el('p', { class: 'muted', style: 'margin-bottom:14px' }, 'העתק את הקישור ושלח לחבר:'),
+    el('div', { class: 'field' }, input),
+  ));
+  setTimeout(() => { input.focus(); input.select(); }, 120);
+}
+
 /* ---------- יעד אימונים שבועי ---------- */
 
 async function openWeeklyGoalSheet() {
@@ -366,6 +404,7 @@ export function initSettingsScreen({ onRerun } = {}) {
   }));
 
   $('#setUsersBtn').addEventListener('click', guard(openUsersSheet));
+  $('#shareAppBtn').addEventListener('click', guard(shareApp));
 
   $('#setNameBtn').addEventListener('click', guard(openNameSheet));
   $('#setHeightBtn').addEventListener('click', guard(openHeightSheet));
