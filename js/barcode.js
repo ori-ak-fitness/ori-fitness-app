@@ -25,9 +25,30 @@ let getDate = null;   // התאריך שמוצג כרגע במסך התזונה
 /* ---------- שליפת מוצר ---------- */
 
 /** @returns {Promise<object|null>} פרטי המוצר, או null אם לא נמצא */
+/*
+ * גודל האריזה מגיע מ-Open Food Facts בשני אופנים: שדה מספרי מנורמל
+ * (product_quantity, תמיד בגרם או מ"ל), ובנוסף מחרוזת חופשית כמו
+ * "500 ml". מעדיפים את המספרי, ונופלים למחרוזת רק אם הוא חסר.
+ */
+function parseAmount(text) {
+  const m = String(text || '').replace(',', '.').match(/([\d.]+)\s*(kg|ק"ג|l|ליטר|ml|מ"ל|מל|g|גרם|גר)?/i);
+  if (!m) return null;
+  const value = parseFloat(m[1]);
+  if (!isFinite(value) || value <= 0) return null;
+  const unit = (m[2] || '').toLowerCase();
+  // ק"ג וליטר מומרים ליחידת הבסיס, אחרת החישוב היה קטן פי אלף
+  if (unit === 'kg' || unit === 'ק"ג' || unit === 'l' || unit === 'ליטר') return value * 1000;
+  return value;
+}
+
+function isLiquid(product) {
+  return /\b(ml|l)\b|מ"ל|ליטר/i.test(`${product.quantity || ''} ${product.product_quantity_unit || ''}`);
+}
+
 async function fetchProduct(code) {
   const fields = [
     'product_name', 'product_name_he', 'generic_name', 'brands', 'quantity',
+    'product_quantity', 'product_quantity_unit', 'serving_size', 'serving_quantity',
     'nutriments', 'image_small_url',
   ].join(',');
 
@@ -41,11 +62,19 @@ async function fetchProduct(code) {
   // Open Food Facts מחזיר קילו-קלוריות ישירות, ואם לא — קילו-ג'אול להמרה
   const kcal100 = n['energy-kcal_100g'] ?? (n['energy_100g'] ? n['energy_100g'] / 4.184 : null);
 
+  const liquid = isLiquid(p);
+
   return {
     code,
     name: p.product_name_he || p.product_name || p.generic_name || '',
     brand: (p.brands || '').split(',')[0].trim(),
     image: p.image_small_url || null,
+    liquid,
+    unit: liquid ? 'מ"ל' : 'גרם',
+    // גודל האריזה השלמה, כדי שסריקה של בקבוק תדע לבד כמה זה בלי שאלות
+    packageAmount: parseAmount(p.product_quantity) ?? parseAmount(p.quantity),
+    packageLabel: (p.quantity || '').trim(),
+    servingAmount: parseAmount(p.serving_quantity) ?? parseAmount(p.serving_size),
     per100: {
       calories: kcal100 != null ? Math.round(kcal100) : null,
       protein: n.proteins_100g ?? null,
@@ -59,10 +88,37 @@ async function fetchProduct(code) {
 
 function openProductSheet(product) {
   const per = product.per100;
+  const unit = product.unit;
+
+  /*
+   * ברירת המחדל היא האריזה השלמה ולא 100 גרם: מי שסורק בקבוק שתייה
+   * רוצה את הקלוריות של הבקבוק, ולא צריך לדעת בעל פה כמה מ"ל יש בו.
+   * 100 נשאר רק כשגודל האריזה לא קיים במאגר.
+   */
+  const presets = [];
+  if (product.packageAmount) {
+    presets.push({ label: `אריזה שלמה · ${fmtNum(product.packageAmount)} ${unit}`, value: product.packageAmount });
+  }
+  if (product.servingAmount && product.servingAmount !== product.packageAmount) {
+    presets.push({ label: `מנה · ${fmtNum(product.servingAmount)} ${unit}`, value: product.servingAmount });
+  }
+  if (!presets.some((p) => p.value === 100)) {
+    presets.push({ label: `100 ${unit}`, value: 100 });
+  }
 
   const amount = el('input', {
-    type: 'number', inputmode: 'decimal', min: '1', value: '100', autocomplete: 'off',
+    type: 'number', inputmode: 'decimal', min: '1',
+    value: String(product.packageAmount || 100), autocomplete: 'off',
   });
+
+  const chips = el('div', { class: 'chip-row' });
+  function syncChips() {
+    const cur = num(amount.value, 0);
+    chips.replaceChildren(...presets.map((p) => el('button', {
+      class: `chip${Math.abs(cur - p.value) < 0.01 ? ' is-on' : ''}`,
+      onclick: () => { amount.value = String(p.value); renderPreview(); syncChips(); },
+    }, p.label)));
+  }
 
   const preview = el('div', { class: 'bc-preview' });
 
@@ -88,8 +144,9 @@ function openProductSheet(product) {
         el('span', {}, `🥑 ${fmtNum(c.fat)}ג'`)),
     );
   }
-  amount.addEventListener('input', renderPreview);
+  amount.addEventListener('input', () => { renderPreview(); syncChips(); });
   renderPreview();
+  syncChips();
 
   const save = guard(async () => {
     const c = calc();
@@ -103,7 +160,7 @@ function openProductSheet(product) {
       name: [product.brand, product.name].filter(Boolean).join(' — ') || 'מוצר סרוק',
       calories: c.calories,
       protein: c.protein, carbs: c.carbs, fat: c.fat,
-      details: `${fmtNum(c.grams)} גרם · ברקוד ${product.code}`,
+      details: `${fmtNum(c.grams)} ${unit} · ברקוד ${product.code}`,
       photo: null, thumb: null,
     });
     closeSheet();
@@ -120,10 +177,16 @@ function openProductSheet(product) {
         el('b', { class: 'bc-name' }, title),
         el('div', { class: 'muted', style: 'font-size:.82rem' },
           per.calories != null
-            ? `${fmtNum(per.calories)} קק"ל ל-100 גרם`
+            ? `${fmtNum(per.calories)} קק"ל ל-100 ${unit}` +
+              (product.packageLabel ? ` · אריזה: ${product.packageLabel}` : '')
             : 'אין נתוני קלוריות למוצר הזה')),
     ),
-    el('div', { class: 'field' }, el('label', {}, 'כמה גרם אכלת?'), amount),
+    chips,
+    el('div', { class: 'field' },
+      el('label', {}, product.liquid ? `כמה שתית? (${unit})` : `כמה אכלת? (${unit})`),
+      amount),
+    ...(product.packageAmount ? [] : [el('p', { class: 'muted', style: 'font-size:.78rem;margin:-6px 0 12px' },
+      'גודל האריזה לא רשום במאגר למוצר הזה, אז צריך להזין כמות ידנית.')]),
     preview,
     el('button', { class: 'btn btn-primary btn-block', onclick: save }, 'הוסף ליומן'),
   );
