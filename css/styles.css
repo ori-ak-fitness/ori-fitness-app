@@ -1288,6 +1288,49 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
    אותה. כל כלל שהיה משנה עיצוב לפי רוחב היה יוצר שוב הבדל בין המכשירים —
    וזה בדיוק מה שאורי ביקש למנוע. */
 
+/* ---------- סורק הברקוד ---------- */
+.bc-scanner {
+  position: fixed; inset: 0; z-index: 95;
+  background: #000; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+}
+body.bc-open { overflow: hidden; }
+.bc-scanner video {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%; object-fit: cover;
+}
+/* מסגרת הכיוון — חלון שקוף בתוך שכבה כהה, כדי שברור לאן לכוון */
+.bc-frame {
+  position: relative; z-index: 1;
+  width: min(78vw, 320px); aspect-ratio: 3 / 2;
+  border: 3px solid var(--gold); border-radius: 18px;
+  box-shadow: 0 0 0 100vmax rgba(0, 0, 0, .55);
+}
+.bc-hint {
+  position: relative; z-index: 1; margin-top: 20px;
+  color: #fff; font-weight: 700; font-size: .95rem;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, .8);
+}
+.bc-actions {
+  position: absolute; z-index: 2;
+  inset-block-end: calc(var(--safe-bottom) + 26px); inset-inline: 0;
+  display: flex; gap: 10px; justify-content: center; padding: 0 20px;
+}
+.bc-actions .btn { background: rgba(255, 255, 255, .92); color: #111; border: none; }
+
+.bc-head { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+.bc-img { width: 58px; height: 58px; object-fit: contain; border-radius: 10px; background: var(--bg-elev-2); }
+.bc-name { display: block; font-size: 1rem; margin-bottom: 3px; }
+.bc-preview {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  background: var(--bg-elev-2); border: 2px solid var(--line);
+  border-radius: var(--r-md); padding: 13px 15px; margin: 14px 0;
+}
+.bc-kcal { display: flex; align-items: baseline; gap: 6px; }
+.bc-kcal b { font-size: 1.5rem; font-weight: 800; }
+.bc-kcal span { font-size: .82rem; color: var(--text-dim); }
+.bc-macros { display: flex; gap: 10px; font-size: .84rem; color: var(--text-dim); }
+
 /* שורת החשבון בהגדרות היא תצוגה בלבד, לא כפתור */
 .settings-item.is-static { cursor: default; }
 .settings-item.is-static:active { background: var(--bg-elev); }

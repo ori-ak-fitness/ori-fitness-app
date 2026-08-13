@@ -7,7 +7,10 @@ import * as db from './db.js';
 import { $, $$, toast, initSheet, setAutoAdvanceMs, AUTO_ADVANCE_DEFAULT_MS, dateKey } from './ui.js';
 import { initCardio, renderCardio, invalidateCardioCache } from './cardio.js';
 import { initWorkouts, startWorkout, hasActiveWorkout, renderHistory, getAllWorkouts } from './workouts.js';
-import { initNutrition, renderNutrition, invalidateGoalsCache, resetToToday } from './nutrition.js';
+import {
+  initNutrition, renderNutrition, invalidateGoalsCache, resetToToday, currentNutritionDate,
+} from './nutrition.js';
+import { initBarcode } from './barcode.js';
 import {
   initDashboard, renderStats, renderQuote, renderGreeting, advanceRotation,
   currentQuote, renderGoals, invalidatePersonalGoalsCache,
@@ -226,6 +229,15 @@ async function main() {
   initMealPlan({ onUpdate: () => renderNutrition() });
   await initNutrition({
     onUpdate: () => { if (currentScreen === 'home') renderStats(); },
+  });
+  initBarcode({
+    // מוסיף לתאריך שמוצג במסך התזונה, לא בהכרח היום — אפשר לסרוק
+    // מוצר גם כשגוללים אחורה ליום קודם
+    currentDate: currentNutritionDate,
+    onAdded: async () => {
+      await renderNutrition();
+      if (currentScreen === 'home') renderStats();
+    },
   });
   await initRoutines({
     onStartWorkout: async (routine) => {
