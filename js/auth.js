@@ -50,6 +50,21 @@ async function loadSdk() {
   return sdk;
 }
 
+/*
+ * שום שלב בהתחברות לא נשאר תלוי לנצח.
+ *
+ * ברשת חלשה — סלולר, מעלית, ווייפיי גרוע — קריאה ל-Firebase יכולה פשוט
+ * לא לחזור. בלי תקרת זמן הכפתור נשאר "טוען…" מושבת לתמיד, וזה נראה
+ * למשתמש בדיוק כמו אפליקציה שבורה. עדיף להיכשל בגלוי ולתת לנסות שוב.
+ */
+function withTimeout(promise, ms) {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => setTimeout(
+      () => reject(Object.assign(new Error('timeout'), { code: 'app/timeout' })), ms)),
+  ]);
+}
+
 function isAdmin(email) {
   return ADMIN_EMAILS.map((e) => e.toLowerCase()).includes((email || '').toLowerCase());
 }
@@ -139,13 +154,15 @@ export async function startAuthFlow({ openGate, closeGate, setNote }) {
 
   let s;
   try {
-    s = await loadSdk();
+    s = await withTimeout(loadSdk(), 20000);
   } catch (err) {
     console.warn('[Ori Fitness] טעינת Firebase נכשלה:', err);
     // הרשת קיימת אבל ה-SDK לא נטען — לא נועלים מי שכבר אושר
     if (cached?.status === 'approved') { closeGate(); return; }
-    setNote('לא הצלחנו להתחבר לשרת. נסה שוב מאוחר יותר.', 'denied');
-    if (btn) { btn.disabled = false; btn.textContent = 'נסה שוב'; }
+    setNote(err?.code === 'app/timeout'
+      ? 'החיבור לשרת לוקח יותר מדי זמן. בדוק את החיבור לאינטרנט ונסה שוב.'
+      : 'לא הצלחנו להתחבר לשרת. נסה שוב מאוחר יותר.', 'denied');
+    if (btn) { btn.disabled = false; btn.textContent = 'נסה שוב'; btn.onclick = () => location.reload(); }
     return;
   }
 
@@ -178,7 +195,7 @@ export async function startAuthFlow({ openGate, closeGate, setNote }) {
 
     let status;
     try {
-      status = await resolveStatus(user);
+      status = await withTimeout(resolveStatus(user), 20000);
     } catch (err) {
       console.warn('[Ori Fitness] בדיקת ההרשאה נכשלה:', err);
       // שסתום ביטחון: מנהל נכנס גם אם מסד הנתונים לא זמין (חוקי הרשאות
@@ -193,8 +210,23 @@ export async function startAuthFlow({ openGate, closeGate, setNote }) {
         return;
       }
       if (cached?.status === 'approved') { closeGate(); return; }
-      setNote('לא הצלחנו לבדוק את ההרשאה. נסה לרענן.', 'denied');
-      if (btn) { btn.disabled = false; btn.textContent = 'נסה שוב'; }
+      /*
+       * מפרידים בין שלוש תקלות שונות לגמרי, כי "נסה שוב" סתמי שולח את
+       * המשתמש ללחוץ שוב ושוב על משהו שלעולם לא יצליח מעצמו:
+       * חסימת הרשאות = תקלת הגדרה שרק בעל האפליקציה יכול לפתור,
+       * תקרת זמן/רשת = כן שווה לנסות שוב.
+       */
+      const denied = err?.code === 'permission-denied';
+      setNote(denied
+        ? `נכנסת עם ${user.email}, אבל השרת חסם את בדיקת ההרשאה. זו תקלת הגדרה — פנה לבעל האפליקציה.`
+        : err?.code === 'app/timeout'
+          ? 'בדיקת ההרשאה לוקחת יותר מדי זמן. בדוק את החיבור ונסה שוב.'
+          : 'לא הצלחנו לבדוק את ההרשאה. נסה לרענן.', 'denied');
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = denied ? 'התנתק' : 'נסה שוב';
+        btn.onclick = denied ? () => signOutUser() : () => location.reload();
+      }
       return;
     }
 
@@ -220,8 +252,10 @@ export async function startAuthFlow({ openGate, closeGate, setNote }) {
 
   // קליטת חזרה מהפניה. ההפניה היא רק מסלול גיבוי היום, אבל מי שנתקע
   // באמצע כזו קודם עדיין צריך שהתשובה תיקלט — לפני שמאזינים למצב.
-  try { await s.getRedirectResult(s.auth); } catch (err) {
-    if (err?.code !== 'auth/no-auth-event') {
+  try { await withTimeout(s.getRedirectResult(s.auth), 15000); } catch (err) {
+    // תקרת זמן כאן אינה שגיאה שכדאי להציג: רוב הפעמים המשתמש לא הגיע
+    // מהפניה בכלל, והמאזין שלמטה עדיין יקלוט התחברות תקינה בעצמו
+    if (err?.code !== 'auth/no-auth-event' && err?.code !== 'app/timeout') {
       console.warn('[Ori Fitness] redirect:', err);
       // חשוב במיוחד בטלפון: כשההתחברות מתבצעת ב-redirect, כישלון בחזרה
       // ממנו הוא בדיוק המקרה שבו נראה כאילו "לחצתי ולא קרה כלום"
