@@ -261,11 +261,6 @@ export function blobUrl(blob) {
   return url;
 }
 
-export function revokeAllBlobUrls() {
-  for (const url of objectUrls) URL.revokeObjectURL(url);
-  objectUrls.clear();
-}
-
 /* ---------- קונפטי ---------- */
 
 export function confetti(host, count = 70) {
@@ -305,10 +300,6 @@ let autoAdvanceMs = AUTO_ADVANCE_DEFAULT_MS;
 
 export function setAutoAdvanceMs(ms) {
   autoAdvanceMs = Math.max(0, num(ms, AUTO_ADVANCE_DEFAULT_MS));
-}
-
-export function getAutoAdvanceMs() {
-  return autoAdvanceMs;
 }
 
 /**

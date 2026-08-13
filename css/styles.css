@@ -300,15 +300,12 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .icon-btn:active { background: var(--bg-elev-2); }
 
 /* ---------- כרטיסים ---------- */
-.hero-card, .quote-card, .timer-card, .kcal-card, .chart-card, .card {
+.quote-card, .timer-card, .kcal-card, .chart-card, .card {
   background: var(--bg-elev);
   border: 2px solid var(--line);
   border-radius: var(--r-lg);
   padding: 18px;
 }
-.hero-card { text-align: center; }
-.hero-card h2 { margin-bottom: 6px; }
-.hero-card .muted { margin-bottom: 16px; }
 
 /* ברכה בראש מסך הבית — לפי שעה + שם, אם הוגדר. פונט סריפי עברי לתחושה
    יוקרתית/עורכת-דין יותר מברירת המחדל, ותאריך מלא כשורת משנה איטלקית עדינה */
@@ -397,15 +394,6 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
   width: 64px; height: 64px; border-radius: var(--r-sm);
   object-fit: cover; cursor: pointer; background: var(--bg-elev-2);
 }
-
-/* ---------- סטטיסטיקות ---------- */
-.stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 14px; }
-.stat {
-  background: var(--bg-elev); border: 2px solid var(--line);
-  border-radius: var(--r-md); padding: 13px 8px; text-align: center;
-}
-.stat-value { font-size: 1.35rem; font-weight: 800; font-variant-numeric: tabular-nums; }
-.stat-label { font-size: .72rem; color: var(--text-dim); margin-top: 2px; }
 
 /* ---------- כרטיסי סיכום בבית: אימונים השבוע + תזונה היום ---------- */
 /* צל רך דו-שכבתי לתחושת עומק, בלי פס עליון — אורי לא אהב את הפס הכהה
@@ -988,10 +976,6 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
   margin-top: 6px;
 }
 .reset-confirm-input:focus { outline: none; border-color: var(--danger); }
-
-/* ---------- גיבוי ---------- */
-.backup-card { padding: 16px 18px; }
-.backup-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-top: 14px; }
 
 .sheet-body textarea {
   width: 100%; background: var(--bg-elev-2); border: 2px solid var(--line);

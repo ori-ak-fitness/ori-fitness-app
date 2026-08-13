@@ -130,13 +130,6 @@ export function uid() {
   return Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 9);
 }
 
-/** דיווח על שימוש באחסון (לשלב 5 / אבחון) */
-export async function storageEstimate() {
-  if (!navigator.storage?.estimate) return null;
-  const { usage, quota } = await navigator.storage.estimate();
-  return { usage, quota };
-}
-
 /** בקשה לאחסון מתמיד כדי שהדפדפן לא ימחק את הנתונים */
 export async function requestPersistence() {
   if (!navigator.storage?.persist) return false;

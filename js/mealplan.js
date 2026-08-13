@@ -65,16 +65,6 @@ async function saveLibrary(items) {
   invalidatePlanCache();
 }
 
-export async function planTotals() {
-  const plan = await getPlan();
-  return plan.filter((m) => m.isDefault).reduce((t, m) => ({
-    calories: t.calories + num(m.calories, 0),
-    protein:  t.protein  + num(m.protein, 0),
-    carbs:    t.carbs    + num(m.carbs, 0),
-    fat:      t.fat      + num(m.fat, 0),
-  }), { calories: 0, protein: 0, carbs: 0, fat: 0 });
-}
-
 /* ---------- רישום ליום ---------- */
 
 const busy = new Set();

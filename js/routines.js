@@ -101,13 +101,6 @@ async function setSchedule(schedule) {
   await db.setSetting(SCHEDULE_KEY, schedule);
 }
 
-/** התוכנית המשובצת ליום נתון (ברירת מחדל: היום) */
-export async function routineForDay(dayIndex = new Date().getDay()) {
-  const schedule = await getSchedule();
-  const id = schedule[dayIndex];
-  return id ? await getRoutine(id) : null;
-}
-
 /* ---------- תצוגה ---------- */
 
 export async function renderPlan() {
