@@ -103,7 +103,8 @@ function userRow(user, { isMe, onChange }) {
       : el('span', { class: 'li-thumb user-avatar user-avatar-blank' }, '👤'),
     el('div', { class: 'li-main' },
       el('div', { class: 'li-title' }, user.name || user.email || 'משתמש'),
-      el('div', { class: 'li-sub' }, user.email || STATUS_LABEL[status] || status),
+      // בלי השם, הכותרת כבר מציגה את המייל — אין טעם לחזור עליו פעמיים
+      el('div', { class: 'li-sub' }, user.name ? (user.email || '') : (STATUS_LABEL[status] || status)),
     ),
     el('div', { class: 'user-actions' }, ...actions),
   );
