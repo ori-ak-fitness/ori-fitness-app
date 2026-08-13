@@ -74,11 +74,15 @@ if ($browser) {
     # --app gives a clean window: no tabs, no address bar.
     # A separate profile folder keeps this window independent of your normal browsing.
     $profileDir = Join-Path $env:LOCALAPPDATA "OriFitnessApp\browser-profile"
-    Start-Process -FilePath $browser -ArgumentList @(
-        "--app=$url",
-        "--user-data-dir=`"$profileDir`"",
-        "--window-size=430,860"
-    )
+
+    # Pass ONE argument string, not an array. With an array, PowerShell quotes
+    # each element itself, so Chrome received --user-data-dir="C:\..." with the
+    # quote characters as part of the path, treated it as invalid and exited
+    # without opening anything - the shortcut looked completely dead. A single
+    # string is passed through verbatim, and Chrome does its own quote parsing,
+    # which also keeps it correct if the path ever contains a space.
+    $argLine = '--app={0} --user-data-dir="{1}" --window-size=430,860' -f $url, $profileDir
+    Start-Process -FilePath $browser -ArgumentList $argLine
     Write-Host "Ori Fitness App opened: $url" -ForegroundColor Green
 } else {
     Write-Host "Chrome/Edge not found - opening in your default browser instead." -ForegroundColor Yellow
