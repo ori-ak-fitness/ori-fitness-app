@@ -25,6 +25,14 @@
       fitToDesktopWidth();
       addEventListener('resize', fitToDesktopWidth);
       addEventListener('DOMContentLoaded', fitToDesktopWidth);
+
+      /* ספארי באייפון מתעלם בכוונה מ-user-scalable=no, ולכן צביטה עדיין
+         מגדילה שם את המסך ומוציאה את הפריסה הקבועה משליטה. אלה האירועים
+         היחידים שספארי כן מאפשר לעצור, וזו הדרך היחידה לכבות את זה שם.
+         בדפדפנים אחרים האירועים לא קיימים והשורות פשוט לא עושות כלום. */
+      for (const evt of ['gesturestart', 'gesturechange', 'gestureend']) {
+        document.addEventListener(evt, function (e) { e.preventDefault(); }, { passive: false });
+      }
     })();
   </script>
   <meta name="theme-color" content="#f4efe4">

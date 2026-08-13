@@ -179,6 +179,15 @@ input, textarea, [contenteditable],
  */
 * { touch-action: manipulation; }
 
+/*
+ * ספארי באייפון מגדיל את כל העמוד ברגע שנוגעים בשדה קלט שהגופן בו קטן
+ * מ-16px — ואז נשאר מוגדל. רוב השדות כאן היו 15.2px, ולכן כל הקלדה של
+ * משקל, חזרות או קלוריות הקפיצה את המסך. אין דרך לכבות את זה; הדרך
+ * היחידה היא שהגופן לא ירד מ-16px. הכלל יושב אחרי כל השאר בכוונה,
+ * כדי לתפוס גם שדות שמגדירים גודל משלהם.
+ */
+input, select, textarea { font-size: 16px; }
+
 html, body {
   margin: 0;
   padding: 0;
@@ -680,7 +689,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .day-select {
   flex: none; background: var(--bg-elev-2); border: 2px solid var(--line);
   color: var(--text); border-radius: var(--r-sm); padding: 8px 10px;
-  font-size: .85rem; font-family: inherit; max-width: 45%;
+  font-size: 1rem; font-family: inherit; max-width: 45%;
 }
 .day-select:focus { outline: none; border-color: var(--accent); }
 
@@ -701,7 +710,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .plan-ex-main { display: flex; flex-direction: column; gap: 7px; min-width: 0; }
 .plan-ex-main > input {
   width: 100%; background: var(--bg-elev); border: 2px solid var(--line);
-  color: var(--text); border-radius: var(--r-sm); padding: 9px 11px; font-size: .95rem;
+  color: var(--text); border-radius: var(--r-sm); padding: 9px 11px; font-size: 1rem;
   font-family: inherit;
 }
 .plan-ex-main > input:focus { outline: none; border-color: var(--accent); }
@@ -712,7 +721,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .plan-ex-targets input {
   width: 58px; background: var(--bg-elev); border: 2px solid var(--line);
   color: var(--text); border-radius: 8px; padding: 7px 6px; text-align: center;
-  font-size: .9rem; font-variant-numeric: tabular-nums; direction: ltr; font-family: inherit;
+  font-size: 1rem; font-variant-numeric: tabular-nums; direction: ltr; font-family: inherit;
 }
 .plan-ex-targets input:focus { outline: none; border-color: var(--accent); }
 /* שדות מאקרו עם כותרת מפורשת מעל כל אחד — קלוריות, חלבון, פחמימות, שומן */
@@ -729,7 +738,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .macro-cell input {
   width: 100%; background: var(--bg-elev); border: 2px solid var(--line);
   color: var(--text); border-radius: 8px; padding: 8px 4px; text-align: center;
-  font-size: .95rem; font-variant-numeric: tabular-nums; direction: ltr; font-family: inherit;
+  font-size: 1rem; font-variant-numeric: tabular-nums; direction: ltr; font-family: inherit;
 }
 .macro-cell input:focus { outline: none; border-color: var(--accent); }
 .macro-cell-unit {
@@ -737,7 +746,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 }
 
 .plan-ex-actions { display: flex; flex-direction: column; gap: 2px; }
-.plan-ex-actions .icon-btn { width: 30px; height: 30px; font-size: .95rem; }
+.plan-ex-actions .icon-btn { width: 30px; height: 30px; font-size: 1rem; }
 .plan-ex-actions .icon-btn[disabled] { opacity: .25; pointer-events: none; }
 
 .plan-total {
@@ -953,7 +962,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .setting-row select {
   flex: none; background: var(--bg-elev-2); border: 2px solid var(--line);
   color: var(--text); border-radius: var(--r-sm); padding: 9px 11px;
-  font-size: .88rem; font-family: inherit;
+  font-size: 1rem; font-family: inherit;
 }
 .setting-row select:focus { outline: none; border-color: var(--accent); }
 
