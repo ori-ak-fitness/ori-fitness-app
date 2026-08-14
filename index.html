@@ -45,6 +45,40 @@
       }
     })();
   </script>
+  <!--
+    פתיחת הקובץ ישירות מהתיקייה (file://) מציגה דף שבור: הדפדפן חוסם
+    טעינת מודולים מכתובת מקומית, ולכן שום קוד לא רץ, שער הכניסה לא נסגר
+    וכל המסכים מופיעים זה על גבי זה כטקסט חשוף. זה נראה בדיוק כאילו
+    הפרויקט נמחק — וזה כבר הבהיל את אורי פעם אחת.
+
+    לכן במקרה הזה מוחלף הדף כולו בהסבר קצר ובקישור לאפליקציה האמיתית.
+    הכל כתוב כאן פנימית ובלי תלות בקובץ עיצוב, כי גם הוא לא בהכרח נטען.
+  -->
+  <style>html.is-local-file body > *{display:none !important}</style>
+  <script>
+    if (location.protocol === 'file:') {
+      document.documentElement.className += ' is-local-file';
+      addEventListener('DOMContentLoaded', function () {
+        var url = 'https://ori-ak-fitness.github.io/ori-fitness-app/';
+        document.body.removeAttribute('class');
+        document.body.style.cssText =
+          'margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;' +
+          'background:#f4efe4;color:#2f2a22;font-family:system-ui,Arial,sans-serif;direction:rtl;padding:24px';
+        document.body.innerHTML =
+          '<div style="max-width:420px;text-align:center">' +
+            '<img src="icons/icon-192.png" alt="" style="width:96px;height:96px;border-radius:22px;margin-bottom:20px">' +
+            '<h1 style="font-size:1.35rem;margin:0 0 12px">זה קובץ הקוד, לא האפליקציה</h1>' +
+            '<p style="line-height:1.6;color:#5c5346;margin:0 0 22px">' +
+              'פתחת את הקובץ ישירות מהתיקייה שבמחשב. האפליקציה עובדת רק מהכתובת שלה.' +
+              '<br><b>שום דבר לא נמחק — הכל שמור.</b>' +
+            '</p>' +
+            '<a href="' + url + '" style="display:inline-block;background:#1d6b6f;color:#eaf6f6;' +
+              'text-decoration:none;padding:15px 30px;border-radius:12px;font-weight:700;font-size:1.05rem">' +
+              'פתח את האפליקציה</a>' +
+          '</div>';
+      });
+    }
+  </script>
   <meta name="theme-color" content="#f4efe4">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
