@@ -44,6 +44,53 @@ function strengthOnly(workouts) {
   return workouts.filter((w) => (w.kind ?? 'strength') === 'strength');
 }
 
+/* ---------- המלצה לאימון הבא ---------- */
+
+/*
+ * עומס מתקדם: אחרי כמה חזרות שהצלחת בפעם הקודמת, מה הצעד הבא.
+ *
+ * הכלל פשוט בכוונה, כי הוא צריך להיות מוסבר בשורה אחת ולהרגיש הוגן:
+ * הרבה חזרות => מוסיפים משקל, מעט חזרות => נשארים במשקל ומוסיפים חזרה.
+ * זו לא תוכנית אימונים מדעית — זו דחיפה קטנה קדימה שמונעת דריכה במקום.
+ *
+ * ההעלאה מעוגלת ל-2.5 ק"ג כי אלה הפלטות שיש בפועל במכון. במשקלים
+ * קלים (משקוליות יד) קופצים ב-1 ק"ג, אחרת הקפיצה גדולה מדי באחוזים.
+ */
+const REPS_FOR_WEIGHT_JUMP = 10;
+
+function stepFor(weight) {
+  if (weight < 10) return 1;
+  if (weight < 25) return 2;
+  return 2.5;
+}
+
+/**
+ * מה לנסות הפעם, על סמך הסט הכי כבד שבוצע בפעם הקודמת.
+ * @param {Array} sets סטים מהאימון הקודם באותו תרגיל
+ * @returns {{weight:number, reps:number, kind:'weight'|'reps'}|null}
+ *          null כשאין ממה ללמוד — תרגיל חדש, או משקל גוף בלבד
+ */
+export function suggestNext(sets) {
+  if (!Array.isArray(sets)) return null;
+
+  let best = null;
+  for (const s of sets) {
+    const w = liftedWeight(s), r = liftedReps(s);
+    if (!w || !r) continue;
+    // הסט הכבד ביותר, ובמשקל שווה — זה עם הכי הרבה חזרות
+    if (!best || w > best.weight || (w === best.weight && r > best.reps)) {
+      best = { weight: w, reps: r };
+    }
+  }
+  if (!best) return null;
+
+  if (best.reps >= REPS_FOR_WEIGHT_JUMP) {
+    // עלה במשקל, וחזור לטווח חזרות נמוך יותר — כך שהקפיצה בת ביצוע
+    return { weight: best.weight + stepFor(best.weight), reps: 8, kind: 'weight' };
+  }
+  return { weight: best.weight, reps: best.reps + 1, kind: 'reps' };
+}
+
 /**
  * המשקל הכבד ביותר שהורם אי־פעם בכל תרגיל.
  * @returns {Map<string, number>} שם תרגיל -> משקל בק"ג

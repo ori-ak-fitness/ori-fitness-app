@@ -12,7 +12,7 @@ import {
 import { getRoutines } from './routines.js';
 import {
   isSetDone, liftedWeight, liftedReps, bestWeightByExercise, bestRepsByExercise, prSetsByWorkout,
-  announcePR, dismissPR, prBadge, initRecords,
+  announcePR, dismissPR, prBadge, initRecords, suggestNext,
 } from './records.js';
 
 const ACTIVE_KEY = 'activeWorkout';
@@ -48,6 +48,7 @@ function newWorkout(routine = null, lastByExercise = new Map()) {
         name: ex.name,
         targetReps: ex.reps || '',
         lastTime: last ? { date: last.date, summary: summarizeSets(last.sets) } : null,
+        suggest: last ? suggestNext(last.sets) : null,
         sets: Array.from({ length: count }, (_, i) => {
           const s = newSet();
           // קודם מה שהרמת בפועל בפעם הקודמת (אותו סט, ואם אין — האחרון),
@@ -63,7 +64,7 @@ function newWorkout(routine = null, lastByExercise = new Map()) {
 }
 
 function newExercise(name) {
-  return { id: db.uid(), name: name.trim(), targetReps: '', lastTime: null, sets: [newSet()] };
+  return { id: db.uid(), name: name.trim(), targetReps: '', lastTime: null, suggest: null, sets: [newSet()] };
 }
 
 function newSet() {
@@ -290,6 +291,17 @@ function renderExerciseCard(ex) {
               el('span', { class: 'last-time-tag' }, 'פעם שעברה'),
               `${ex.lastTime.summary} · ${formatDateHe(ex.lastTime.date)}`)
           : null,
+        // ההמלצה לצד "פעם שעברה", כי היא נגזרת ממנה ורק ביחד הן מסבירות
+        // את עצמן: זה מה שעשית, וזה הצעד הקטן קדימה מכאן
+        ex.suggest
+          ? el('div', { class: 'suggest-line' },
+              el('span', { class: 'suggest-tag' }, 'היעד היום'),
+              // חצי קילו נשאר חצי קילו: 62.5 הוא צירוף פלטות אמיתי,
+              // ו-63 שולח אותך לחפש משקל שלא קיים במכון
+              `${fmtNum(ex.suggest.weight, 1)} ק"ג × ${ex.suggest.reps}`,
+              el('span', { class: 'suggest-why' },
+                ex.suggest.kind === 'weight' ? 'עלית במשקל' : 'עוד חזרה אחת'))
+          : null,
       ),
       el('button', {
         class: 'icon-btn', 'aria-label': 'מחק תרגיל',
@@ -445,6 +457,7 @@ async function addExercise(name) {
   const last = (await lastPerformanceByExercise()).get(clean);
   if (last) {
     ex.lastTime = { date: last.date, summary: summarizeSets(last.sets) };
+    ex.suggest = suggestNext(last.sets);
     if (last.sets[0]?.weight) ex.sets[0].weight = last.sets[0].weight;
   }
 
