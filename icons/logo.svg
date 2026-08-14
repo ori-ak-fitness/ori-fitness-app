@@ -1,23 +1,63 @@
 <!--
-  לוגו אורי AK פיטנס — קרם ושחור, תואם לערכת הצבעים הבהירה של האפליקציה.
-  מוצג ב-28 פיקסלים בסרגל העליון (שם רק הצורה נראית) וגם כבסיס
-  לאייקוני ההתקנה (192/512/מסכה), שם גם "ORI AK FITNESS" קריא למטה.
+  לוגו אורי AK פיטנס.
 
-  ה-AK בטורקיז בכוונה: זו האות הייחודית של המותג, וצבע נפרד גורם לה
-  להיקרא כחלק מהשם ולא כרעש. אותו טורקיז של משתנה gold באפליקציה.
+  רקע בז' כמו האפליקציה, משקולת שחורה, ו"ORI FITNESS" בטורקיז.
 
-  להחלפה בלוגו שלך: פשוט דרוס את הקובץ הזה. מומלץ ריבועי.
+  הטורקיז אינו צבע שנבחר בעין אלא בדיוק המעבר של כפתור ראשי באפליקציה
+  (gold אל gold-deep, כלומר 2f9298 אל 1d6b6f). לכן הלוגו והכפתורים
+  נראים כמו אותה מערכת, וכל שינוי עתידי בצבע המותג צריך לעדכן את שניהם.
+
+  המשקולת טעונה כמו במציאות: שלוש פלטות בכל צד, הגדולה צמודה לידית
+  והן קטנות כלפי חוץ. הצללית המדורגת הזו היא מה שנקרא גם ב־28 פיקסלים
+  בסרגל העליון, גם כשהמרווחים בין הפלטות כבר לא נראים.
+
+  להחלפה בלוגו אחר: פשוט דרוס את הקובץ. מומלץ ריבועי.
 -->
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="אורי AK פיטנס">
+  <defs>
+    <linearGradient id="brandTeal" x1="0" y1="0" x2="0.5" y2="1">
+      <stop offset="0" stop-color="#2f9298"/>
+      <stop offset="1" stop-color="#1d6b6f"/>
+    </linearGradient>
+  </defs>
+
   <rect width="512" height="512" rx="102" fill="#f4efe4"/>
+
   <g fill="#2f2a22">
-    <rect x="146" y="146" width="220" height="60"  rx="26"/>
-    <rect x="76"  y="90"  width="72"  height="172" rx="30"/>
-    <rect x="364" y="90"  width="72"  height="172" rx="30"/>
+    <!-- ידית -->
+    <rect x="196" y="150" width="120" height="30" rx="15"/>
+
+    <!-- צד ימין: גדולה, בינונית, קטנה -->
+    <rect x="316" y="99"  width="40" height="132" rx="14"/>
+    <rect x="360" y="115" width="34" height="100" rx="12"/>
+    <rect x="398" y="130" width="28" height="70"  rx="10"/>
+
+    <!-- צד שמאל: מראה -->
+    <rect x="156" y="99"  width="40" height="132" rx="14"/>
+    <rect x="118" y="115" width="34" height="100" rx="12"/>
+    <rect x="86"  y="130" width="28" height="70"  rx="10"/>
   </g>
-  <text x="256" y="390" text-anchor="middle"
-        font-family="'Monotype Corsiva', 'Segoe Script', cursive" font-size="48" font-weight="400"
-        font-style="italic" letter-spacing="1">
-    <tspan fill="#2f2a22">ORI </tspan><tspan fill="#1d6b6f">AK</tspan><tspan fill="#2f2a22"> FITNESS</tspan>
-  </text>
+
+  <!-- חריצי אחיזה, חתוכים מהידית בצבע הרקע -->
+  <g fill="#f4efe4" opacity=".45">
+    <rect x="222" y="157" width="5" height="16" rx="2.5"/>
+    <rect x="238" y="157" width="5" height="16" rx="2.5"/>
+    <rect x="254" y="157" width="5" height="16" rx="2.5"/>
+    <rect x="270" y="157" width="5" height="16" rx="2.5"/>
+    <rect x="286" y="157" width="5" height="16" rx="2.5"/>
+  </g>
+
+  <!-- AK — הגיבור, בשחור של המשקולת -->
+  <text x="256" y="368" text-anchor="middle" fill="#2f2a22"
+        font-family="'Century Gothic', 'Futura', 'Segoe UI', 'Trebuchet MS', sans-serif"
+        font-size="150" font-weight="700" letter-spacing="-4">AK</text>
+
+  <!--
+    ORI FITNESS — סריף מעודן ונטוי, בניגוד מכוון ל־AK הגיאומטרי והכבד.
+    שני כתבים מנוגדים נקראים כמו מותג; אותו כתב פעמיים נקרא כמו טקסט.
+    הטורקיז הוא בדיוק המעבר של הכפתורים.
+  -->
+  <text x="256" y="430" text-anchor="middle" fill="url(#brandTeal)"
+        font-family="'Bodoni MT', 'Didot', 'Baskerville Old Face', Garamond, Georgia, serif"
+        font-size="44" font-weight="400" font-style="italic" letter-spacing="9">ORI FITNESS</text>
 </svg>
