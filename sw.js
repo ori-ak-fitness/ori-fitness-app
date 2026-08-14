@@ -3,7 +3,7 @@
    העלה את CACHE_VERSION בכל שחרור גרסה כדי לרענן קבצים.
    =================================================================== */
 
-const CACHE_VERSION = 'ori-fitness-v39';
+const CACHE_VERSION = 'ori-fitness-v40';
 
 const APP_SHELL = [
   './',
@@ -46,8 +46,18 @@ self.addEventListener('install', (event) => {
     await Promise.all(APP_SHELL.map((url) =>
       cache.add(new Request(url, { cache: 'reload' })).catch((err) =>
         console.warn('[SW] לא נטען למטמון:', url, err))));
-    self.skipWaiting();
+    /*
+     * אין כאן skipWaiting בכוונה. גרסה חדשה ממתינה עד שהמשתמש מאשר,
+     * ואז app.js שולח SKIP_WAITING. אם היינו משתלטים מיד, החלפה של
+     * קוד מתחת לדף שכבר רץ עלולה לתפוס אותו באמצע פעולה — למשל
+     * באמצע אימון פעיל.
+     */
   })());
+});
+
+// אישור מהמשתמש: מעכשיו הגרסה החדשה משתלטת, ו-app.js ירענן
+self.addEventListener('message', (event) => {
+  if (event.data?.type === 'SKIP_WAITING') self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {

@@ -1410,6 +1410,25 @@ body.gate-open main { display: none !important; }
 /* הכפתורים יורדים לשורה משלהם כשאין מקום, במקום למעוך את השם */
 .user-actions { display: flex; flex-wrap: wrap; gap: 7px; flex: none; }
 
+/* ---------- הודעת גרסה חדשה (זמני, ראה showUpdateBar ב-app.js) ---------- */
+
+/* יושבת מעל שורת הטאבים ולא מעליהם, כדי לא לחסום ניווט בזמן שהיא מוצגת */
+.update-bar {
+  position: fixed; inset-inline: 10px;
+  inset-block-end: calc(var(--tabbar-h) + var(--safe-bottom) + 10px);
+  z-index: 40;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  background: linear-gradient(150deg, var(--gold), var(--gold-deep));
+  color: var(--gold-ink);
+  border-radius: var(--r-md); padding: 11px 14px;
+  box-shadow: 0 10px 24px -8px rgba(0, 0, 0, .45);
+  font-size: .9rem; font-weight: 600;
+}
+.update-bar button {
+  background: var(--gold-ink); color: var(--gold-deep);
+  border: 0; font-weight: 800; flex: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
 }

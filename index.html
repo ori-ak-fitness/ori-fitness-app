@@ -722,6 +722,13 @@
     </div>
   </div>
 
+  <!-- מוצג רק כשיש גרסה חדשה שממתינה. זמני לתקופת הפיתוח — ראה
+       showUpdateBar ב-js/app.js -->
+  <div class="update-bar hidden" id="updateBar">
+    <span>יש גרסה חדשה של האפליקציה</span>
+    <button class="btn btn-sm" id="updateBtn">רענן עכשיו</button>
+  </div>
+
   <div class="toast-host" id="toastHost"></div>
 
   <script type="module" src="js/app.js"></script>

@@ -182,10 +182,60 @@ async function registerSW() {
     return;
   }
   try {
-    await navigator.serviceWorker.register('sw.js');
+    const reg = await navigator.serviceWorker.register('sw.js');
+
+    // גרסה שכבר סיימה להיטען וממתינה מרגע הפתיחה
+    if (reg.waiting && navigator.serviceWorker.controller) showUpdateBar(reg.waiting);
+
+    reg.addEventListener('updatefound', () => {
+      const incoming = reg.installing;
+      if (!incoming) return;
+      incoming.addEventListener('statechange', () => {
+        /*
+         * התנאי על controller הוא מה שמונע את ההודעה בהתקנה הראשונה:
+         * שם אין גרסה קודמת להחליף, ו"יש עדכון" היה סתם מבלבל.
+         */
+        if (incoming.state === 'installed' && navigator.serviceWorker.controller) {
+          showUpdateBar(incoming);
+        }
+      });
+    });
+
+    // בדיקה מחדש בכל חזרה לאפליקציה — אחרת גרסה חדשה מתגלה רק
+    // בטעינה מלאה, וזה בדיוק המצב שבו נראה כאילו התיקון לא הגיע
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') reg.update().catch(() => {});
+    });
+
+    let reloading = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (reloading) return;   // controllerchange יכול לירות יותר מפעם אחת
+      reloading = true;
+      location.reload();
+    });
   } catch (err) {
     console.warn('[Ori Fitness] רישום Service Worker נכשל:', err);
   }
+}
+
+/*
+ * הודעת "יש גרסה חדשה".
+ *
+ * זמנית ומכוונת לתקופת הפיתוח: כשאני דוחף תיקון, האפליקציה המותקנת
+ * ממשיכה להריץ את הגרסה השמורה עד סגירה ופתיחה מלאה — וזה נראה בדיוק
+ * כמו תיקון שלא עבד. **כשהאפליקציה תהיה גמורה ותפסיק להשתנות כל יום,
+ * להסיר את המקטע הזה ואת #updateBar.**
+ */
+function showUpdateBar(worker) {
+  const bar = $('#updateBar');
+  const btn = $('#updateBtn');
+  if (!bar || !btn) return;
+  bar.classList.remove('hidden');
+  btn.onclick = () => {
+    btn.disabled = true;
+    btn.textContent = 'מרענן…';
+    worker.postMessage({ type: 'SKIP_WAITING' });
+  };
 }
 
 /* ---------- אתחול ---------- */
