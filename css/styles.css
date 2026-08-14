@@ -822,23 +822,6 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
   padding: 2px 8px; font-size: .68rem; font-weight: 700; flex: none;
 }
 
-/*
- * היעד להיום. נבנה על אותה שורה כמו "פעם שעברה" בכוונה, אבל בצבע המותג
- * ובטקסט מלא — כדי שהעין תיפול קודם על מה שצריך לעשות, ורק אחר כך על
- * מה שהיה. זה ההבדל בין יומן לבין מאמן.
- */
-.suggest-line {
-  margin-top: 5px; font-size: .82rem; color: var(--text);
-  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
-  font-variant-numeric: tabular-nums; direction: rtl; font-weight: 700;
-}
-.suggest-tag {
-  background: linear-gradient(150deg, var(--gold), var(--gold-deep));
-  color: var(--gold-ink); border-radius: 999px;
-  padding: 2px 9px; font-size: .68rem; font-weight: 800; flex: none;
-}
-.suggest-why { color: var(--text-dim); font-weight: 500; font-size: .74rem; }
-
 /* ---------- אירובי — יעד שבועי (עיגולים לחיצים בתוך שורת האירובי עצמה,
    לא כרטיס נפרד מעליה — כפתור אחד לכל סוג אירובי, לא שניים) ---------- */
 .wg-dots { display: flex; gap: 6px; flex: none; }
