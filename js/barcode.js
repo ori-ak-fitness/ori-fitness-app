@@ -41,8 +41,14 @@ function parseAmount(text) {
   return value;
 }
 
+/*
+ * היחידה נקבעת מהטקסט החופשי של האריזה, והוא נכתב שם בכל צורה
+ * אפשרית: ml, מ"ל, מל', ליטר. כיסוי חלקי גרם ל"330 מל'" להיות
+ * מסומן כגרם, ואז המסך שאל "כמה אכלת?" על פחית שתייה.
+ */
 function isLiquid(product) {
-  return /\b(ml|l)\b|מ"ל|ליטר/i.test(`${product.quantity || ''} ${product.product_quantity_unit || ''}`);
+  const text = `${product.quantity || ''} ${product.product_quantity_unit || ''}`;
+  return /\d\s*(ml|cl|l)\b/i.test(text) || /(מ["'׳]?ל|ליטר)/.test(text);
 }
 
 async function fetchProduct(code) {
@@ -220,6 +226,121 @@ function openManualSheet(message) {
   );
 
   openSheet('הזנת ברקוד', body);
+  setTimeout(() => input.focus(), 120);
+}
+
+/* ---------- חיפוש לפי שם ---------- */
+
+const OFF_SEARCH = 'https://world.openfoodfacts.org/cgi/search.pl';
+
+/*
+ * חיפוש חופשי, כדי שלא צריך ברקוד בשביל כל שתייה או חטיף.
+ * מסננים למוצרים שנמכרים בישראל: לאותו מוצר יש ערכים שונים בשווקים
+ * שונים (ספרייט אירופאית היא כ-19 קק"ל ל-100 מ"ל, הישראלית כפול),
+ * ורשומה מהשוק הלא נכון תיתן מספר שגוי ביומן.
+ */
+async function searchProducts(term) {
+  const fields = 'code,product_name,brands,quantity,product_quantity,product_quantity_unit,' +
+                 'serving_size,serving_quantity,nutriments,image_small_url';
+  const url = `${OFF_SEARCH}?search_terms=${encodeURIComponent(term)}` +
+              '&tagtype_0=countries&tag_contains_0=contains&tag_0=israel' +
+              `&search_simple=1&action=process&json=1&page_size=24&fields=${fields}`;
+
+  /*
+   * שרת החיפוש של המאגר פחות יציב מזה של הברקוד, ונופל מדי פעם ל-503.
+   * מבדילים בין "השירות למטה" ל"אין אינטרנט" כדי שלא תיראה כאן תקלה
+   * של האפליקציה כשהיא לא שלה.
+   */
+  const res = await fetch(url);
+  if (res.status === 503 || res.status === 429) {
+    throw Object.assign(new Error('service'), { code: 'service-down' });
+  }
+  if (!res.ok) throw new Error('שגיאת רשת');
+  const data = await res.json();
+
+  return (data.products || [])
+    .map((p) => {
+      const n = p.nutriments || {};
+      const kcal100 = n['energy-kcal_100g'] ?? (n['energy_100g'] ? n['energy_100g'] / 4.184 : null);
+      if (kcal100 == null) return null;          // בלי קלוריות אין מה להוסיף ליומן
+      const liquid = isLiquid(p);
+      const name = (p.product_name || '').trim();
+      const brand = (p.brands || '').split(',')[0].trim();
+      if (!name && !brand) return null;
+      return {
+        code: p.code || '',
+        name, brand,
+        image: p.image_small_url || null,
+        liquid,
+        unit: liquid ? 'מ"ל' : 'גרם',
+        packageAmount: parseAmount(p.product_quantity) ?? parseAmount(p.quantity),
+        packageLabel: (p.quantity || '').trim(),
+        servingAmount: parseAmount(p.serving_quantity) ?? parseAmount(p.serving_size),
+        per100: {
+          calories: Math.round(kcal100),
+          protein: n.proteins_100g ?? null,
+          carbs: n.carbohydrates_100g ?? null,
+          fat: n.fat_100g ?? null,
+        },
+      };
+    })
+    .filter(Boolean);
+}
+
+export async function openSearchSheet() {
+  const input = el('input', { type: 'search', placeholder: 'קולה, שוקו, במבה…', autocomplete: 'off' });
+  const results = el('div', { class: 'list', style: 'margin-top:14px' });
+
+  const run = guard(async () => {
+    const term = input.value.trim();
+    if (term.length < 2) { toast('הקלד לפחות שתי אותיות', 'err'); return; }
+    results.replaceChildren(el('p', { class: 'muted' }, 'מחפש…'));
+    let found;
+    try {
+      found = await searchProducts(term);
+    } catch {
+      /*
+       * אי אפשר להבדיל כאן בין "אין אינטרנט" ל"שרת החיפוש שלהם נפל":
+       * כששרת חיצוני מחזיר שגיאה בלי כותרות הרשאה, הדפדפן מכשיל את
+       * הבקשה כולה בלי לחשוף את הסיבה. לכן ההודעה מכסה את שתי
+       * האפשרויות במקום לנחש אחת ולהישמע בטוחה בטעות.
+       */
+      results.replaceChildren(el('div', { class: 'empty-state' },
+        el('div', { class: 'empty-icon' }, '📡'),
+        el('p', {}, 'לא הצלחנו להגיע למאגר החיפוש. או שאין אינטרנט, או ' +
+          'ששירות החיפוש שלהם לא זמין כרגע — זה קורה להם מדי פעם.'),
+        el('p', { style: 'margin-top:8px' }, 'סריקת ברקוד עובדת בנפרד, וגם בלי רשת ' +
+          'למוצרים שכבר לימדת.')));
+      return;
+    }
+    if (!found.length) {
+      results.replaceChildren(el('div', { class: 'empty-state' },
+        el('div', { class: 'empty-icon' }, '🔎'),
+        el('p', {}, 'לא נמצא. אפשר לסרוק את הברקוד ולהזין את המוצר פעם אחת.')));
+      return;
+    }
+    results.replaceChildren(...found.map((p) => el('button', {
+      class: 'list-item', onclick: () => openProductSheet(p),
+    },
+      ...(p.image ? [el('img', { class: 'li-thumb', src: p.image, alt: '', referrerpolicy: 'no-referrer' })] : []),
+      el('div', { class: 'li-main' },
+        el('div', { class: 'li-title' }, [p.brand, p.name].filter(Boolean).join(' — ')),
+        el('div', { class: 'li-sub' },
+          `${fmtNum(p.per100.calories)} קק"ל ל-100 ${p.unit}` +
+          (p.packageLabel ? ` · ${p.packageLabel}` : ''))),
+    )));
+  });
+
+  input.addEventListener('keydown', (e) => { if (e.key === 'Enter') run(); });
+
+  openSheet('🔎 חיפוש מוצר', el('div', {},
+    el('p', { class: 'muted', style: 'margin-bottom:14px' },
+      'חפש בשם — משקאות, חטיפים, מוצרי חלב. התוצאות מסוננות למוצרים שנמכרים בישראל, ' +
+      'כי לאותו מוצר יש ערכים שונים בכל שוק.'),
+    el('div', { class: 'field' }, el('label', {}, 'מה לחפש?'), input),
+    el('button', { class: 'btn btn-primary btn-block', onclick: run }, 'חפש'),
+    results,
+  ));
   setTimeout(() => input.focus(), 120);
 }
 
@@ -463,4 +584,5 @@ export function initBarcode({ onAdded: cb, currentDate } = {}) {
   onAdded = cb;
   getDate = currentDate;
   $('#scanBarcodeBtn')?.addEventListener('click', guard(openScanner));
+  $('#searchFoodBtn')?.addEventListener('click', guard(openSearchSheet));
 }
