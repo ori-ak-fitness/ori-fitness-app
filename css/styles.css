@@ -195,11 +195,14 @@ html, body {
   color: var(--text);
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   /*
-   * 18px ולא 16: כמעט כל הגדלים בקובץ הזה נמדדים ב-rem, ולכן שינוי
-   * כאן מגדיל את כל הטקסט באפליקציה ביחס אחיד ושומר על הפרופורציות.
-   * הועלה לבקשת אורי אחרי שראה את האפליקציה על האייפון.
+   * 16px — גודל הבסיס הסטנדרטי, וכמעט כל הגדלים בקובץ נמדדים ממנו ב-rem.
+   *
+   * היה כאן 18px לזמן קצר, יחד עם הקטנה של כל העמוד בטלפון: השילוב
+   * הזה נראה קטן. כשההקטנה בוטלה והדף עבר לרוחב המכשיר, אותם 18px
+   * הפכו לגדולים מדי. 16 ברוחב אמיתי הוא הגודל הנכון — גדול יותר
+   * ממה שהיה כאן קודם בפועל, ובלי להיראות מוגזם.
    */
-  font-size: 18px;
+  font-size: 16px;
   line-height: 1.5;
   overscroll-behavior-y: none;
 }
@@ -1442,6 +1445,17 @@ body.gate-open main { display: none !important; }
   background: var(--gold-ink); color: var(--gold-deep);
   border: 0; font-weight: 800; flex: none;
 }
+
+/*
+ * "נותרו X ג'" הוסתר: הוא חזר על מה שכתוב שורה מעליו ("0/150 ג'"),
+ * והוסיף שורה שלישית לכל מאקרו — שלוש שורות כפולות שניפחו את כרטיס
+ * התזונה בלי להוסיף מידע.
+ *
+ * במצב חריגה הוא כן מוצג, כי "חריגה של 20 ג'" הוא המקרה היחיד שבו
+ * המספר הזה אומר משהו שלא ניתן לקרוא ישירות מהשורה שמעל.
+ */
+.macro-left { display: none; }
+.macro.is-over .macro-left { display: block; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
