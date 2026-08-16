@@ -32,6 +32,18 @@ let enabled = false;
 let queue = new Map();   // key -> value שממתין לדחיפה
 let flushTimer = null;
 
+/*
+ * מצב אחרון של הסנכרון, לתצוגה בהגדרות.
+ * בלי זה כשל בענן הוא בלתי נראה: הכל ממשיך לעבוד מקומית, ומבחוץ
+ * זה נראה פשוט כמו "הנתונים לא עוברים" בלי שום רמז למה.
+ */
+let status = { state: 'לא הופעל', reason: null, lastSyncAt: null, pulled: 0, pushed: 0 };
+
+/** @returns {{state:string, reason:?string, lastSyncAt:?number, pulled:number, pushed:number, queued:number}} */
+export function cloudStatus() {
+  return { ...status, queued: queue.size };
+}
+
 /* ---------- עזר ---------- */
 
 async function readMeta() {
@@ -71,8 +83,14 @@ async function flush() {
     try {
       await putRecord(recordId(key), { store: 'settings', key, value, updatedAt });
       meta[key] = updatedAt;
+      status.pushed++;
+      status.state = 'מסונכרן';
+      status.reason = null;
+      status.lastSyncAt = updatedAt;
     } catch (err) {
       console.warn('[Ori Fitness] סנכרון לענן נכשל:', key, err?.code || err);
+      status.state = 'שגיאה בשליחה';
+      status.reason = err?.code || err?.message || 'שגיאה';
       // מחזירים לתור כדי לנסות שוב בהזדמנות הבאה, אלא אם כבר נכתב מאז
       if (!queue.has(key)) queue.set(key, value);
     }
@@ -120,13 +138,20 @@ async function pull() {
  * @returns {Promise<{ok: boolean, applied?: number, reason?: string}>}
  */
 export async function initCloud(onPulled) {
-  if (!currentUser()?.uid) return { ok: false, reason: 'לא מחובר' };
+  if (!currentUser()?.uid) {
+    status = { ...status, state: 'לא מחובר', reason: 'אין משתמש' };
+    return { ok: false, reason: 'לא מחובר' };
+  }
 
   db.watchSettings(onLocalChange);
   enabled = true;
 
   try {
     const applied = await pull();
+    status.state = 'מסונכרן';
+    status.reason = null;
+    status.lastSyncAt = Date.now();
+    status.pulled += applied;
     if (applied) onPulled?.();
 
     // חוזרים לאפליקציה — מושכים שוב, כי ייתכן ששינית משהו במכשיר אחר
@@ -138,9 +163,37 @@ export async function initCloud(onPulled) {
     return { ok: true, applied };
   } catch (err) {
     console.warn('[Ori Fitness] משיכה מהענן נכשלה:', err?.code || err);
+    status.state = 'שגיאה בקריאה';
+    status.reason = err?.code || err?.message || 'שגיאה';
     // נשארים פעילים: דחיפות עדיין ינוסו, והאפליקציה עובדת מקומית כרגיל
     return { ok: false, reason: err?.code || 'שגיאה' };
   }
+}
+
+/**
+ * סנכרון יזום מההגדרות: שולח מה שממתין, מושך מה שיש, ומחזיר את המצב.
+ * קיים כדי שאפשר יהיה לראות תקלה מיד ובמפורש, במקום לנחש למה
+ * "הנתונים לא עוברים".
+ */
+export async function syncNow(onPulled) {
+  if (!currentUser()?.uid) {
+    status = { ...status, state: 'לא מחובר', reason: 'אין משתמש' };
+    return cloudStatus();
+  }
+  enabled = true;
+  await flushNow();
+  try {
+    const applied = await pull();
+    status.state = 'מסונכרן';
+    status.reason = null;
+    status.lastSyncAt = Date.now();
+    status.pulled += applied;
+    if (applied) onPulled?.();
+  } catch (err) {
+    status.state = 'שגיאה בקריאה';
+    status.reason = err?.code || err?.message || 'שגיאה';
+  }
+  return cloudStatus();
 }
 
 /** דחיפה מיידית של מה שממתין — לפני שהאפליקציה נסגרת */

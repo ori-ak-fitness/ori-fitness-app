@@ -25,6 +25,7 @@ import { getBadgeStatus, openBadgesSheet } from './badges.js';
 import { getUserHeightCm, setUserHeightCm, renderBodyWeight } from './bodyweight.js';
 import { isConfigured } from './firebase-config.js';
 import { isAdminUser, openUsersSheet, usersSummary } from './admin.js';
+import { cloudStatus, syncNow } from './cloud.js';
 
 let onRerunSetup = null;
 
@@ -83,6 +84,64 @@ async function openHeightSheet() {
 
   openSheet('גובה', body);
   setTimeout(() => input.focus(), 120);
+}
+
+/* ---------- מצב הסנכרון ---------- */
+
+/*
+ * כשל בענן אינו שובר כלום, ולכן הוא גם בלתי נראה — מבחוץ זה נראה
+ * פשוט כמו "הנתונים לא עוברים". המסך הזה הופך את זה למשהו שאפשר
+ * לקרוא ולדווח עליו, במקום לנחש.
+ */
+function syncLine(st) {
+  if (st.state === 'מסונכרן' && st.lastSyncAt) {
+    const mins = Math.round((Date.now() - st.lastSyncAt) / 60000);
+    return `✅ מסונכרן · ${mins < 1 ? 'הרגע' : `לפני ${mins} דק׳`}`;
+  }
+  if (st.reason) return `⚠️ ${st.state} (${st.reason})`;
+  return st.state;
+}
+
+function renderCloudRow() {
+  const sub = $('#cloudStatusSub');
+  if (sub) sub.textContent = syncLine(cloudStatus());
+}
+
+async function openCloudSheet() {
+  const body = el('div', {});
+  const draw = (st) => body.replaceChildren(
+    el('p', { class: 'muted', style: 'margin-bottom:14px' },
+      'ההגדרות שלך (שם, יעדים, אתגר) נשמרות גם בענן, כדי שיופיעו בכל המכשירים. ' +
+      'האימונים והתזונה עדיין מקומיים — הם בתור.'),
+    el('div', { class: 'list' },
+      el('div', { class: 'list-item is-static' },
+        el('div', { class: 'li-main' }, el('div', { class: 'li-title' }, 'מצב'),
+          el('div', { class: 'li-sub' }, syncLine(st)))),
+      el('div', { class: 'list-item is-static' },
+        el('div', { class: 'li-main' }, el('div', { class: 'li-title' }, 'נשלחו לענן'),
+          el('div', { class: 'li-sub' }, `${st.pushed} הגדרות`))),
+      el('div', { class: 'list-item is-static' },
+        el('div', { class: 'li-main' }, el('div', { class: 'li-title' }, 'התקבלו מהענן'),
+          el('div', { class: 'li-sub' }, `${st.pulled} הגדרות`))),
+      ...(st.queued ? [el('div', { class: 'list-item is-static' },
+        el('div', { class: 'li-main' }, el('div', { class: 'li-title' }, 'ממתין לשליחה'),
+          el('div', { class: 'li-sub' }, `${st.queued} — ייסגר בסנכרון הבא`)))] : []),
+    ),
+    el('button', {
+      class: 'btn btn-primary btn-block', style: 'margin-top:16px',
+      onclick: guard(async function () {
+        this.textContent = 'מסנכרן…';
+        const res = await syncNow(async () => { await renderGreeting(); await renderStats(); });
+        draw(res);
+        renderCloudRow();
+        toast(res.state === 'מסונכרן' ? 'סונכרן ✓' : `לא הצליח: ${res.reason || res.state}`,
+          res.state === 'מסונכרן' ? 'ok' : 'err');
+      }),
+    }, 'סנכרן עכשיו'),
+  );
+
+  draw(cloudStatus());
+  openSheet('☁️ מצב הסנכרון', body);
 }
 
 /* ---------- יעד אימונים שבועי ---------- */
@@ -242,6 +301,7 @@ export async function renderSettings() {
   ]);
 
   renderAccount();
+  renderCloudRow();
   $('#setNameSub').textContent = name ? name : 'לא הוגדר — לחץ כדי להוסיף';
   const height = await getUserHeightCm();
   $('#setHeightSub').textContent = height ? `${height} ס"מ` : 'לא הוגדר — לחץ כדי להוסיף';
@@ -366,6 +426,7 @@ export function initSettingsScreen({ onRerun } = {}) {
   }));
 
   $('#setUsersBtn').addEventListener('click', guard(openUsersSheet));
+  $('#cloudStatusBtn').addEventListener('click', guard(openCloudSheet));
 
   $('#setNameBtn').addEventListener('click', guard(openNameSheet));
   $('#setHeightBtn').addEventListener('click', guard(openHeightSheet));
