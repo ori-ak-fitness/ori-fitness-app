@@ -275,7 +275,12 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 }
 /* דחיפה לקצה השני של השורה — כדי שהאייקון+הכותרת יישארו צמודים בהתחלה
    גם כשיש עוד פריט (badge/כפתורים) באותה שורה */
-.head-actions { display: flex; gap: 8px; margin-inline-start: auto; }
+/* עוטף שורה: במסך התזונה יש כאן כמה כפתורים (חיפוש, ברקוד, מהיר,
+   חדש), ובלי גלישה לשורה הבאה האחרון מהם יוצא מחוץ למסך בטלפון */
+.head-actions {
+  display: flex; gap: 8px; margin-inline-start: auto;
+  flex-wrap: wrap; justify-content: flex-end; min-width: 0;
+}
 .hs-value { margin-inline-start: auto; }
 
 /* ---------- כפתורים ---------- */
