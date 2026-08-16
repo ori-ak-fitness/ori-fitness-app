@@ -1312,17 +1312,19 @@ body.bc-open { overflow: hidden; }
   position: absolute; inset: 0;
   width: 100%; height: 100%; object-fit: cover;
 }
-/* מסגרת הכיוון — חלון שקוף בתוך שכבה כהה, כדי שברור לאן לכוון */
+/* מסגרת הכיוון — חלון שקוף בתוך שכבה כהה, כדי שברור לאן לכוון.
+   המסגרת רחבה ושטוחה כצורת ברקוד אמיתי, וההחשכה סביבה קלה בלבד:
+   שכבה כהה מדי מקשה לראות מה מכוונים, וזו הייתה תלונה אמיתית. */
 .bc-frame {
   position: relative; z-index: 1;
-  width: min(78vw, 320px); aspect-ratio: 3 / 2;
-  border: 3px solid var(--gold); border-radius: 18px;
-  box-shadow: 0 0 0 100vmax rgba(0, 0, 0, .55);
+  width: min(92vw, 460px); aspect-ratio: 5 / 2;
+  border: 3px solid var(--gold); border-radius: 14px;
+  box-shadow: 0 0 0 100vmax rgba(0, 0, 0, .28);
 }
 .bc-hint {
-  position: relative; z-index: 1; margin-top: 20px;
-  color: #fff; font-weight: 700; font-size: .95rem;
-  text-shadow: 0 1px 8px rgba(0, 0, 0, .8);
+  position: relative; z-index: 1; margin-top: 22px;
+  color: #fff; font-weight: 700; font-size: 1.05rem;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, .9);
 }
 .bc-actions {
   position: absolute; z-index: 2;

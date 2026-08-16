@@ -53,6 +53,9 @@ async function fetchProduct(code) {
   ].join(',');
 
   const res = await fetch(`${OFF_API}${encodeURIComponent(code)}.json?fields=${fields}`);
+  // 404 מהמאגר פירושו "המוצר לא קיים", לא "אין רשת" — בלי ההפרדה הזו
+  // כל מוצר לא מוכר היה מוצג כתקלת תקשורת
+  if (res.status === 404) return null;
   if (!res.ok) throw new Error('שגיאת רשת');
   const data = await res.json();
   if (data.status !== 1 || !data.product) return null;
@@ -220,22 +223,105 @@ function openManualSheet(message) {
   setTimeout(() => input.focus(), 120);
 }
 
+/* ---------- המוצרים שלי ---------- */
+
+/*
+ * המאגר העולמי לא מכיר חלק גדול מהמוצרים בסופר הישראלי, ואי אפשר
+ * לעקוף את זה. מה שכן אפשר: שהאפליקציה תלמד מוצר פעם אחת ותזכור
+ * אותו לתמיד. מהסריקה השנייה והלאה הוא נפתח מיד, גם בלי אינטרנט.
+ *
+ * נשמר כהגדרה ולא בטבלה נפרדת, ולכן הוא גם עובר בין המכשירים
+ * יחד עם שאר ההגדרות בסנכרון הענן.
+ */
+const MY_PRODUCTS_KEY = 'myBarcodeProducts';
+
+async function getMyProducts() {
+  try { return (await db.getSetting(MY_PRODUCTS_KEY, null)) || {}; }
+  catch { return {}; }
+}
+
+async function saveMyProduct(code, product) {
+  const all = await getMyProducts();
+  all[code] = product;
+  await db.setSetting(MY_PRODUCTS_KEY, all);
+}
+
+/** טופס ללמד את האפליקציה מוצר חדש, לפי מה שכתוב על האריזה */
+function openTeachSheet(code) {
+  const f = (placeholder) => el('input', {
+    type: 'number', inputmode: 'decimal', min: '0', placeholder, autocomplete: 'off',
+  });
+  const name = el('input', { type: 'text', placeholder: 'למשל: קוטג׳ 5%', autocomplete: 'off' });
+  const kcal = f('0'), prot = f('0'), carb = f('0'), fat = f('0');
+  const pack = f('לא חובה');
+  const unit = el('select', {}, el('option', { value: 'גרם' }, 'גרם'), el('option', { value: 'מ"ל' }, 'מ"ל'));
+
+  const save = guard(async () => {
+    if (!name.value.trim()) { toast('צריך שם למוצר', 'err'); return; }
+    const product = {
+      code,
+      name: name.value.trim(),
+      brand: '',
+      image: null,
+      liquid: unit.value === 'מ"ל',
+      unit: unit.value,
+      packageAmount: num(pack.value, 0) || null,
+      packageLabel: pack.value ? `${pack.value} ${unit.value}` : '',
+      servingAmount: null,
+      per100: {
+        calories: num(kcal.value, 0),
+        protein: num(prot.value, 0),
+        carbs: num(carb.value, 0),
+        fat: num(fat.value, 0),
+      },
+    };
+    await saveMyProduct(code, product);
+    toast('נשמר — בפעם הבאה הוא ייפתח מיד', 'ok');
+    openProductSheet(product);
+  });
+
+  const cell = (label, input, suffix) => el('div', { class: 'field' },
+    el('label', {}, label), input, ...(suffix ? [el('small', { class: 'muted' }, suffix)] : []));
+
+  openSheet('מוצר חדש', el('div', {},
+    el('p', { class: 'muted', style: 'margin-bottom:14px' },
+      `הברקוד ${code} לא קיים במאגר העולמי. הזן את מה שכתוב בטבלת הערכים על האריזה — ` +
+      'זה חד־פעמי, ומהפעם הבאה הוא ייסרק מיד.'),
+    cell('שם המוצר', name),
+    el('div', { class: 'field' }, el('label', {}, 'יחידה'), unit),
+    el('p', { class: 'muted', style: 'font-size:.85rem;margin:4px 0 10px' },
+      `הערכים הבאים הם ל-100 ${unit.value} — בדיוק כמו שרשום על האריזה:`),
+    cell('קלוריות ל-100', kcal),
+    cell('חלבון ל-100', prot),
+    cell('פחמימות ל-100', carb),
+    cell('שומן ל-100', fat),
+    cell('גודל האריזה', pack, 'לא חובה — אם תמלא, נדע לחשב אריזה שלמה'),
+    el('button', { class: 'btn btn-primary btn-block', onclick: save }, 'שמור מוצר'),
+  ));
+  setTimeout(() => name.focus(), 120);
+}
+
 /** משותף לסריקה ולהזנה ידנית */
 async function lookupAndShow(code) {
+  // קודם המוצרים שלמדנו: מיידי, עובד אופליין, ומנצח את המאגר העולמי
+  const mine = await getMyProducts();
+  if (mine[code]) { openProductSheet(mine[code]); return; }
+
   toast('מחפש מוצר…');
-  let product;
+  let product = null;
+  let networkFailed = false;
   try {
     product = await fetchProduct(code);
   } catch (err) {
     console.warn('[Ori Fitness] שליפת מוצר נכשלה:', err);
-    toast('אין חיבור למאגר המוצרים', 'err');
-    return;
+    networkFailed = true;
   }
-  if (!product) {
-    openManualSheet(`הברקוד ${code} לא נמצא במאגר. אפשר לנסות מספר אחר, או להוסיף ידנית דרך "חדש".`);
-    return;
-  }
-  openProductSheet(product);
+
+  if (product) { openProductSheet(product); return; }
+
+  // לא נמצא (או שאין רשת) — מציעים ללמד אותו במקום להיתקע
+  openTeachSheet(code);
+  if (networkFailed) toast('אין חיבור למאגר — אפשר להזין ידנית', 'err');
 }
 
 /* ---------- המצלמה ---------- */
@@ -301,8 +387,18 @@ export async function openScanner() {
   document.body.classList.add('bc-open');
 
   try {
+    /*
+     * הרזולוציה היא ההבדל בין סורק שעובד לסורק שלא.
+     * בלי בקשה מפורשת הדפדפן פותח את המצלמה בברירת מחדל נמוכה
+     * (לרוב 640x480), ובגודל כזה פשוט אין מספיק פיקסלים בקווי הברקוד
+     * כדי לפענח אותו — הסורק מסתכל ולא רואה כלום.
+     */
     stream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: { ideal: 'environment' } },
+      video: {
+        facingMode: { ideal: 'environment' },
+        width: { ideal: 1920 },
+        height: { ideal: 1080 },
+      },
       audio: false,
     });
   } catch (err) {
@@ -314,6 +410,34 @@ export async function openScanner() {
 
   video.srcObject = stream;
   try { await video.play(); } catch { /* חלק מהדפדפנים מנגנים לבד */ }
+
+  /*
+   * מיקוד רציף ותאורה — נשלחים בנפרד ובתוך try, ולא כחלק מהבקשה
+   * הראשונה: אלה יכולות שלא כל מכשיר תומך בהן, ובקשה שכוללת אותן
+   * מראש נכשלת כולה בדפדפן שלא מכיר אותן. עדיף מצלמה שנפתחה בלי
+   * מיקוד רציף מאשר מצלמה שלא נפתחה בכלל.
+   */
+  const track = stream.getVideoTracks()[0];
+  const caps = track?.getCapabilities?.() || {};
+  try {
+    if (caps.focusMode?.includes('continuous')) {
+      await track.applyConstraints({ advanced: [{ focusMode: 'continuous' }] });
+    }
+  } catch { /* לא נתמך — ממשיכים */ }
+
+  // פנס: קריטי בסופר ובמטבח, אבל קיים רק בחלק מהמכשירים
+  if (caps.torch) {
+    let on = false;
+    const torchBtn = el('button', { class: 'btn btn-secondary' }, '🔦 פנס');
+    torchBtn.addEventListener('click', async () => {
+      on = !on;
+      try {
+        await track.applyConstraints({ advanced: [{ torch: on }] });
+        torchBtn.textContent = on ? '🔦 כבה' : '🔦 פנס';
+      } catch { torchBtn.remove(); }
+    });
+    overlay.querySelector('.bc-actions')?.prepend(torchBtn);
+  }
 
   // נעילה: בלעדיה זיהוי חוזר של אותו ברקוד היה פותח כמה גיליונות
   let handled = false;
