@@ -116,8 +116,19 @@ export async function getSetting(key, fallback = null) {
   return row ? row.value : fallback;
 }
 
+/*
+ * מודול הסנכרון נרשם כאן כדי לדעת על כל שינוי בהגדרות.
+ * db.js לא מייבא אותו בכוונה — כך האחסון המקומי נשאר עצמאי לגמרי,
+ * וכשאין ענן (או שהוא נופל) שום דבר כאן לא משתנה.
+ */
+let onSettingWrite = null;
+export function watchSettings(fn) { onSettingWrite = fn; }
+
 export async function setSetting(key, value) {
-  return put(STORES.settings, { key, value });
+  const res = await put(STORES.settings, { key, value });
+  // כישלון בסנכרון לעולם לא מפיל שמירה מקומית
+  try { onSettingWrite?.(key, value); } catch { /* לא קריטי */ }
+  return res;
 }
 
 export async function delSetting(key) {

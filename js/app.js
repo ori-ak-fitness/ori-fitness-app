@@ -24,6 +24,7 @@ import { initBackup, renderBackupInfo } from './backup.js';
 import { initSettingsScreen, renderSettings } from './settings.js';
 import { initOnboarding, shouldRunWizard, openWizard, rerunWizard } from './onboarding.js';
 import { initGate } from './gate.js';
+import { initCloud, flushNow } from './cloud.js';
 
 const SCREENS = ['home', 'workout', 'nutrition', 'progress', 'settings'];
 let currentScreen = 'home';
@@ -364,6 +365,26 @@ async function main() {
   initDayWatcher();
 
   if (await shouldRunWizard()) openWizard();
+
+  /*
+   * הסנכרון עולה אחרון ובלי await לפניו: הוא תלוי ברשת, ואסור שהוא
+   * יעכב את הצגת האפליקציה. אם הוא נכשל — לא קורה כלום, הכל מקומי.
+   */
+  initCloud(async () => {
+    invalidateGoalsCache();
+    invalidatePersonalGoalsCache();
+    invalidateChallengeCache();
+    await renderGreeting();
+    await renderStats();
+    await renderGoals();
+    await renderChallengeWidget();
+    if (currentScreen === 'settings') await renderSettings();
+  }).then((res) => {
+    if (res.ok && res.applied) toast(`עודכנו ${res.applied} הגדרות מהענן`, 'ok');
+  });
+
+  // סגירת האפליקציה לא אמורה לאבד שינוי שנרשם שנייה קודם
+  addEventListener('pagehide', () => { flushNow(); });
 }
 
 document.addEventListener('DOMContentLoaded', main);

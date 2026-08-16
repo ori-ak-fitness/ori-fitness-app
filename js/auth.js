@@ -120,6 +120,33 @@ export async function setUserStatus(uid, status) {
   await s.setDoc(s.doc(s.db, 'users', uid), { status }, { merge: true });
 }
 
+/* ---------- הנתונים בענן ---------- */
+
+/*
+ * גם כאן, כמו ברשימת המשתמשים: Firebase נשאר סגור בתוך auth.js.
+ * cloud.js מחזיק את היגיון הסנכרון ולא נוגע ב-SDK.
+ * הנתונים יושבים תחת users/{uid}/records, ולפי firestore.rules
+ * רק בעל הרשומה ניגש אליהן.
+ */
+
+function requireUid() {
+  const uid = readLocalState()?.uid;
+  if (!uid) throw Object.assign(new Error('not signed in'), { code: 'app/no-user' });
+  return uid;
+}
+
+/** @returns {Promise<Array<{id:string, store:string, key:string, value:any, updatedAt:number}>>} */
+export async function fetchRecords() {
+  const s = await loadSdk();
+  const snap = await s.getDocs(s.collection(s.db, 'users', requireUid(), 'records'));
+  return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+}
+
+export async function putRecord(id, data) {
+  const s = await loadSdk();
+  await s.setDoc(s.doc(s.db, 'users', requireUid(), 'records', id), data);
+}
+
 export async function signOutUser() {
   try {
     const s = await loadSdk();
