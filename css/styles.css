@@ -278,11 +278,36 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 }
 /* דחיפה לקצה השני של השורה — כדי שהאייקון+הכותרת יישארו צמודים בהתחלה
    גם כשיש עוד פריט (badge/כפתורים) באותה שורה */
-/* עוטף שורה: במסך התזונה יש כאן כמה כפתורים (חיפוש, ברקוד, מהיר,
-   חדש), ובלי גלישה לשורה הבאה האחרון מהם יוצא מחוץ למסך בטלפון */
-.head-actions {
-  display: flex; gap: 8px; margin-inline-start: auto;
-  flex-wrap: wrap; justify-content: flex-end; min-width: 0;
+.head-actions { display: flex; gap: 8px; margin-inline-start: auto; }
+
+/*
+ * שורת פעולות התזונה (חיפוש/ברקוד/מהיר/חדש/מהמאגר) — היו חמישה
+ * כפתורי טקסט בתוך שורת הכותרת, שנשברו בלי סדר ברוחב טלפון ואחד
+ * מהם (הראשי) בלט בגודל שונה. עכשיו רשת אחידה מתחת לכותרת, בסגנון
+ * אייקון-מעל-תווית כמו שורת הניווט התחתונה — כל התאים באותו גודל
+ * בדיוק, כולל הפעולה הראשית, שמסומנת רק בצבע ולא בגודל.
+ */
+.food-actions {
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px;
+  margin: 2px 0 16px;
+}
+.food-action {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  background: var(--bg-elev); border: 2px solid var(--line); color: var(--text-dim);
+  border-radius: var(--r-md); padding: 10px 2px; font-size: .72rem; font-weight: 700;
+  cursor: pointer; transition: transform .08s ease, border-color .15s ease;
+}
+.food-action:active { transform: scale(.96); }
+.food-action span { font-size: 1.2rem; line-height: 1; }
+.food-action.is-primary {
+  background: linear-gradient(155deg, rgba(255,255,255,.28), rgba(0,0,0,.08)), linear-gradient(150deg, var(--gold), var(--gold-deep));
+  border-color: transparent; color: var(--gold-ink);
+}
+/* חמישה תאים ברוחב טלפון צר במיוחד נדחסים מתחת לנוחות קריאה —
+   התווית יורדת שורה כדי שהריווח הפנימי לא יילחץ עוד יותר */
+@media (max-width: 350px) {
+  .food-action { font-size: 0; }
+  .food-action span { font-size: 1.3rem; }
 }
 .hs-value { margin-inline-start: auto; }
 
