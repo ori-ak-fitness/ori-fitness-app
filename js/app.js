@@ -11,6 +11,7 @@ import {
   initNutrition, renderNutrition, invalidateGoalsCache, resetToToday, currentNutritionDate,
 } from './nutrition.js';
 import { initBarcode } from './barcode.js';
+import { initSnacks, openSnacksSheet } from './snacks.js';
 import {
   initDashboard, renderStats, renderQuote, renderGreeting, advanceRotation,
   currentQuote, renderGoals, invalidatePersonalGoalsCache,
@@ -320,15 +321,15 @@ async function main() {
   await initNutrition({
     onUpdate: () => { if (currentScreen === 'home') renderStats(); },
   });
-  initBarcode({
-    // מוסיף לתאריך שמוצג במסך התזונה, לא בהכרח היום — אפשר לסרוק
-    // מוצר גם כשגוללים אחורה ליום קודם
-    currentDate: currentNutritionDate,
-    onAdded: async () => {
-      await renderNutrition();
-      if (currentScreen === 'home') renderStats();
-    },
-  });
+  // מוסיפים לתאריך שמוצג במסך התזונה, לא בהכרח היום — אפשר לרשום
+  // מוצר גם כשגוללים אחורה ליום קודם
+  const foodAdded = async () => {
+    await renderNutrition();
+    if (currentScreen === 'home') renderStats();
+  };
+  initBarcode({ currentDate: currentNutritionDate, onAdded: foodAdded });
+  initSnacks({ currentDate: currentNutritionDate, onAdded: foodAdded });
+  $('#snacksBtn')?.addEventListener('click', openSnacksSheet);
   await initRoutines({
     onStartWorkout: async (routine) => {
       showScreen('workout');

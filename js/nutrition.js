@@ -202,41 +202,6 @@ function renderMealRow(meal) {
   );
 }
 
-/* ---------- הזנת קלוריות מהירה — בלי שם/מאקרו, רק מספר ---------- */
-
-function openQuickCalorieSheet() {
-  const input = el('input', {
-    type: 'number', inputmode: 'numeric', min: '0', placeholder: '0', autocomplete: 'off',
-  });
-
-  const save = guard(async () => {
-    const calories = num(input.value, 0);
-    if (calories <= 0) { toast('הזן קלוריות תקינות', 'err'); return; }
-    await db.put(db.STORES.meals, {
-      id: db.uid(),
-      date: currentDate,
-      createdAt: Date.now(),
-      name: 'תוספת מהירה',
-      calories, protein: 0, carbs: 0, fat: 0, details: '',
-      photo: null, thumb: null,
-    });
-    closeSheet();
-    await renderNutrition();
-    toast('נוסף', 'ok');
-  });
-  input.addEventListener('keydown', (e) => { if (e.key === 'Enter') save(); });
-
-  const body = el('div', {},
-    el('p', { class: 'muted', style: 'margin-bottom:14px' },
-      'רק מספר קלוריות, בלי שם או פירוט מאקרו — לרגעים שלא בא לך להזין הכל.'),
-    el('div', { class: 'field' }, el('label', {}, 'קלוריות'), input),
-    el('button', { class: 'btn btn-primary btn-block', onclick: save }, 'הוסף'),
-  );
-
-  openSheet('הזנה מהירה', body);
-  setTimeout(() => input.focus(), 120);
-}
-
 /* ---------- גיליון ארוחה (הוספה / עריכה) ---------- */
 
 function openMealSheet(existing = null) {
@@ -525,7 +490,6 @@ export async function initNutrition({ onUpdate } = {}) {
   });
   picker.addEventListener('change', () => { if (picker.value) goToDate(picker.value); });
 
-  $('#quickKcalBtn').addEventListener('click', guard(openQuickCalorieSheet));
   $('#addMealBtn').addEventListener('click', () => openMealSheet(null));
   $('#addFromLibraryBtn').addEventListener('click', guard(() =>
     openFoodPicker(currentDate, () => renderNutrition())));
