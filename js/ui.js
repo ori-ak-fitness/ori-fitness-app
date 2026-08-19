@@ -215,6 +215,20 @@ export function fmtNum(n, digits = 0) {
   return n.toLocaleString('he-IL', { maximumFractionDigits: digits });
 }
 
+/*
+ * שורת המאקרו שמופיעה מתחת לכל ארוחה — בתפריט הקבוע וגם ביומן.
+ *
+ * האמוג'י מחליף את המילה: "חלבון 39ג' · פחמימות 40ג' · שומן 20ג'" הוא
+ * שורה ארוכה שנקראת כמו טקסט, ואילו שלושה סמלים ומספרים נסרקים במבט.
+ * אותם סמלים בדיוק כמו בכרטיס העליון, כדי שיהיה אפשר לקשר ביניהם.
+ */
+export const MACRO_ICONS = { protein: '🥩', carbs: '🍞', fat: '🥑' };
+
+export function macroLine(protein, carbs, fat) {
+  const g = (v) => `${fmtNum(num(v))}ג'`;
+  return `${MACRO_ICONS.protein} ${g(protein)} · ${MACRO_ICONS.carbs} ${g(carbs)} · ${MACRO_ICONS.fat} ${g(fat)}`;
+}
+
 /**
  * ספירה בעברית תקינה: 1 -> "תרגיל אחד" / "ארוחה אחת", אחרת "3 תרגילים".
  * @param {boolean} feminine  שם עצם בנקבה (ארוחה, תוכנית, תמונה)

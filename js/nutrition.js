@@ -7,7 +7,7 @@ import * as db from './db.js';
 import {
   $, el, toast, openSheet, closeSheet, confirmSheet,
   dateKey, formatDateHe, formatTime, shiftDateKey,
-  num, fmtNum, guard, resizeImage, blobUrl, pickFileOnce,
+  num, fmtNum, guard, resizeImage, blobUrl, pickFileOnce, macroLine,
 } from './ui.js';
 import { renderMealPlan, getPlan, openFoodPicker } from './mealplan.js';
 import {
@@ -140,6 +140,11 @@ export async function renderNutrition() {
   $('#kcalRemaining').textContent = fmtNum(Math.abs(Math.round(remaining)));
   $('#kcalCaption').textContent = over ? 'מעל היעד!' : 'נותרו';
 
+  // שורת הסיכום מתחת לכרטיס — אותו מספר, אבל עם ההקשר שחסר בעיגול
+  $('#kcalFootLabel').textContent = over ? 'חריגה' : 'נותרו';
+  $('#kcalFootNum').textContent = fmtNum(Math.abs(Math.round(remaining)));
+  $('#kcalFootGoal').textContent = fmtNum(goal.calories);
+
   // מאקרו — כמה נשאר, לא רק כמה נאכל
   for (const [key, cur] of Object.entries({ protein: totals.protein, carbs: totals.carbs, fat: totals.fat })) {
     const row = $(`.macro[data-macro="${key}"]`);
@@ -196,7 +201,7 @@ function renderMealRow(meal) {
     el('div', { class: 'li-main' },
       el('div', { class: 'li-title' }, meal.name || 'ארוחה'),
       el('div', { class: 'li-sub' },
-        `${formatTime(meal.createdAt)} · חלבון ${fmtNum(num(meal.protein))}ג' · פחמימות ${fmtNum(num(meal.carbs))}ג' · שומן ${fmtNum(num(meal.fat))}ג'` +
+        `${formatTime(meal.createdAt)} · ${macroLine(meal.protein, meal.carbs, meal.fat)}` +
         (meal.details ? ' · 📄 יש תפריט כתוב' : '')),
     ),
     el('div', { class: 'li-side' }, fmtNum(num(meal.calories)), el('small', {}, 'קק"ל')),

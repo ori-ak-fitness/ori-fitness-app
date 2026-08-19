@@ -12,7 +12,7 @@
 import * as db from './db.js';
 import {
   $, el, toast, openSheet, closeSheet, confirmSheet,
-  num, fmtNum, dateKey, guard, keepScroll,
+  num, fmtNum, dateKey, guard, keepScroll, macroLine,
 } from './ui.js';
 
 let libraryCache = null;
@@ -152,7 +152,7 @@ export async function renderMealPlan(date, loggedMeals) {
       el('div', { class: 'li-main' },
         el('div', { class: 'li-title' }, item.name),
         el('div', { class: 'li-sub' },
-          `חלבון ${fmtNum(num(item.protein))}ג' · פחמימות ${fmtNum(num(item.carbs))}ג' · שומן ${fmtNum(num(item.fat))}ג'`),
+          macroLine(item.protein, item.carbs, item.fat)),
         item.details ? el('button', {
           class: 'plan-note-btn',
           // כפתור מקונן בתוך שורה שהלחיצה עליה מסמנת "אכלתי" — עוצרים
@@ -231,7 +231,7 @@ export async function openFoodPicker(date, onAdded) {
       el('div', { class: 'li-main' },
         el('div', { class: 'li-title' }, item.name),
         el('div', { class: 'li-sub' },
-          `חלבון ${fmtNum(num(item.protein))}ג' · פחמימות ${fmtNum(num(item.carbs))}ג' · שומן ${fmtNum(num(item.fat))}ג'`),
+          macroLine(item.protein, item.carbs, item.fat)),
       ),
       el('div', { class: 'li-side' }, fmtNum(num(item.calories)), el('small', {}, 'קק"ל')),
     )));
@@ -373,7 +373,7 @@ export async function openPlanEditor() {
             el('div', { class: 'li-title' }, item.name),
             el('div', { class: 'li-sub' },
               (item.isDefault ? 'קבוע ליום · ' : '') +
-              `חלבון ${fmtNum(num(item.protein))}ג' · פחמימות ${fmtNum(num(item.carbs))}ג' · שומן ${fmtNum(num(item.fat))}ג'` +
+              macroLine(item.protein, item.carbs, item.fat) +
               (item.details ? ' · 📄 יש תפריט כתוב' : '')),
           ),
           el('div', { class: 'li-side' }, fmtNum(num(item.calories)), el('small', {}, 'קק"ל')),

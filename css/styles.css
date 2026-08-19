@@ -1135,7 +1135,23 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .hidden-date { position: fixed; opacity: 0; pointer-events: none; width: 1px; height: 1px; }
 
 /* ---------- קלוריות ---------- */
-.kcal-card { display: flex; align-items: center; gap: 18px; }
+.kcal-card { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+
+/*
+ * שורת הסיכום מתחת לטבעת ולמאקרו. המספר הגדול בתוך הטבעת אומר כמה
+ * נשאר, אבל לא ממה — והשורה הזו סוגרת את זה במילים, ברוחב מלא, בלי
+ * לדחוס עוד טקסט לתוך העיגול.
+ */
+.kcal-footer {
+  flex-basis: 100%;
+  display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
+  margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line);
+  font-size: .92rem;
+}
+.kcal-foot-label { font-weight: 700; color: var(--text-dim); }
+.kcal-foot-val { color: var(--text-dim); font-variant-numeric: tabular-nums; }
+.kcal-foot-val b { color: var(--text); font-size: 1.12rem; font-weight: 800; }
+.kcal-card.over .kcal-foot-val b { color: var(--danger); }
 .kcal-ring-wrap { position: relative; width: 132px; height: 132px; flex: none; }
 .kcal-ring { width: 100%; height: 100%; transform: rotate(-90deg) scaleX(-1); }
 .ring-bg { fill: none; stroke: var(--bg-elev-2); stroke-width: 11; }
@@ -1180,13 +1196,23 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
  * המספר והיחידה יחד בקצה, והספרות ב-tabular-nums כדי ששלוש השורות
  * יתיישרו זו מתחת לזו גם כשהמספרים באורך שונה.
  */
+/*
+ * flex ולא טקסט זורם: "ג׳" הוא תו עברי, ואלגוריתם הדו-כיווניות של
+ * הדפדפן מסדר מחדש טקסט מעורב של עברית וספרות לפי כללים משלו — גם
+ * בתוך אזור שמוגדר LTR. התוצאה הייתה שהיחידה קפצה לימין המספר.
+ * פריטי flex אינם עוברים סידור כזה, ולכן הסדר כאן הוא בדיוק סדר
+ * ה-HTML: יחידה, ואז המספרים.
+ */
 .macro-val {
   font-size: .92rem; color: var(--text); font-weight: 700;
   font-variant-numeric: tabular-nums; white-space: nowrap;
-  justify-self: end; direction: ltr;
+  justify-self: end;
+  display: flex; align-items: baseline; direction: ltr;
 }
 .macro-val .m-sep, .macro-val .m-goal { color: var(--text-dim); font-weight: 600; }
-.macro-val .m-unit { color: var(--text-faint); font-weight: 600; font-size: .8em; margin-inline-start: 3px; }
+/* היחידה ראשונה בסדר ה-LTR, כלומר בקצה השמאלי — כך שלוש היחידות
+   יושבות בטור אחד ולא רודפות אחרי מספרים באורך משתנה */
+.macro-val .m-unit { color: var(--text-faint); font-weight: 600; font-size: .8em; margin-inline-end: 5px; }
 .macro.is-done .macro-val b { color: var(--ok); }
 .macro.is-over .macro-val b { color: var(--danger); }
 .macro.is-over .bar-fill { background: var(--danger) !important; }
