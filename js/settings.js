@@ -421,6 +421,7 @@ const RESET_STORES = [
 const RESET_SETTING_KEYS = [
   'onboardingDone', 'weekSchedule', 'cardioWeekSchedule', 'activeWorkout', 'quoteRotation',
   'personalGoals', 'activeChallenge', 'challengesCompletedCount', 'lastWeighInReminderDate',
+  'remindersDismissed',
 ];
 
 const CONFIRM_PHRASE = 'מחק הכל';

@@ -151,11 +151,12 @@ export async function renderNutrition() {
     const p = target > 0 ? Math.min(cur / target, 1) * 100 : 0;
     row.querySelector('.bar-fill').style.width = p + '%';
 
-    const leftEl = row.querySelector('.macro-left');
+    /*
+     * שורת "נותרו X ג׳" הוסרה — היא שילשה את גובה המקטע בשביל מספר
+     * שכבר נגזר ממה שכתוב לידו. חריגה וסיום עדיין נראים, בצבע המספר.
+     */
     row.classList.toggle('is-over', left < 0);
     row.classList.toggle('is-done', target > 0 && left <= 0);
-    leftEl.querySelector('.m-left').textContent = fmtNum(Math.abs(left));
-    leftEl.firstChild.textContent = left < 0 ? 'חריגה של ' : 'נותרו ';
   }
 
   // התפריט הקבוע — סימון "אכלתי"

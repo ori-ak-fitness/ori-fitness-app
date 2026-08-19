@@ -6,7 +6,7 @@
 import * as db from './db.js';
 import {
   $, el, toast, confirmSheet, guard,
-  dateKey, formatDateHe, shortDate, shiftDateKey, num, fmtNum,
+  dateKey, formatDateHe, shortDate, num, fmtNum,
 } from './ui.js';
 import { lineChart } from './charts.js';
 
@@ -94,26 +94,6 @@ export function bmiCategory(bmi) {
   if (bmi < 25) return 'תקין';
   if (bmi < 30) return 'עודף משקל';
   return 'השמנה';
-}
-
-/* ---------- תזכורת שקילה ליום שלישי ---------- */
-
-const LAST_REMINDER_KEY = 'lastWeighInReminderDate';
-
-/** ביום שלישי, אם עוד לא נשקל השבוע — תזכורת עדינה, פעם אחת ביום */
-export async function checkWeighInReminder() {
-  if (new Date().getDay() !== 2) return; // 2 = יום שלישי
-  const today = dateKey();
-  const lastShown = await db.getSetting(LAST_REMINDER_KEY, null);
-  if (lastShown === today) return;
-
-  const entries = await loadEntries();
-  const sunday = shiftDateKey(today, -new Date().getDay());
-  const weighedThisWeek = entries.some((e) => e.date >= sunday && e.date <= today);
-  if (weighedThisWeek) return;
-
-  await db.setSetting(LAST_REMINDER_KEY, today);
-  toast('יום שלישי — זמן טוב לשקילה שבועית 🏋️');
 }
 
 /* ---------- תצוגה ---------- */

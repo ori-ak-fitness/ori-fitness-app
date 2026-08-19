@@ -3,13 +3,10 @@
    ונפח כולל לכל אימון.
    =================================================================== */
 
-import { $, el, num, fmtNum, shortDate, formatDateHe, dateKey, shiftDateKey } from './ui.js';
+import { $, el, num, fmtNum, shortDate, formatDateHe } from './ui.js';
 import { lineChart, barChart } from './charts.js';
 import { getAllWorkouts, calcVolume } from './workouts.js';
 import { isSetDone } from './records.js';
-import { getWeeklyWorkoutGoal } from './dashboard.js';
-import { totalsForDate, goalForDate } from './nutrition.js';
-import { getWeightEntries } from './bodyweight.js';
 
 let selected = null;
 let selectedExerciseType = 'all';
@@ -85,65 +82,7 @@ function buildExerciseSeries(workouts) {
   return map;
 }
 
-/* ---------- סיכום השבוע ---------- */
-
-/** ראשון (getDay=0) עד היום — לא כוללים ימים עתידיים בשבוע הנוכחי */
-function weekSoFar() {
-  const today = dateKey();
-  const todayIdx = new Date().getDay();
-  const start = shiftDateKey(today, -todayIdx);
-  const days = Array.from({ length: todayIdx + 1 }, (_, i) => shiftDateKey(start, i));
-  return { start, today, days };
-}
-
-async function renderWeeklySummary() {
-  const host = $('#weeklySummaryCard');
-  const { start, today, days } = weekSoFar();
-
-  const [allWorkouts, weeklyGoal, entries] = await Promise.all([
-    getAllWorkouts(), getWeeklyWorkoutGoal(), getWeightEntries(),
-  ]);
-
-  const weekWorkouts = allWorkouts.filter((w) => w.date >= start && w.date <= today);
-  const strengthCount = weekWorkouts.filter((w) => (w.kind ?? 'strength') === 'strength').length;
-  const cardioCount = weekWorkouts.filter((w) => w.kind === 'cardio').length;
-  const totalVolume = weekWorkouts
-    .filter((w) => (w.kind ?? 'strength') === 'strength')
-    .reduce((s, w) => s + (w.totalVolume ?? calcVolume(w)), 0);
-
-  // משקל: מהשקילה האחרונה שלפני השבוע הזה, לשקילה האחרונה השבוע
-  const weekEntries = entries.filter((e) => e.date >= start && e.date <= today);
-  const beforeWeek = entries.filter((e) => e.date < start);
-  const weightDelta = (weekEntries.length && beforeWeek.length)
-    ? weekEntries[weekEntries.length - 1].weight - beforeWeek[beforeWeek.length - 1].weight
-    : null;
-
-  // תזונה: מתוך הימים שבאמת נרשם בהם משהו השבוע, כמה בתוך התקציב
-  let loggedDays = 0, withinBudget = 0;
-  for (const d of days) {
-    const [totals, goal] = await Promise.all([totalsForDate(d), goalForDate(d)]);
-    if (totals.calories > 0) {
-      loggedDays++;
-      if (totals.calories <= goal.calories) withinBudget++;
-    }
-  }
-
-  host.replaceChildren(
-    el('div', { class: 'chart-legend' },
-      el('div', { class: 'cl' }, el('b', {}, `${strengthCount}/${weeklyGoal}`), el('span', {}, 'אימוני כוח')),
-      el('div', { class: 'cl' }, el('b', {}, fmtNum(totalVolume)), el('span', {}, 'נפח (ק"ג)')),
-      el('div', { class: 'cl' }, el('b', {}, String(cardioCount)), el('span', {}, 'אימוני אירובי')),
-      ...(weightDelta !== null ? [el('div', { class: 'cl' },
-        el('b', {}, `${weightDelta >= 0 ? '+' : ''}${fmtNum(weightDelta, 1)}`), el('span', {}, 'שינוי במשקל'))] : []),
-      ...(loggedDays ? [el('div', { class: 'cl' },
-        el('b', {}, `${withinBudget}/${loggedDays}`), el('span', {}, 'ימים בתקציב'))] : []),
-    ),
-  );
-}
-
 export async function renderProgress() {
-  await renderWeeklySummary();
-
   const workouts = await getAllWorkouts();
   const chronological = [...workouts].sort((a, b) => a.startedAt - b.startedAt);
   const types = Array.from(new Set(chronological.map(workoutTypeLabel))).sort((a, b) => a.localeCompare(b, 'he'));

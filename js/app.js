@@ -17,9 +17,10 @@ import {
   currentQuote, renderGoals, invalidatePersonalGoalsCache,
 } from './dashboard.js';
 import { initProgress, renderProgress } from './progress.js';
-import { initBodyWeight, renderBodyWeight, invalidateWeightCache, checkWeighInReminder } from './bodyweight.js';
+import { initBodyWeight, renderBodyWeight, invalidateWeightCache, getWeightEntries } from './bodyweight.js';
+import { initReminders, renderReminders } from './reminders.js';
 import { renderChallengeWidget, invalidateChallengeCache } from './challenge.js';
-import { initRoutines, renderPlan, invalidateRoutinesCache } from './routines.js';
+import { initRoutines, renderPlan, invalidateRoutinesCache, getRoutines, getSchedule } from './routines.js';
 import { initMealPlan, invalidatePlanCache } from './mealplan.js';
 import { initBackup, renderBackupInfo } from './backup.js';
 import { initSettingsScreen, renderSettings } from './settings.js';
@@ -38,12 +39,25 @@ let currentScreen = 'home';
  * fromHistory=true כשההגעה היא מלחיצה על "חזור" של המכשיר — אז אסור לרשום
  * רשומה חדשה בהיסטוריה, אחרת נוצרת לולאה ואי אפשר לצאת מהמסך.
  */
-function showScreen(name, fromHistory = false) {
+function showScreen(name, fromHistory = false, slideFrom = null) {
   if (!SCREENS.includes(name)) name = 'home';
   currentScreen = name;
 
   for (const s of SCREENS) {
     $(`#screen-${s}`).classList.toggle('hidden', s !== name);
+  }
+
+  /*
+   * המסך הנכנס מחליק מהכיוון שאליו האצבע זזה. זה קיים רק להחלקה
+   * ולא ללחיצה על לשונית: בלחיצה אין כיוון, ואנימציה שרירותית שם
+   * רק מאטה את המעבר.
+   */
+  const entering = $(`#screen-${name}`);
+  entering.classList.remove('slide-left', 'slide-right');
+  if (slideFrom) {
+    // הפעלה מחדש של האנימציה גם כשמחליקים פעמיים לאותו כיוון
+    void entering.offsetWidth;
+    entering.classList.add(slideFrom === 'left' ? 'slide-left' : 'slide-right');
   }
   for (const tab of $$('.tab')) {
     tab.classList.toggle('active', tab.dataset.screen === name);
@@ -70,10 +84,67 @@ function showScreen(name, fromHistory = false) {
   }
 }
 
+/* ---------- החלקה בין מסכים ---------- */
+
+/*
+ * סדר ההחלקה הוא סדר הלשוניות על המסך, לא סדר המערך SCREENS.
+ * ההגדרות אינן ברשימה בכוונה: הן נפתחות מגלגל השיניים ואינן חלק
+ * מהמסלול שעוברים בו באצבע.
+ */
+const SWIPE_ORDER = ['home', 'nutrition', 'workout', 'progress'];
+
+/* מרחק מינימלי, ויחס מול התנועה האנכית — בלי היחס הזה כל גלילה
+   אלכסונית של רשימה ארוכה הייתה מחליפה מסך בטעות */
+const SWIPE_MIN_PX = 60;
+const SWIPE_RATIO = 1.7;
+const SWIPE_MAX_MS = 700;
+
+/** מקומות שבהם החלקה אופקית שייכת למשהו אחר ואסור לחטוף אותה */
+function swipeBlocked(target) {
+  if (!(target instanceof Element)) return false;
+  return !!target.closest(
+    '#sheet, .bc-scanner, .wizard, .gate, input, textarea, select, .lightbox, [data-no-swipe]');
+}
+
+function initSwipeNav() {
+  let x0 = 0, y0 = 0, t0 = 0, tracking = false;
+
+  addEventListener('touchstart', (e) => {
+    if (e.touches.length !== 1 || swipeBlocked(e.target)) { tracking = false; return; }
+    const t = e.touches[0];
+    x0 = t.clientX; y0 = t.clientY; t0 = Date.now(); tracking = true;
+  }, { passive: true });
+
+  addEventListener('touchend', (e) => {
+    if (!tracking) return;
+    tracking = false;
+
+    const t = e.changedTouches[0];
+    const dx = t.clientX - x0;
+    const dy = t.clientY - y0;
+    if (Date.now() - t0 > SWIPE_MAX_MS) return;
+    if (Math.abs(dx) < SWIPE_MIN_PX || Math.abs(dx) < Math.abs(dy) * SWIPE_RATIO) return;
+
+    const i = SWIPE_ORDER.indexOf(currentScreen);
+    if (i === -1) return;   // הגדרות או מסך שאינו במסלול
+
+    /*
+     * הממשק בעברית, ולכן הלשונית הראשונה יושבת מימין. החלקה שמאלה
+     * מתקדמת ברשימה — כלומר לכיוון שאליו האצבע זזה, וזו ההתנהגות
+     * שמרגישה נכונה ולא הפוכה.
+     */
+    const next = SWIPE_ORDER[dx < 0 ? i + 1 : i - 1];
+    if (!next) return;
+
+    showScreen(next, false, dx < 0 ? 'left' : 'right');
+  }, { passive: true });
+}
+
 function initNav() {
   for (const tab of $$('.tab')) {
     tab.addEventListener('click', () => showScreen(tab.dataset.screen));
   }
+  initSwipeNav();
   // צ'יפ הטיימר העליון מקפיץ למסך האימון
   $('#liveTimerChip').addEventListener('click', () => showScreen('workout'));
   $('#settingsBtn').addEventListener('click', () =>
@@ -112,7 +183,7 @@ async function checkDayRollover() {
   await renderChallengeWidget(); // יום חדש = "יום X" חדש, וסימון ה-✓/✗ של אתמול לא תקף היום
   if (currentScreen === 'nutrition') await renderNutrition();
   if (currentScreen === 'progress') { await renderProgress(); await renderBodyWeight(); }
-  await checkWeighInReminder();
+  await renderReminders();
 }
 
 function initDayWatcher() {
@@ -380,7 +451,27 @@ async function main() {
   });
   initProgress();
   initBodyWeight();
-  checkWeighInReminder();
+
+  initReminders({
+    getWeightEntries,
+    getRoutines,
+    getSchedule,
+    isDoneToday: async (routineId) => {
+      const workouts = await getAllWorkouts();
+      const today = dateKey();
+      return workouts.some((w) => w.date === today && w.routineId === routineId);
+    },
+    startWorkout: async (routine) => {
+      showScreen('workout');
+      if (!hasActiveWorkout()) await startWorkout(routine);
+    },
+    goToWeighIn: () => {
+      showScreen('progress');
+      // ממקדים את שדה המשקל אחרי שהמסך כבר מוצג, אחרת אין למה למקד
+      setTimeout(() => $('#weightInput')?.focus(), 150);
+    },
+  });
+  await renderReminders();
 
   initSettingsScreen({
     onRerun: () => rerunWizard(),

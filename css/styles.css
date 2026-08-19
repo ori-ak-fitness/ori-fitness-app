@@ -255,6 +255,12 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .screen { animation: fadeIn .22s ease; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 
+/* מעבר בהחלקת אצבע — קצר בכוונה: מעל זה זה מרגיש איטי, לא חלק */
+.screen.slide-left  { animation: slideFromLeft .19s ease-out; }
+.screen.slide-right { animation: slideFromRight .19s ease-out; }
+@keyframes slideFromLeft  { from { opacity: .4; transform: translateX(26px); } to { opacity: 1; transform: none; } }
+@keyframes slideFromRight { from { opacity: .4; transform: translateX(-26px); } to { opacity: 1; transform: none; } }
+
 .section-head {
   display: flex; align-items: center; justify-content: flex-start; gap: 10px;
   margin: 26px 0 12px;
@@ -620,9 +626,18 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
   background: linear-gradient(160deg, var(--bg-elev-2), var(--bg-elev));
   border: 2px solid var(--line); border-radius: var(--r-lg); overflow: hidden;
 }
+/*
+ * לוח הימים במסך האימון הוא סקירה בלבד — מתחתיו יושב כרטיס היום
+ * עצמו, שהוא העיקר. לכן הוא מוגש קטן יותר מזה שבמסך הבית: אריחים
+ * צרים יותר וממורכזים, וטקסט קטן יותר.
+ */
 .week-plan-card .week-strip {
-  padding: 16px 16px 12px; border-bottom: 2px solid var(--line);
+  padding: 12px 14px 10px; border-bottom: 2px solid var(--line);
+  gap: 4px; justify-items: center;
 }
+.week-plan-card .day-chip { width: min(100%, 46px); border-radius: 11px; }
+.week-plan-card .day-letter { font-size: .95rem; }
+.week-plan-card .day-plan { font-size: .54rem; }
 .week-plan-card .today-card {
   border: none; border-radius: 0; background: transparent;
 }
@@ -680,9 +695,25 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
    `aspect-ratio: 1` ולא גובה בפיקסלים: הרוחב נגזר מרוחב המסך, והגובה
    רודף אחריו לבדו. כך זה נשאר ריבוע מדויק בכל מסך בלי מספר קבוע
    שצריך לתחזק, וגם אם גודל הטקסט הבסיסי משתנה. */
-.week-strip { display: grid; grid-template-columns: repeat(7, 1fr); gap: 7px; }
+.week-strip { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+
+/*
+ * במסך הבית האריחים גדולים ככל שהרוחב מרשה: שבעה ריבועים בשורה
+ * אחת הם דבר צר מטבעו, ולכן הרווחים ביניהם מצומצמים והרצועה נמשכת
+ * עד הקצוות — זה כל מה שאפשר להוציא בלי לוותר על יום או לגלוש.
+ */
+#hsWeekStrip { gap: 4px; margin-inline: -10px; }
+#hsWeekStrip .day-letter { font-size: 1.24rem; }
+#hsWeekStrip .day-plan { font-size: .63rem; }
 .day-chip {
   position: relative; aspect-ratio: 1;
+  /*
+   * בלי זה האריח מסרב להצטמצם מתחת לרוחב הטקסט שבתוכו (ברירת המחדל
+   * של פריט ב-grid היא min-width: auto), שבעת האריחים גולשים מהרוחב
+   * הזמין, והאחרון נחתך מחוץ למסך. שם אימון ארוך כמו "כתפיים ובטן"
+   * הספיק כדי שיום שישי ושבת ייעלמו.
+   */
+  min-width: 0;
   background: var(--bg-elev); color: var(--text-dim);
   /* קו דק ובגוון עצמאי ולא ב-var(--line) הכללי: האריח אמור להיראות
      כמו משטח שקוע, לא כמו משהו מוקף במסגרת */
@@ -1122,18 +1153,42 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .kcal-card.over .kcal-num { color: var(--danger); }
 /* חלבון/פחמימות/שומן יושבים כאן ליד הטבעת, בתוך כרטיס הקלוריות עצמו —
    לא כרשימה נפרדת ונחותה למטה, ולא כפילות עם "יעד/נאכל/נותרו" שכבר יש בטבעת */
-.macros { flex: 1; display: flex; flex-direction: column; gap: 11px; min-width: 0; }
-.macro-top { display: flex; justify-content: space-between; font-size: .98rem; font-weight: 600; color: var(--text-dim); margin-bottom: 5px; }
-.macro-top b { color: var(--text); font-variant-numeric: tabular-nums; }
+/*
+ * מאקרו — שורה אחת לכל אחד: שם, פס, ומספר.
+ *
+ * קודם כל מאקרו תפס שלוש שורות (שם ומספר, פס, ו"נותרו X ג׳"), כלומר
+ * תשע שורות לשלושה מספרים. הפריסה כאן היא grid ולא flex בכל שורה
+ * בנפרד, כדי שהשמות, הפסים והמספרים יתיישרו לטורים — זה מה שהופך
+ * את זה לקריא במבט אחד במקום שלושה בלוקים נפרדים.
+ */
+.macros {
+  flex: 1; min-width: 0;
+  display: grid; grid-template-columns: auto 1fr auto; align-items: center;
+  column-gap: 10px; row-gap: 9px;
+}
+.macro { display: contents; }
+.macro-name {
+  font-size: .92rem; font-weight: 600; color: var(--text-dim);
+  white-space: nowrap;
+}
 .bar { height: 7px; background: var(--bg-elev-2); border-radius: 999px; overflow: hidden; }
-.bar-fill { height: 100%; width: 0; border-radius: 999px; transition: width .45s ease; }
+.bar-fill { display: block; height: 100%; width: 0; border-radius: 999px; transition: width .45s ease; }
 .macro[data-macro="protein"] .bar-fill { background: var(--protein); }
 .macro[data-macro="carbs"]   .bar-fill { background: var(--carbs); }
 .macro[data-macro="fat"]     .bar-fill { background: var(--fat); }
-.macro-left { font-size: .82rem; color: var(--text-faint); margin-top: 4px; }
-.macro-left .m-left { font-variant-numeric: tabular-nums; }
-.macro.is-done .macro-left { color: var(--ok); }
-.macro.is-over .macro-left { color: var(--danger); }
+/*
+ * המספר והיחידה יחד בקצה, והספרות ב-tabular-nums כדי ששלוש השורות
+ * יתיישרו זו מתחת לזו גם כשהמספרים באורך שונה.
+ */
+.macro-val {
+  font-size: .92rem; color: var(--text); font-weight: 700;
+  font-variant-numeric: tabular-nums; white-space: nowrap;
+  justify-self: end; direction: ltr;
+}
+.macro-val .m-sep, .macro-val .m-goal { color: var(--text-dim); font-weight: 600; }
+.macro-val .m-unit { color: var(--text-faint); font-weight: 600; font-size: .8em; margin-inline-start: 3px; }
+.macro.is-done .macro-val b { color: var(--ok); }
+.macro.is-over .macro-val b { color: var(--danger); }
 .macro.is-over .bar-fill { background: var(--danger) !important; }
 
 .head-badge {
@@ -1366,6 +1421,25 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
    וזה בדיוק מה שאורי ביקש למנוע. */
 
 /* ---------- סורק הברקוד ---------- */
+/* ---------- תזכורות במסך הבית ---------- */
+
+/* צבע הזהב ולא כרטיס רגיל: תזכורת אמורה למשוך את העין ברגע שנכנסים,
+   אחרת היא סתם עוד שורה בין השאר */
+.reminder {
+  display: flex; align-items: center; gap: 11px;
+  background: var(--bg-elev); border: 1px solid var(--gold);
+  border-radius: var(--r-md); padding: 12px 14px; margin-bottom: 12px;
+  box-shadow: 0 2px 10px -6px var(--shadow-strong);
+}
+.reminder-ico { font-size: 1.5rem; line-height: 1; flex: none; }
+.reminder-main { flex: 1; min-width: 0; }
+.reminder-title { font-weight: 700; font-size: .95rem; }
+.reminder-text { font-size: .8rem; color: var(--text-dim); margin-top: 2px; }
+.reminder-x {
+  flex: none; background: transparent; border: none; color: var(--text-faint);
+  font-size: 1rem; cursor: pointer; padding: 4px 2px; line-height: 1;
+}
+
 /* ---------- נשנושים ---------- */
 
 /* גובה קבוע ולא רשימה שנמתחת: הגיליון נשאר באותו גודל בזמן שמסננים
@@ -1539,16 +1613,6 @@ body.gate-open main { display: none !important; }
   border: 0; font-weight: 800; flex: none;
 }
 
-/*
- * "נותרו X ג'" הוסתר: הוא חזר על מה שכתוב שורה מעליו ("0/150 ג'"),
- * והוסיף שורה שלישית לכל מאקרו — שלוש שורות כפולות שניפחו את כרטיס
- * התזונה בלי להוסיף מידע.
- *
- * במצב חריגה הוא כן מוצג, כי "חריגה של 20 ג'" הוא המקרה היחיד שבו
- * המספר הזה אומר משהו שלא ניתן לקרוא ישירות מהשורה שמעל.
- */
-.macro-left { display: none; }
-.macro.is-over .macro-left { display: block; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }

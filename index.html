@@ -173,6 +173,8 @@
         <p class="home-date" id="homeDateText"></p>
       </div>
 
+      <div id="remindersHost"></div>
+
       <div class="quote-card" id="quoteCard">
         <div class="quote-photo" id="quotePhoto"></div>
         <div class="quote-body">
@@ -511,28 +513,19 @@
         </div>
         <div class="macros" id="macros">
           <div class="macro" data-macro="protein">
-            <div class="macro-top">
-              <span>🥩 חלבון</span>
-              <b><span class="m-cur">0</span>/<span class="m-goal">0</span> ג'</b>
-            </div>
-            <div class="bar"><div class="bar-fill"></div></div>
-            <div class="macro-left">נותרו <span class="m-left">0</span> ג'</div>
+            <span class="macro-name">🥩 חלבון</span>
+            <span class="bar"><span class="bar-fill"></span></span>
+            <span class="macro-val"><b class="m-cur">0</b><span class="m-sep">/</span><span class="m-goal">0</span><span class="m-unit">ג'</span></span>
           </div>
           <div class="macro" data-macro="carbs">
-            <div class="macro-top">
-              <span>🍞 פחמימות</span>
-              <b><span class="m-cur">0</span>/<span class="m-goal">0</span> ג'</b>
-            </div>
-            <div class="bar"><div class="bar-fill"></div></div>
-            <div class="macro-left">נותרו <span class="m-left">0</span> ג'</div>
+            <span class="macro-name">🍞 פחמימות</span>
+            <span class="bar"><span class="bar-fill"></span></span>
+            <span class="macro-val"><b class="m-cur">0</b><span class="m-sep">/</span><span class="m-goal">0</span><span class="m-unit">ג'</span></span>
           </div>
           <div class="macro" data-macro="fat">
-            <div class="macro-top">
-              <span>🥑 שומן</span>
-              <b><span class="m-cur">0</span>/<span class="m-goal">0</span> ג'</b>
-            </div>
-            <div class="bar"><div class="bar-fill"></div></div>
-            <div class="macro-left">נותרו <span class="m-left">0</span> ג'</div>
+            <span class="macro-name">🥑 שומן</span>
+            <span class="bar"><span class="bar-fill"></span></span>
+            <span class="macro-val"><b class="m-cur">0</b><span class="m-sep">/</span><span class="m-goal">0</span><span class="m-unit">ג'</span></span>
           </div>
         </div>
       </div>
@@ -572,12 +565,6 @@
 
     <!-- ---------- התקדמות ---------- -->
     <section class="screen hidden" id="screen-progress">
-      <div class="section-head">
-        <span class="head-icon" aria-hidden="true">📊</span>
-        <h2>סיכום השבוע</h2>
-      </div>
-      <div class="chart-card" id="weeklySummaryCard"></div>
-
       <div class="section-head">
         <span class="head-icon" aria-hidden="true">🏋️</span>
         <h2>יומן שקילות</h2>
