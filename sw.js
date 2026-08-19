@@ -3,7 +3,7 @@
    העלה את CACHE_VERSION בכל שחרור גרסה כדי לרענן קבצים.
    =================================================================== */
 
-const CACHE_VERSION = 'ori-fitness-v59';
+const CACHE_VERSION = 'ori-fitness-v60';
 
 const APP_SHELL = [
   './',
@@ -36,10 +36,6 @@ const APP_SHELL = [
   './js/cloud.js',
   './js/snacks.js',
   './js/reminders.js',
-  './fonts/heebo-hebrew.woff2',
-  './fonts/heebo-latin.woff2',
-  './fonts/frankruhl-hebrew.woff2',
-  './fonts/frankruhl-latin.woff2',
   './icons/logo.svg',
   './icons/icon-192.png',
   './icons/icon-512.png',

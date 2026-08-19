@@ -2,57 +2,6 @@
    Ori Fitness App — עיצוב ראשי (RTL, מובייל-first)
    =================================================================== */
 
-/* ===================================================================
-   הכתב.
-
-   שני פונטים עבריים אמיתיים במקום פונט ברירת המחדל של המכשיר, שנראה
-   זהה בכל אפליקציה אחרת:
-     • Frank Ruhl Libre — סריף עברי קלאסי, לכותרות בלבד.
-     • Heebo — סאנס נקי, לכל השאר.
-
-   הקבצים יושבים בפרויקט ולא נטענים מגוגל: כך הכתב מופיע מיד, עובד
-   בלי אינטרנט (האפליקציה היא PWA), ואף שרת חיצוני לא רואה מתי אורי
-   פותח אותה. שניהם variable fonts — קובץ אחד מכסה את כל המשקלים.
-
-   כל פונט מפוצל לעברית וללטינית עם unicode-range, ולכן הדפדפן מוריד
-   את החלק הלטיני רק אם באמת מופיע בו טקסט לטיני.
-   =================================================================== */
-
-@font-face {
-  font-family: 'Heebo';
-  font-style: normal;
-  font-weight: 300 800;
-  font-display: swap;
-  src: url('../fonts/heebo-hebrew.woff2') format('woff2');
-  unicode-range: U+0307-0308, U+0590-05FF, U+200C-2010, U+20AA, U+25CC, U+FB1D-FB4F;
-}
-@font-face {
-  font-family: 'Heebo';
-  font-style: normal;
-  font-weight: 300 800;
-  font-display: swap;
-  src: url('../fonts/heebo-latin.woff2') format('woff2');
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
-    U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
-@font-face {
-  font-family: 'Frank Ruhl Libre';
-  font-style: normal;
-  font-weight: 400 900;
-  font-display: swap;
-  src: url('../fonts/frankruhl-hebrew.woff2') format('woff2');
-  unicode-range: U+0307-0308, U+0590-05FF, U+200C-2010, U+20AA, U+25CC, U+FB1D-FB4F;
-}
-@font-face {
-  font-family: 'Frank Ruhl Libre';
-  font-style: normal;
-  font-weight: 400 900;
-  font-display: swap;
-  src: url('../fonts/frankruhl-latin.woff2') format('woff2');
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
-    U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
-
 /* ===== ערכת ברירת המחדל: קרם בהיר ===== */
 :root {
   --bg:            #f4efe4;
@@ -95,9 +44,15 @@
   --gold-deep: #1d6b6f;
   --gold-ink:  #eaf6f6;
 
-  /* הפונטים כטוקנים ולא ישירות בכללים: החלפת כתב היא שינוי בשתי שורות */
-  --font-body: 'Heebo', system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
-  --font-display: 'Frank Ruhl Libre', Georgia, 'Times New Roman', serif;
+  /*
+   * חזרה לפונט המערכת. ניסינו כאן Heebo לגוף ו-Frank Ruhl Libre
+   * לכותרות, ואורי ביקש את הכתב הקודם בחזרה.
+   *
+   * הטוקנים נשארו: החלפת כתב בעתיד היא שינוי בשתי השורות האלה בלבד,
+   * ואין צורך לגעת שוב בכל הקובץ.
+   */
+  --font-body: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-display: var(--font-body);
 
   --r-sm: 10px;
   --r-md: 16px;
@@ -276,18 +231,7 @@ body {
   padding-bottom: calc(var(--tabbar-h) + var(--safe-bottom));
 }
 
-/*
- * הכותרות בסריף והשאר בסאנס — זה ההבדל בין ממשק שנראה מותאם לבין
- * ממשק שנראה כמו ברירת מחדל. הסריף נשאר לכותרות בלבד: בגוף טקסט
- * וברשימות הוא היה מכביד, וזו בדיוק התחושה שביקשנו להוריד.
- *
- * המשקל נמוך יותר משהיה. Frank Ruhl כבד מטבעו יותר מפונט מערכת,
- * ובאותו מספר משקל הוא היה נראה מגושם.
- */
-h1, h2, h3 {
-  margin: 0; font-family: var(--font-display);
-  font-weight: 600; letter-spacing: 0;
-}
+h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -.01em; }
 p { margin: 0; }
 button { font-family: inherit; font-size: inherit; }
 .hidden { display: none !important; }
@@ -434,8 +378,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .home-heading { margin: 2px 4px 20px; }
 /* שחור קבוע, לא הופך צבע לפי ערכת נושא — אורי ביקש שחור תמיד כאן */
 .greeting {
-  font-family: var(--font-display);
-  font-size: 1.72rem; font-weight: 500; letter-spacing: 0; line-height: 1.25;
+  font-size: 1.65rem; font-weight: 600; letter-spacing: -.01em;
   margin: 0; text-wrap: balance; color: #000;
 }
 .home-date {
