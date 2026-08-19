@@ -29,6 +29,12 @@ import { cloudStatus, syncNow } from './cloud.js';
 
 let onRerunSetup = null;
 
+/*
+ * רענון כל המסכים אחרי שהענן הביא נתונים. מוזרק מ-app.js ולא מיובא
+ * ממנו — app.js כבר מייבא את הקובץ הזה, וייבוא הדדי היה סוגר מעגל.
+ */
+let onCloudPulled = null;
+
 const NAME_SETTING_KEY = 'userName';
 
 /* ---------- פרופיל ---------- */
@@ -111,18 +117,19 @@ async function openCloudSheet() {
   const body = el('div', {});
   const draw = (st) => body.replaceChildren(
     el('p', { class: 'muted', style: 'margin-bottom:14px' },
-      'ההגדרות שלך (שם, יעדים, אתגר) נשמרות גם בענן, כדי שיופיעו בכל המכשירים. ' +
-      'האימונים והתזונה עדיין מקומיים — הם בתור.'),
+      'האימונים, התזונה, המשקל, התוכניות וההגדרות שלך נשמרים גם בענן, ' +
+      'כדי שיופיעו בכל מכשיר שתיכנס בו לאותו חשבון. ' +
+      'תמונות הגלריה נשארות במכשיר בלבד — לכן חשוב להמשיך לייצא גיבוי.'),
     el('div', { class: 'list' },
       el('div', { class: 'list-item is-static' },
         el('div', { class: 'li-main' }, el('div', { class: 'li-title' }, 'מצב'),
           el('div', { class: 'li-sub' }, syncLine(st)))),
       el('div', { class: 'list-item is-static' },
         el('div', { class: 'li-main' }, el('div', { class: 'li-title' }, 'נשלחו לענן'),
-          el('div', { class: 'li-sub' }, `${st.pushed} הגדרות`))),
+          el('div', { class: 'li-sub' }, `${st.pushed} פריטים`))),
       el('div', { class: 'list-item is-static' },
         el('div', { class: 'li-main' }, el('div', { class: 'li-title' }, 'התקבלו מהענן'),
-          el('div', { class: 'li-sub' }, `${st.pulled} הגדרות`))),
+          el('div', { class: 'li-sub' }, `${st.pulled} פריטים`))),
       ...(st.queued ? [el('div', { class: 'list-item is-static' },
         el('div', { class: 'li-main' }, el('div', { class: 'li-title' }, 'ממתין לשליחה'),
           el('div', { class: 'li-sub' }, `${st.queued} — ייסגר בסנכרון הבא`)))] : []),
@@ -131,7 +138,10 @@ async function openCloudSheet() {
       class: 'btn btn-primary btn-block', style: 'margin-top:16px',
       onclick: guard(async function () {
         this.textContent = 'מסנכרן…';
-        const res = await syncNow(async () => { await renderGreeting(); await renderStats(); });
+        const res = await syncNow(async () => {
+          if (onCloudPulled) await onCloudPulled();
+          else { await renderGreeting(); await renderStats(); }
+        });
         draw(res);
         renderCloudRow();
         toast(res.state === 'מסונכרן' ? 'סונכרן ✓' : `לא הצליח: ${res.reason || res.state}`,
@@ -413,8 +423,9 @@ async function performReset() {
   for (const key of RESET_SETTING_KEYS) await db.delSetting(key);
 }
 
-export function initSettingsScreen({ onRerun } = {}) {
+export function initSettingsScreen({ onRerun, onCloudRefresh } = {}) {
   onRerunSetup = onRerun;
+  onCloudPulled = onCloudRefresh || null;
 
   $('#signOutBtn').addEventListener('click', guard(async () => {
     const ok = await confirmSheet('התנתקות',

@@ -135,16 +135,39 @@ function requireUid() {
   return uid;
 }
 
-/** @returns {Promise<Array<{id:string, store:string, key:string, value:any, updatedAt:number}>>} */
-export async function fetchRecords() {
+/**
+ * @param {number} [since] מושך רק רשומות שהשתנו אחרי הזמן הזה.
+ *   0 מושך הכל — נחוץ רק בפעם הראשונה במכשיר.
+ * @returns {Promise<Array<{id:string, store:string, key:string, value:any, updatedAt:number, deleted?:boolean}>>}
+ */
+export async function fetchRecords(since = 0) {
   const s = await loadSdk();
-  const snap = await s.getDocs(s.collection(s.db, 'users', requireUid(), 'records'));
+  const col = s.collection(s.db, 'users', requireUid(), 'records');
+  // טווח על שדה בודד אינו דורש אינדקס מורכב ב-Firestore, ולכן זה
+  // עובד בלי שום הגדרה בקונסולה
+  const snap = await s.getDocs(since > 0 ? s.query(col, s.where('updatedAt', '>', since)) : col);
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
 }
 
-export async function putRecord(id, data) {
+/*
+ * כתיבה מרוכזת. סנכרון ראשון של מכשיר מעלה מאות רשומות, ורשומה
+ * לרשומה זה מאות נסיעות הלוך-ושוב ברשת סלולרית. Firestore מגביל
+ * חבילה ל-500 פעולות, ולכן מפצלים.
+ */
+const BATCH_LIMIT = 400;
+
+/** @param {Array<{id:string, data:object}>} items */
+export async function putRecords(items) {
+  if (!items.length) return;
   const s = await loadSdk();
-  await s.setDoc(s.doc(s.db, 'users', requireUid(), 'records', id), data);
+  const uid = requireUid();
+  for (let i = 0; i < items.length; i += BATCH_LIMIT) {
+    const batch = s.writeBatch(s.db);
+    for (const item of items.slice(i, i + BATCH_LIMIT)) {
+      batch.set(s.doc(s.db, 'users', uid, 'records', item.id), item.data);
+    }
+    await batch.commit();
+  }
 }
 
 export async function signOutUser() {

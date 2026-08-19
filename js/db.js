@@ -1,5 +1,8 @@
 /* ===================================================================
-   db.js — שכבת IndexedDB. כל הנתונים נשמרים מקומית במכשיר בלבד.
+   db.js — שכבת IndexedDB. המכשיר הוא מקור האמת לשימוש היומיומי.
+
+   כל כתיבה ומחיקה מדווחות ל-cloud.js דרך watchWrites, וכך הנתונים
+   מגיעים גם למכשירים האחרים. תמונות נשארות מקומיות בלבד.
    =================================================================== */
 
 const DB_NAME = 'ori-fitness';
@@ -15,6 +18,26 @@ export const STORES = {
   mealPlan:   'mealPlan',    // תפריט יומי קבוע
   bodyWeight: 'bodyWeight',  // יומן שקילות — רשומה אחת ליום (keyPath: date)
 };
+
+/*
+ * שדה המזהה של כל מאגר. הסנכרון חייב לדעת איך קוראים לרשומה כדי
+ * להתאים בין מכשירים, ואי אפשר להסיק את זה מהרשומה עצמה.
+ */
+export const KEY_FIELD = {
+  [STORES.workouts]:   'id',
+  [STORES.photos]:     'id',
+  [STORES.meals]:      'id',
+  [STORES.goals]:      'id',
+  [STORES.settings]:   'key',
+  [STORES.routines]:   'id',
+  [STORES.mealPlan]:   'id',
+  [STORES.bodyWeight]: 'date',
+};
+
+/** המזהה של רשומה במאגר נתון */
+export function keyOf(store, value) {
+  return value?.[KEY_FIELD[store] || 'id'];
+}
 
 let dbPromise = null;
 
@@ -75,11 +98,30 @@ function wrap(request) {
   });
 }
 
+/* ---------- הודעה על שינוי ---------- */
+
+/*
+ * מודול הסנכרון נרשם כאן כדי לדעת על כל כתיבה ומחיקה.
+ * db.js לא מייבא אותו בכוונה — כך האחסון המקומי נשאר עצמאי לגמרי,
+ * וכשאין ענן (או שהוא נופל) שום דבר כאן לא משתנה.
+ */
+let onWrite = null;
+
+/** @param {(store:string, key:string, value:any|null) => void} fn */
+export function watchWrites(fn) { onWrite = fn; }
+
+function notify(store, key, value) {
+  if (!onWrite || key == null) return;
+  // כישלון בסנכרון לעולם לא מפיל שמירה מקומית
+  try { onWrite(store, key, value); } catch { /* לא קריטי */ }
+}
+
 /* ---------- פעולות בסיסיות ---------- */
 
 export async function put(store, value) {
   const os = await tx(store, 'readwrite');
   await wrap(os.put(value));
+  notify(store, keyOf(store, value), value);
   return value;
 }
 
@@ -89,6 +131,23 @@ export async function get(store, key) {
 }
 
 export async function del(store, key) {
+  const os = await tx(store, 'readwrite');
+  const res = await wrap(os.delete(key));
+  notify(store, key, null);
+  return res;
+}
+
+/*
+ * כתיבה ומחיקה שאינן מודיעות לסנכרון. מיועדות אך ורק להחלת מה שהגיע
+ * מהענן — אחרת כל משיכה הייתה נדחפת מיד בחזרה, בלולאה אינסופית.
+ */
+export async function putQuiet(store, value) {
+  const os = await tx(store, 'readwrite');
+  await wrap(os.put(value));
+  return value;
+}
+
+export async function delQuiet(store, key) {
   const os = await tx(store, 'readwrite');
   return wrap(os.delete(key));
 }
@@ -105,8 +164,16 @@ export async function getAllByIndex(store, indexName, query) {
 }
 
 export async function clearStore(store) {
+  /*
+   * המפתחות נאספים לפני המחיקה כדי שהסנכרון ירשום מחיקה לכל אחד.
+   * בלי זה, איפוס נתונים במכשיר אחד היה נמחק כאן ומיד חוזר מהענן
+   * בפתיחה הבאה — כלומר איפוס שלא מאפס.
+   */
+  const keys = await wrap((await tx(store, 'readonly')).getAllKeys());
   const os = await tx(store, 'readwrite');
-  return wrap(os.clear());
+  const res = await wrap(os.clear());
+  for (const key of keys) notify(store, key, null);
+  return res;
 }
 
 /* ---------- settings (key/value) ---------- */
@@ -116,19 +183,8 @@ export async function getSetting(key, fallback = null) {
   return row ? row.value : fallback;
 }
 
-/*
- * מודול הסנכרון נרשם כאן כדי לדעת על כל שינוי בהגדרות.
- * db.js לא מייבא אותו בכוונה — כך האחסון המקומי נשאר עצמאי לגמרי,
- * וכשאין ענן (או שהוא נופל) שום דבר כאן לא משתנה.
- */
-let onSettingWrite = null;
-export function watchSettings(fn) { onSettingWrite = fn; }
-
 export async function setSetting(key, value) {
-  const res = await put(STORES.settings, { key, value });
-  // כישלון בסנכרון לעולם לא מפיל שמירה מקומית
-  try { onSettingWrite?.(key, value); } catch { /* לא קריטי */ }
-  return res;
+  return put(STORES.settings, { key, value });
 }
 
 export async function delSetting(key) {

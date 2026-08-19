@@ -22,7 +22,9 @@ import { initRoutines, renderPlan, invalidateRoutinesCache } from './routines.js
 import { initMealPlan, invalidatePlanCache } from './mealplan.js';
 import { initBackup, renderBackupInfo } from './backup.js';
 import { initSettingsScreen, renderSettings } from './settings.js';
-import { initOnboarding, shouldRunWizard, openWizard, rerunWizard } from './onboarding.js';
+import {
+  initOnboarding, shouldRunWizard, openWizard, rerunWizard, closeWizardIfDone,
+} from './onboarding.js';
 import { initGate } from './gate.js';
 import { initCloud, flushNow } from './cloud.js';
 
@@ -239,6 +241,36 @@ function showUpdateBar(worker) {
   };
 }
 
+/* ---------- רענון אחרי סנכרון ---------- */
+
+/*
+ * נקרא כשהענן הביא נתונים ממכשיר אחר. כל מודול מחזיק מטמון משלו,
+ * ולכן לא מספיק לצייר מחדש — צריך קודם לבטל את המטמונים, אחרת
+ * המסך יצייר בדיוק את מה שהיה לפני.
+ */
+async function refreshFromCloud() {
+  invalidateGoalsCache();
+  invalidatePersonalGoalsCache();
+  invalidateChallengeCache();
+  invalidateRoutinesCache();
+  invalidatePlanCache();
+  invalidateCardioCache();
+  invalidateWeightCache();
+
+  await renderGreeting();
+  await renderStats();
+  await renderGoals();
+  await renderChallengeWidget();
+  await renderPlan();
+  await renderCardio();
+  await renderHistory();
+  await renderNutrition();
+  await renderBodyWeight();
+  await renderProgress();
+  if (currentScreen === 'settings') await renderSettings();
+  await closeWizardIfDone();
+}
+
 /* ---------- אתחול ---------- */
 
 async function main() {
@@ -351,6 +383,7 @@ async function main() {
 
   initSettingsScreen({
     onRerun: () => rerunWizard(),
+    onCloudRefresh: refreshFromCloud,
   });
   initOnboarding({
     onDone: async () => {
@@ -376,18 +409,12 @@ async function main() {
   /*
    * הסנכרון עולה אחרון ובלי await לפניו: הוא תלוי ברשת, ואסור שהוא
    * יעכב את הצגת האפליקציה. אם הוא נכשל — לא קורה כלום, הכל מקומי.
+   *
+   * מכיוון שעכשיו יורדים גם אימונים וארוחות, ולא רק הגדרות, הרענון
+   * חייב לגעת בכל המסכים — אחרת נתון חדש יושב במסד ולא על המסך.
    */
-  initCloud(async () => {
-    invalidateGoalsCache();
-    invalidatePersonalGoalsCache();
-    invalidateChallengeCache();
-    await renderGreeting();
-    await renderStats();
-    await renderGoals();
-    await renderChallengeWidget();
-    if (currentScreen === 'settings') await renderSettings();
-  }).then((res) => {
-    if (res.ok && res.applied) toast(`עודכנו ${res.applied} הגדרות מהענן`, 'ok');
+  initCloud(refreshFromCloud).then((res) => {
+    if (res.ok && res.applied) toast(`התקבלו ${res.applied} עדכונים ממכשיר אחר`, 'ok');
   });
 
   // סגירת האפליקציה לא אמורה לאבד שינוי שנרשם שנייה קודם

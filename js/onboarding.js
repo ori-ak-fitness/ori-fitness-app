@@ -515,6 +515,21 @@ export function openWizard() {
   $('#wizard').classList.remove('hidden');
 }
 
+/**
+ * סוגר את האשף אם הענן הספיק להביא הגדרות ותוכניות ממכשיר אחר.
+ *
+ * האשף נפתח לפני שהסנכרון חוזר מהרשת — כך זה חייב להיות, אחרת
+ * הפתיחה הייתה תלויה בגלישה. התוצאה היא שבמכשיר חדש האשף קופץ
+ * לרגע ואז מתברר שאין בו צורך: הכל כבר מוגדר.
+ */
+export async function closeWizardIfDone() {
+  const wiz = $('#wizard');
+  if (!wiz || wiz.classList.contains('hidden')) return false;
+  if (await shouldRunWizard()) return false;
+  close();
+  return true;
+}
+
 /** האם להריץ את האשף — רק בכניסה ראשונה, וכשאין עדיין שום נתון */
 export async function shouldRunWizard() {
   if (await db.getSetting(DONE_KEY, false)) return false;
