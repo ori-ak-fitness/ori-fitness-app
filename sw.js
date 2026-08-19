@@ -3,7 +3,7 @@
    העלה את CACHE_VERSION בכל שחרור גרסה כדי לרענן קבצים.
    =================================================================== */
 
-const CACHE_VERSION = 'ori-fitness-v53';
+const CACHE_VERSION = 'ori-fitness-v54';
 
 const APP_SHELL = [
   './',
@@ -77,37 +77,61 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return; // בקשות חיצוניות (שלב 4) עוברות כרגיל
 
-  // ניווטים: רשת קודם, ואם אין אינטרנט — index.html מהמטמון
+  /*
+   * ניווטים: מהמטמון קודם, ורענון ברקע לפעם הבאה.
+   *
+   * קודם זה היה רשת-קודם, וזה מה שגרם לאפליקציה להיפתח לאט: כל פתיחה
+   * חיכתה לרשת לפני שהוצג משהו, וברשת סלולרית זה שניות של מסך ריק
+   * בכל פעם מחדש. גרסה חדשה לא הולכת לאיבוד בגלל זה — היא נכנסת דרך
+   * מנגנון העדכון של ה-Service Worker ופס ה"יש גרסה חדשה".
+   */
   if (req.mode === 'navigate') {
+    /*
+     * רק שורש האפליקציה נשמר כ-index.html.
+     *
+     * בלי הבדיקה הזו כל דף HTML אחר באותו דומיין — למשל קובץ האימות
+     * של גוגל — היה נשמר תחת index.html ומוגש בפעם הבאה במקום
+     * האפליקציה. זה קרה בפועל בבדיקה: פתיחת האפליקציה החזירה את
+     * תוכן קובץ האימות.
+     */
+    const scope = new URL('./', self.location).pathname;
+    const isAppRoot = url.pathname === scope || url.pathname === scope + 'index.html';
+    if (!isAppRoot) return;   // דף אחר בדומיין — לא נוגעים בו בכלל
+
     event.respondWith((async () => {
-      try {
-        const fresh = await fetch(req);
-        const cache = await caches.open(CACHE_VERSION);
-        cache.put('./index.html', fresh.clone());
-        return fresh;
-      } catch {
-        const cached = await caches.match('./index.html');
-        return cached || new Response('אופליין', { status: 503, headers: { 'Content-Type': 'text/plain; charset=utf-8' } });
-      }
+      const cache = await caches.open(CACHE_VERSION);
+      const cached = await cache.match('./index.html');
+      const network = fetch(req).then((res) => {
+        if (res && res.ok) cache.put('./index.html', res.clone());
+        return res;
+      }).catch(() => null);
+      return cached || (await network)
+        || new Response('אופליין', { status: 503, headers: { 'Content-Type': 'text/plain; charset=utf-8' } });
     })());
     return;
   }
 
-  // קוד האפליקציה (JS/CSS/JSON): רשת קודם, כדי שעדכון גרסה ייכנס מיד.
-  // אם אין רשת — מהמטמון, כך שהאפליקציה עדיין עובדת אופליין.
+  /*
+   * קוד האפליקציה (JS/CSS/JSON): מהמטמון של הגרסה הזו, בלי רשת בכלל.
+   *
+   * זה מה שהופך פתיחה למיידית — שלושים קבצי קוד שלא נמשכים שוב ברשת
+   * בכל פעם. חשוב לא פחות: כל הקבצים מגיעים מאותה גרסה. ברשת-קודם
+   * אפשר היה לקבל חצי קבצים חדשים וחצי ישנים באותה טעינה.
+   * החלפת גרסה נעשית במקום אחד בלבד — התקנת Service Worker חדש.
+   */
   const isCode = /\.(js|mjs|css|json|webmanifest)$/i.test(url.pathname);
   if (isCode) {
     event.respondWith((async () => {
+      const cache = await caches.open(CACHE_VERSION);
+      const cached = await cache.match(req);
+      if (cached) return cached;
+      // קובץ שאינו ב-APP_SHELL (או מטמון שנוקה) — פעם אחת מהרשת, ונשמר
       try {
         const fresh = await fetch(req);
-        if (fresh && fresh.ok) {
-          const cache = await caches.open(CACHE_VERSION);
-          cache.put(req, fresh.clone());
-        }
+        if (fresh && fresh.ok) cache.put(req, fresh.clone());
         return fresh;
       } catch {
-        const cached = await caches.match(req);
-        return cached || new Response('', { status: 504 });
+        return new Response('', { status: 504 });
       }
     })());
     return;

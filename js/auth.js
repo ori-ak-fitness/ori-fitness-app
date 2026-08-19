@@ -69,6 +69,27 @@ function isAdmin(email) {
   return ADMIN_EMAILS.map((e) => e.toLowerCase()).includes((email || '').toLowerCase());
 }
 
+/*
+ * כל עוד האישור טרי, לא בודקים אותו מול השרת שוב.
+ *
+ * הבדיקה עולה שתי נסיעות רשת (קריאת הרשומה וכתיבת lastSeen) בכל פתיחה
+ * של האפליקציה, וכמעט תמיד היא מחזירה בדיוק את מה שכבר שמור כאן.
+ * ברשת סלולרית זה נתפס כ"האפליקציה בודקת אותי כל פעם מחדש".
+ *
+ * המחיר: הסרת גישה נכנסת לתוקף עד חצי יום באיחור במכשיר שכבר נכנס.
+ * מי שעדיין ממתין לאישור או חסום נבדק בכל פעם, כי אצלו התשובה באמת
+ * יכולה להשתנות, וגם התחברות חדשה תמיד נבדקת.
+ */
+const REVERIFY_AFTER_MS = 12 * 60 * 60 * 1000;
+
+function verificationIsFresh(cached, user) {
+  return cached
+    && cached.uid === user.uid
+    && cached.status === 'approved'
+    && typeof cached.verifiedAt === 'number'
+    && Date.now() - cached.verifiedAt < REVERIFY_AFTER_MS;
+}
+
 /**
  * מביא את רשומת המשתמש, ויוצר אותה בפעם הראשונה.
  * @returns {Promise<'approved'|'pending'|'blocked'>}
@@ -255,6 +276,9 @@ export async function startAuthFlow({ openGate, closeGate, setNote }) {
       return;
     }
 
+    // אישור טרי — נכנסים בלי לשאול את השרת שוב
+    if (verificationIsFresh(cached, user)) { closeGate(); return; }
+
     if (btn) { btn.disabled = true; btn.textContent = 'בודק הרשאה…'; }
 
     let status;
@@ -301,6 +325,8 @@ export async function startAuthFlow({ openGate, closeGate, setNote }) {
       photo: user.photoURL || '',
       status,
       isAdmin: isAdmin(user.email),
+      // מתי באמת נבדק מול השרת — הבסיס להחלטה לדלג על הבדיקה הבאה
+      verifiedAt: Date.now(),
     });
 
     if (status === 'approved') { closeGate(); return; }

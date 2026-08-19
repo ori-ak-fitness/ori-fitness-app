@@ -273,7 +273,17 @@ export async function initCloud(onPulled) {
   enabled = true;
 
   // מה שנשאר בתור מכשל קודם ראוי לניסיון נוסף ברגע שיש רשת
-  addEventListener('online', () => { flush().catch(() => {}); });
+  addEventListener('online', () => { catchUp(onPulled); });
+
+  /*
+   * המאזין הזה נרשם לפני הניסיון הראשון ולא אחריו.
+   * קודם הוא ישב בתוך ה-try, כך שכישלון אחד — רשת סלולרית שנפלה
+   * לרגע בדיוק בפתיחה — היה משאיר את המכשיר בלי שום ניסיון נוסף עד
+   * טעינה מלאה של האפליקציה. זה בדיוק המצב שנראה כמו "לא מסתנכרן".
+   */
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') catchUp(onPulled);
+  });
 
   try {
     const applied = await pull();
@@ -283,25 +293,38 @@ export async function initCloud(onPulled) {
     status.pulled += applied;
     if (applied) onPulled?.();
 
-    await seed().catch(() => {});
-
-    // חוזרים לאפליקציה — מושכים שוב, כי ייתכן ששינית משהו במכשיר אחר
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState !== 'visible') return;
-      pull().then((n) => {
-        if (!n) return;
-        status.pulled += n;
-        status.lastSyncAt = Date.now();
-        onPulled?.();
-      }).catch(() => {});
-    });
+    // העלאה ראשונית, ואז משיכה נוספת: אחרי שהמכשיר הזה תרם את שלו,
+    // ייתכן שבינתיים המכשיר השני העלה את שלו
+    const seeded = await seed().catch(() => 0);
+    if (seeded) {
+      const more = await pull().catch(() => 0);
+      if (more) { status.pulled += more; onPulled?.(); }
+    }
 
     return { ok: true, applied };
   } catch (err) {
     console.warn('[Ori Fitness] משיכה מהענן נכשלה:', err?.code || err);
     fail('שגיאה בקריאה', err);
+    // ניסיון נוסף אחרי כמה שניות — רוב התקלות כאן הן רגעיות
+    setTimeout(() => catchUp(onPulled), 8000);
     // נשארים פעילים: דחיפות עדיין ינוסו, והאפליקציה עובדת מקומית כרגיל
     return { ok: false, reason: err?.code || 'שגיאה' };
+  }
+}
+
+/** ניסיון השלמה: שולח מה שממתין, מעלה מה שטרם הועלה, ומושך מה שיש */
+async function catchUp(onPulled) {
+  if (!enabled) return;
+  try {
+    await flush();
+    await seed();
+    const n = await pull();
+    status.state = 'מסונכרן';
+    status.reason = null;
+    status.lastSyncAt = Date.now();
+    if (n) { status.pulled += n; onPulled?.(); }
+  } catch (err) {
+    fail('שגיאה בקריאה', err);
   }
 }
 
@@ -330,6 +353,36 @@ export async function syncNow(onPulled) {
     fail('שגיאה בקריאה', err);
   }
   return cloudStatus();
+}
+
+/**
+ * מה באמת יושב בענן, לפי מאגר.
+ *
+ * קיים כדי שאפשר יהיה לענות על "האימונים לא מגיעים לטלפון" בעובדה
+ * ולא בניחוש: אם המספרים כאן זהים בשני המכשירים, הבעיה בתצוגה; אם
+ * הם שונים, המכשיר שחסר לו פשוט עוד לא העלה או לא משך.
+ * נקרא רק בלחיצה מפורשת — הוא מושך את כל הרשומות.
+ */
+export async function cloudReport() {
+  const user = currentUser();
+  const report = { email: user?.email || null, uid: user?.uid || null, byStore: {}, total: 0, error: null };
+  if (!user?.uid) { report.error = 'לא מחובר'; return report; }
+
+  try {
+    const records = await fetchRecords(0);
+    for (const rec of records) {
+      if (rec.deleted) continue;
+      report.byStore[rec.store] = (report.byStore[rec.store] || 0) + 1;
+      report.total++;
+    }
+  } catch (err) {
+    report.error = err?.code || err?.message || 'שגיאה';
+  }
+
+  const meta = await readMeta();
+  report.knownLocally = Object.keys(meta.at).length;
+  report.seeded = !!meta.seeded;
+  return report;
 }
 
 /** דחיפה מיידית של מה שממתין — לפני שהאפליקציה נסגרת */

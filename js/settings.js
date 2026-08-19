@@ -25,7 +25,7 @@ import { getBadgeStatus, openBadgesSheet } from './badges.js';
 import { getUserHeightCm, setUserHeightCm, renderBodyWeight } from './bodyweight.js';
 import { isConfigured } from './firebase-config.js';
 import { isAdminUser, openUsersSheet, usersSummary } from './admin.js';
-import { cloudStatus, syncNow } from './cloud.js';
+import { cloudStatus, syncNow, cloudReport } from './cloud.js';
 
 let onRerunSetup = null;
 
@@ -115,6 +115,7 @@ function renderCloudRow() {
 
 async function openCloudSheet() {
   const body = el('div', {});
+  const checkHost = el('div', {});
   const draw = (st) => body.replaceChildren(
     el('p', { class: 'muted', style: 'margin-bottom:14px' },
       'האימונים, התזונה, המשקל, התוכניות וההגדרות שלך נשמרים גם בענן, ' +
@@ -148,7 +149,51 @@ async function openCloudSheet() {
           res.state === 'מסונכרן' ? 'ok' : 'err');
       }),
     }, 'סנכרן עכשיו'),
+    checkHost,
+    el('button', {
+      class: 'btn btn-secondary btn-block', style: 'margin-top:10px',
+      onclick: guard(async function () {
+        this.textContent = 'בודק…';
+        const r = await cloudReport();
+        drawReport(r);
+        this.textContent = 'בדוק מה יש בענן';
+      }),
+    }, 'בדוק מה יש בענן'),
   );
+
+  /*
+   * "האימונים לא מגיעים לטלפון" הוא בדיוק סוג התלונה שאי אפשר לפתור
+   * בניחוש. המסך הזה עונה בעובדות: באיזה חשבון אני מחובר, וכמה
+   * רשומות מכל סוג באמת יושבות בענן. אם המספרים זהים בשני המכשירים
+   * הבעיה אינה בסנכרון.
+   */
+  const STORE_NAMES = {
+    workouts: 'אימונים', meals: 'ארוחות', goals: 'יעדים',
+    routines: 'תוכניות', mealPlan: 'תפריט', bodyWeight: 'שקילות', settings: 'הגדרות',
+  };
+
+  function drawReport(r) {
+    if (r.error) {
+      checkHost.replaceChildren(el('p', { class: 'muted', style: 'margin-top:14px' },
+        `לא הצלחנו לקרוא מהענן: ${r.error}`));
+      return;
+    }
+    const rows = Object.entries(r.byStore)
+      .sort((a, b) => b[1] - a[1])
+      .map(([store, n]) => el('div', { class: 'list-item is-static' },
+        el('div', { class: 'li-main' }, el('div', { class: 'li-title' }, STORE_NAMES[store] || store)),
+        el('div', { class: 'li-side' }, String(n))));
+
+    checkHost.replaceChildren(
+      el('p', { class: 'muted', style: 'margin:14px 0 8px' },
+        `מחובר כ-${r.email || 'לא ידוע'} · ${r.total} רשומות בענן`),
+      ...(rows.length ? [el('div', { class: 'list' }, ...rows)]
+        : [el('p', { class: 'muted' }, 'הענן ריק. פתח את האפליקציה במכשיר שיש בו את הנתונים, חכה כמה שניות, ונסה שוב.')]),
+      el('p', { class: 'muted', style: 'font-size:.78rem;margin-top:10px' },
+        'המספרים האלה צריכים להיות זהים בטלפון ובמחשב. אם הם שונים — ' +
+        'המכשיר עם המספר הנמוך עדיין לא סיים לסנכרן.'),
+    );
+  }
 
   draw(cloudStatus());
   openSheet('☁️ מצב הסנכרון', body);
