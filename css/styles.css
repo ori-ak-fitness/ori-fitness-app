@@ -676,31 +676,57 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 
-.week-strip { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+/* ימי השבוע — שבעה אריחים ריבועיים.
+   `aspect-ratio: 1` ולא גובה בפיקסלים: הרוחב נגזר מרוחב המסך, והגובה
+   רודף אחריו לבדו. כך זה נשאר ריבוע מדויק בכל מסך בלי מספר קבוע
+   שצריך לתחזק, וגם אם גודל הטקסט הבסיסי משתנה. */
+.week-strip { display: grid; grid-template-columns: repeat(7, 1fr); gap: 7px; }
 .day-chip {
-  position: relative;
-  background: var(--bg-elev); border: 2px solid var(--line); color: var(--text-dim);
-  border-radius: var(--r-md); padding: 12px 2px; cursor: pointer;
-  display: flex; flex-direction: column; align-items: center; gap: 4px;
-  transition: border-color .15s ease, background .15s ease;
+  position: relative; aspect-ratio: 1;
+  background: var(--bg-elev); color: var(--text-dim);
+  /* קו דק ובגוון עצמאי ולא ב-var(--line) הכללי: האריח אמור להיראות
+     כמו משטח שקוע, לא כמו משהו מוקף במסגרת */
+  border: 1px solid var(--line-neutral);
+  /* פינה של בערך חמישית מהצלע — היחס שנותן לריבוע להיראות רך
+     ומכוון, במקום מלבן מעוגל */
+  border-radius: 13px; padding: 5px 3px; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  transition: border-color .15s ease, background .15s ease, color .15s ease;
 }
 .day-chip:active { background: var(--bg-elev-2); }
 /* האות והתווית מתחתיה היו קטנות מדי לקריאה נוחה — הועלו יחד,
    בדוק שבעה תגים עדיין נכנסים בשורה אחת ברוחב טלפון לפני שינוי חוזר */
-.day-letter { font-weight: 800; font-size: 1.05rem; color: var(--text); }
+.day-letter { font-weight: 700; font-size: 1.12rem; line-height: 1.1; color: var(--text); }
 .day-plan {
-  font-size: .66rem; line-height: 1.25; text-align: center;
+  font-size: .61rem; line-height: 1.2; text-align: center;
   max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-.day-chip.has-plan { border-color: var(--accent); }
+.day-chip.has-plan { border-color: var(--line-neutral); }
+.day-chip.has-plan .day-letter { color: var(--text); }
 .day-chip.has-plan .day-plan { color: var(--accent); }
-.day-chip.is-today { background: var(--accent-soft); border-color: var(--accent); }
-.day-chip.is-today .day-letter { color: var(--accent); }
+/* היום מסומן באריח מלא ולא במסגרת נוספת — סימון אחד חזק קריא יותר
+   משבע מסגרות שנבדלות בגוון */
+.day-chip.is-today {
+  background: linear-gradient(155deg, rgba(255, 255, 255, .22), rgba(0, 0, 0, .06)),
+              linear-gradient(150deg, var(--gold), var(--gold-deep));
+  border-color: transparent; color: var(--gold-ink);
+  box-shadow: 0 3px 10px -4px rgba(29, 107, 111, .55);
+}
+.day-chip.is-today .day-letter,
+.day-chip.is-today .day-plan { color: var(--gold-ink); }
 .day-chip.is-static { cursor: default; }
 /* התג כולו נצבע ירוק שקוף כשהאימון שלו כבר בוצע השבוע — וי גדול ושקוף
    ברקע, כדי שהצבע יראה "מהרקע" ובכל זאת יישאר אפשר לקרוא איזה יום ומה
    האימון (האות והשם נשארים מעל הוי, לא מוחלפים בו) */
-.day-chip.is-done { background: var(--ok-soft); border-color: var(--ok); }
+.day-chip.is-done { background: var(--ok-soft); border-color: var(--ok); box-shadow: none; }
+/* יום שהוא גם היום וגם כבר בוצע: האריח המלא נשאר, אחרת הטקסט הבהיר
+   שלו היה נופל על רקע ירוק בהיר ונעלם. הוי מצויר בגוון של האריח. */
+.day-chip.is-today.is-done {
+  background: linear-gradient(155deg, rgba(255, 255, 255, .22), rgba(0, 0, 0, .06)),
+              linear-gradient(150deg, var(--gold), var(--gold-deep));
+  border-color: transparent;
+}
+.day-chip.is-today.is-done .day-check polyline { stroke: var(--gold-ink); opacity: .85; }
 /* וי אמיתי מ-SVG (קו קצר וקו ארוך, כמו וי אמיתי) — לא תו טקסט מעוגל,
    פינות חדות לגמרי (stroke-linecap/linejoin לא round) */
 .day-check {
