@@ -115,7 +115,6 @@ export async function totalsForDate(date) {
 
 /* ---------- תצוגה ---------- */
 
-const RING_CIRC = 2 * Math.PI * 52; // r=52 ב-SVG
 
 export async function renderNutrition() {
   $('#nutDateLabel').textContent = formatDateHe(currentDate);
@@ -126,22 +125,17 @@ export async function renderNutrition() {
     mealsForDate(currentDate),
   ]);
 
-  // טבעת קלוריות
   const remaining = goal.calories - totals.calories;
   const over = remaining < 0;
-  const pct = goal.calories > 0 ? Math.min(totals.calories / goal.calories, 1) : 0;
 
   // תג עם סך הקלוריות שנאכלו היום, בראש "התפריט של היום" — כדי לראות
   // את המספר בלי לגלול למטה לטבעת
   $('#kcalTodayBadge').textContent = `${fmtNum(Math.round(totals.calories))} קק"ל היום`;
 
   $('#kcalCard').classList.toggle('over', over);
-  $('#kcalRing').style.strokeDashoffset = String(RING_CIRC * (1 - pct));
-  $('#kcalRemaining').textContent = fmtNum(Math.abs(Math.round(remaining)));
-  $('#kcalCaption').textContent = over ? 'מעל היעד!' : 'נותרו';
 
-  // שורת הסיכום מתחת לכרטיס — אותו מספר, אבל עם ההקשר שחסר בעיגול
-  $('#kcalFootLabel').textContent = over ? 'חריגה' : 'נותרו';
+  // שורת הקלוריות — היא המספר הראשי מאז שהטבעת ירדה
+  $('#kcalFootLabel').textContent = over ? 'חריגה של' : 'נותרו';
   $('#kcalFootNum').textContent = fmtNum(Math.abs(Math.round(remaining)));
   $('#kcalFootGoal').textContent = fmtNum(goal.calories);
 

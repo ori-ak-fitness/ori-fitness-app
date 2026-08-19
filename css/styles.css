@@ -1148,27 +1148,11 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
   margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line);
   font-size: .92rem;
 }
+/* מאז שהטבעת ירדה זה המספר הראשי של המסך, ולכן הוא גדול בהתאם */
 .kcal-foot-label { font-weight: 700; color: var(--text-dim); }
 .kcal-foot-val { color: var(--text-dim); font-variant-numeric: tabular-nums; }
-.kcal-foot-val b { color: var(--text); font-size: 1.12rem; font-weight: 800; }
+.kcal-foot-val b { color: var(--text); font-size: 1.5rem; font-weight: 800; margin-inline-end: 3px; }
 .kcal-card.over .kcal-foot-val b { color: var(--danger); }
-.kcal-ring-wrap { position: relative; width: 132px; height: 132px; flex: none; }
-.kcal-ring { width: 100%; height: 100%; transform: rotate(-90deg) scaleX(-1); }
-.ring-bg { fill: none; stroke: var(--bg-elev-2); stroke-width: 11; }
-.ring-fg {
-  fill: none; stroke: var(--accent); stroke-width: 11; stroke-linecap: round;
-  stroke-dasharray: 326.7; stroke-dashoffset: 326.7;
-  transition: stroke-dashoffset .5s ease, stroke .3s ease;
-}
-.kcal-card.over .ring-fg { stroke: var(--danger); }
-.kcal-center {
-  position: absolute; inset: 0; display: grid; place-content: center; text-align: center;
-}
-.kcal-num { font-size: 1.7rem; font-weight: 800; font-variant-numeric: tabular-nums; }
-.kcal-cap { font-size: .74rem; color: var(--text-dim); }
-.kcal-card.over .kcal-num { color: var(--danger); }
-/* חלבון/פחמימות/שומן יושבים כאן ליד הטבעת, בתוך כרטיס הקלוריות עצמו —
-   לא כרשימה נפרדת ונחותה למטה, ולא כפילות עם "יעד/נאכל/נותרו" שכבר יש בטבעת */
 /*
  * מאקרו — שורה אחת לכל אחד: שם, פס, ומספר.
  *
