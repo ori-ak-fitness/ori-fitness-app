@@ -2,12 +2,64 @@
    Ori Fitness App — עיצוב ראשי (RTL, מובייל-first)
    =================================================================== */
 
+/* ===================================================================
+   הכתב.
+
+   שני פונטים עבריים אמיתיים במקום פונט ברירת המחדל של המכשיר, שנראה
+   זהה בכל אפליקציה אחרת:
+     • Frank Ruhl Libre — סריף עברי קלאסי, לכותרות בלבד.
+     • Heebo — סאנס נקי, לכל השאר.
+
+   הקבצים יושבים בפרויקט ולא נטענים מגוגל: כך הכתב מופיע מיד, עובד
+   בלי אינטרנט (האפליקציה היא PWA), ואף שרת חיצוני לא רואה מתי אורי
+   פותח אותה. שניהם variable fonts — קובץ אחד מכסה את כל המשקלים.
+
+   כל פונט מפוצל לעברית וללטינית עם unicode-range, ולכן הדפדפן מוריד
+   את החלק הלטיני רק אם באמת מופיע בו טקסט לטיני.
+   =================================================================== */
+
+@font-face {
+  font-family: 'Heebo';
+  font-style: normal;
+  font-weight: 300 800;
+  font-display: swap;
+  src: url('../fonts/heebo-hebrew.woff2') format('woff2');
+  unicode-range: U+0307-0308, U+0590-05FF, U+200C-2010, U+20AA, U+25CC, U+FB1D-FB4F;
+}
+@font-face {
+  font-family: 'Heebo';
+  font-style: normal;
+  font-weight: 300 800;
+  font-display: swap;
+  src: url('../fonts/heebo-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+    U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Frank Ruhl Libre';
+  font-style: normal;
+  font-weight: 400 900;
+  font-display: swap;
+  src: url('../fonts/frankruhl-hebrew.woff2') format('woff2');
+  unicode-range: U+0307-0308, U+0590-05FF, U+200C-2010, U+20AA, U+25CC, U+FB1D-FB4F;
+}
+@font-face {
+  font-family: 'Frank Ruhl Libre';
+  font-style: normal;
+  font-weight: 400 900;
+  font-display: swap;
+  src: url('../fonts/frankruhl-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+    U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
 /* ===== ערכת ברירת המחדל: קרם בהיר ===== */
 :root {
   --bg:            #f4efe4;
   --bg-elev:       #fffdf7;
   --bg-elev-2:     #eae3d4;
-  --line:          rgba(20, 18, 14, .5);
+  --line:          rgba(20, 18, 14, .14);
+  --line-strong:   rgba(20, 18, 14, .30);
   --line-neutral:  #dbd1be;
   --text:          #221e18;
   --text-dim:      #6b6253;
@@ -28,6 +80,7 @@
   --fat:           #6d4bab;
 
   --shadow-strong: rgba(90, 75, 45, .16);
+  --shadow-soft:   rgba(90, 75, 45, .10);
   --scrim:         rgba(255, 253, 247, .82);
   --overlay:       rgba(244, 239, 228, .92);
   --quote-scrim-1: rgba(24, 20, 14, .92);
@@ -41,6 +94,10 @@
   --gold:      #2f9298;
   --gold-deep: #1d6b6f;
   --gold-ink:  #eaf6f6;
+
+  /* הפונטים כטוקנים ולא ישירות בכללים: החלפת כתב היא שינוי בשתי שורות */
+  --font-body: 'Heebo', system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  --font-display: 'Frank Ruhl Libre', Georgia, 'Times New Roman', serif;
 
   --r-sm: 10px;
   --r-md: 16px;
@@ -57,7 +114,8 @@
   --bg:            #0f1115;
   --bg-elev:       #171a21;
   --bg-elev-2:     #1e222b;
-  --line:          rgba(240, 227, 200, .38);
+  --line:          rgba(240, 227, 200, .13);
+  --line-strong:   rgba(240, 227, 200, .30);
   --line-neutral:  #2a2f3a;
   --text:          #eef1f6;
   --text-dim:      #9aa3b2;
@@ -78,6 +136,7 @@
   --fat:           #b98cff;
 
   --shadow-strong: rgba(0, 0, 0, .45);
+  --shadow-soft:   rgba(0, 0, 0, .32);
   --scrim:         rgba(15, 17, 21, .82);
   --overlay:       rgba(10, 11, 14, .9);
   --quote-scrim-1: rgba(10, 11, 14, .94);
@@ -92,7 +151,8 @@
     --bg:            #0f1115;
     --bg-elev:       #171a21;
     --bg-elev-2:     #1e222b;
-    --line:          rgba(240, 227, 200, .38);
+    --line:          rgba(240, 227, 200, .13);
+    --line-strong:   rgba(240, 227, 200, .30);
     --line-neutral:  #2a2f3a;
     --text:          #eef1f6;
     --text-dim:      #9aa3b2;
@@ -113,6 +173,7 @@
     --fat:           #b98cff;
 
     --shadow-strong: rgba(0, 0, 0, .45);
+    --shadow-soft:   rgba(0, 0, 0, .32);
     --scrim:         rgba(15, 17, 21, .82);
     --overlay:       rgba(10, 11, 14, .9);
     --quote-scrim-1: rgba(10, 11, 14, .94);
@@ -127,7 +188,8 @@
   --bg:            #f4efe4;
   --bg-elev:       #fffdf7;
   --bg-elev-2:     #eae3d4;
-  --line:          rgba(20, 18, 14, .5);
+  --line:          rgba(20, 18, 14, .14);
+  --line-strong:   rgba(20, 18, 14, .30);
   --line-neutral:  #dbd1be;
   --text:          #221e18;
   --text-dim:      #6b6253;
@@ -148,6 +210,7 @@
   --fat:           #6d4bab;
 
   --shadow-strong: rgba(90, 75, 45, .16);
+  --shadow-soft:   rgba(90, 75, 45, .10);
   --scrim:         rgba(255, 253, 247, .82);
   --overlay:       rgba(244, 239, 228, .92);
 }
@@ -193,7 +256,7 @@ html, body {
   padding: 0;
   background: var(--bg);
   color: var(--text);
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family: var(--font-body);
   /*
    * 16px — גודל הבסיס הסטנדרטי, וכמעט כל הגדלים בקובץ נמדדים ממנו ב-rem.
    *
@@ -213,7 +276,18 @@ body {
   padding-bottom: calc(var(--tabbar-h) + var(--safe-bottom));
 }
 
-h1, h2, h3 { margin: 0; font-weight: 700; letter-spacing: -.01em; }
+/*
+ * הכותרות בסריף והשאר בסאנס — זה ההבדל בין ממשק שנראה מותאם לבין
+ * ממשק שנראה כמו ברירת מחדל. הסריף נשאר לכותרות בלבד: בגוף טקסט
+ * וברשימות הוא היה מכביד, וזו בדיוק התחושה שביקשנו להוריד.
+ *
+ * המשקל נמוך יותר משהיה. Frank Ruhl כבד מטבעו יותר מפונט מערכת,
+ * ובאותו מספר משקל הוא היה נראה מגושם.
+ */
+h1, h2, h3 {
+  margin: 0; font-family: var(--font-display);
+  font-weight: 600; letter-spacing: 0;
+}
 p { margin: 0; }
 button { font-family: inherit; font-size: inherit; }
 .hidden { display: none !important; }
@@ -226,7 +300,7 @@ button { font-family: inherit; font-size: inherit; }
   background: var(--scrim);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
-  border-bottom: 2px solid var(--line);
+  border-bottom: 1px solid var(--line);
 }
 .topbar-inner {
   height: var(--topbar-h);
@@ -235,14 +309,14 @@ button { font-family: inherit; font-size: inherit; }
 }
 .brand { display: flex; align-items: center; gap: 9px; }
 .brand-logo { width: 28px; height: 28px; border-radius: 8px; display: block; }
-.brand-name { font-weight: 800; font-size: 1.05rem; letter-spacing: -.02em; }
+.brand-name { font-weight: 700; font-size: 1.05rem; letter-spacing: -.02em; }
 
 .live-timer {
   display: flex; align-items: center; gap: 7px;
   background: var(--accent-soft); color: var(--accent);
   border: 1px solid var(--accent);
   padding: 5px 11px; border-radius: 999px;
-  font-variant-numeric: tabular-nums; font-weight: 700; font-size: .9rem;
+  font-variant-numeric: tabular-nums; font-weight: 600; font-size: .9rem;
 }
 .pulse-dot {
   width: 7px; height: 7px; border-radius: 50%; background: var(--accent);
@@ -261,9 +335,11 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 @keyframes slideFromLeft  { from { opacity: .4; transform: translateX(26px); } to { opacity: 1; transform: none; } }
 @keyframes slideFromRight { from { opacity: .4; transform: translateX(-26px); } to { opacity: 1; transform: none; } }
 
+/* יותר אוויר בין המקטעים — הרווח הוא מה שמפריד ביניהם עכשיו, במקום
+   הקווים הכהים שהוסרו */
 .section-head {
   display: flex; align-items: center; justify-content: flex-start; gap: 10px;
-  margin: 26px 0 12px;
+  margin: 34px 0 12px;
 }
 .section-head h2 { font-size: 1.05rem; }
 
@@ -279,7 +355,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 /* ---------- תת-קטגוריות אימונים: כוח / אירובי, תחת כותרת "אימונים" אחת ---------- */
 .workout-categories { display: flex; flex-direction: column; gap: 22px; }
 .workout-category h3 {
-  font-size: .86rem; font-weight: 700; color: var(--text-dim);
+  font-size: .86rem; font-weight: 600; color: var(--text-dim);
   margin: 0 0 9px; padding: 0 2px;
 }
 /* דחיפה לקצה השני של השורה — כדי שהאייקון+הכותרת יישארו צמודים בהתחלה
@@ -299,8 +375,8 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 }
 .food-action {
   display: flex; flex-direction: column; align-items: center; gap: 4px;
-  background: var(--bg-elev); border: 2px solid var(--line); color: var(--text-dim);
-  border-radius: var(--r-md); padding: 10px 2px; font-size: .72rem; font-weight: 700;
+  background: var(--bg-elev); border: 1px solid var(--line); color: var(--text-dim);
+  border-radius: var(--r-md); padding: 10px 2px; font-size: .72rem; font-weight: 600;
   cursor: pointer; transition: transform .08s ease, border-color .15s ease;
 }
 .food-action:active { transform: scale(.96); }
@@ -320,7 +396,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 /* ---------- כפתורים ---------- */
 .btn {
   border: none; border-radius: var(--r-md); padding: 13px 18px;
-  font-weight: 700; color: var(--text); background: var(--bg-elev-2);
+  font-weight: 600; color: var(--text); background: var(--bg-elev-2);
   cursor: pointer; transition: transform .08s ease, filter .15s ease, background .15s ease;
   display: inline-flex; align-items: center; justify-content: center; gap: 7px;
 }
@@ -332,9 +408,9 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
   box-shadow: 0 8px 18px -6px rgba(29, 107, 111, .45), 0 2px 4px rgba(29, 107, 111, .3);
   letter-spacing: .01em;
 }
-.btn-secondary { background: var(--bg-elev-2); border: 2px solid var(--line); }
+.btn-secondary { background: var(--bg-elev-2); border: 1px solid var(--line); }
 .btn-danger { background: var(--danger); color: #fff; }
-.btn-ghost { background: transparent; border: 2px solid var(--line); color: var(--text-dim); }
+.btn-ghost { background: transparent; border: 1px solid var(--line); color: var(--text-dim); }
 .btn-sm { padding: 8px 13px; font-size: .85rem; border-radius: var(--r-sm); }
 .btn-xl { width: 100%; padding: 17px; font-size: 1.08rem; border-radius: var(--r-lg); margin-top: 4px; }
 .btn-block { width: 100%; }
@@ -348,7 +424,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 /* ---------- כרטיסים ---------- */
 .quote-card, .timer-card, .kcal-card, .chart-card, .card {
   background: var(--bg-elev);
-  border: 2px solid var(--line);
+  border: 1px solid var(--line);
   border-radius: var(--r-lg);
   padding: 18px;
 }
@@ -358,17 +434,18 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .home-heading { margin: 2px 4px 20px; }
 /* שחור קבוע, לא הופך צבע לפי ערכת נושא — אורי ביקש שחור תמיד כאן */
 .greeting {
-  font-size: 1.65rem; font-weight: 700; letter-spacing: -.01em;
+  font-family: var(--font-display);
+  font-size: 1.72rem; font-weight: 500; letter-spacing: 0; line-height: 1.25;
   margin: 0; text-wrap: balance; color: #000;
 }
 .home-date {
-  margin: 5px 0 0; font-size: .85rem; font-weight: 600;
+  margin: 5px 0 0; font-size: .85rem; font-weight: 500;
   color: #000; opacity: .75;
 }
 
 /* כותרות המקטעים במסך הבית — פונט רגיל, נקי, עקבי עם שאר האפליקציה */
 #screen-home .section-head h2 {
-  font-weight: 700; font-size: 1.05rem;
+  font-weight: 600; font-size: 1.05rem;
 }
 
 /* כרטיס הציטוט — תמונה מהגלריה שלך ברקע, מתחלפת מדי יום עם הציטוט */
@@ -404,7 +481,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 /* הטקסט (עם הגרשיים) ממורכז אנכית ואופקית בכרטיס */
 .quote-body { position: relative; z-index: 1; padding: 18px 18px 44px; width: 100%; text-align: center; }
 .quote-text {
-  font-size: 1.06rem; font-weight: 600; text-wrap: balance;
+  font-size: 1.06rem; font-weight: 500; text-wrap: balance;
   text-shadow: 0 1px 12px rgba(0,0,0,.6);
 }
 /* שורת המקור — צמודה לתחתית הכרטיס, קטנה ונפרדת מהציטוט הממורכז */
@@ -417,10 +494,10 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
   flex: none; width: 24px; height: 24px; border-radius: 50%;
   background: var(--accent); color: var(--accent-ink);
   display: grid; place-items: center;
-  font-size: .68rem; font-weight: 800; letter-spacing: -.02em;
+  font-size: .68rem; font-weight: 700; letter-spacing: -.02em;
 }
 .quote-badge:empty { display: none; }
-.quote-author { color: rgba(255, 255, 255, .84); font-size: .82rem; font-weight: 600; }
+.quote-author { color: rgba(255, 255, 255, .84); font-size: .82rem; font-weight: 500; }
 
 /* כפתור מצלמה קבוע — תמיד זמין להוספת עוד תמונות, גם כשכבר יש רקע */
 .quote-photo-btn {
@@ -450,25 +527,25 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 }
 .hs-card {
   background: var(--bg-elev);
-  border: 2px solid var(--line);
+  border: 1px solid var(--line);
   border-radius: var(--r-md); padding: 13px 14px; overflow: hidden;
 }
 .hs-value { font-size: .92rem; font-variant-numeric: tabular-nums; }
-.hs-value b { font-size: 1.15rem; font-weight: 800; }
+.hs-value b { font-size: 1.15rem; font-weight: 700; }
 .hs-kcal-row {
   margin: 8px 0 9px; font-size: .95rem; font-variant-numeric: tabular-nums;
 }
-.hs-kcal-row b { font-size: 1.15rem; font-weight: 800; }
+.hs-kcal-row b { font-size: 1.15rem; font-weight: 700; }
 /* שורת מאקרו בבית — טור קומפקטי במקום שלוש עמודות, כדי לתפוס פחות מקום */
 .hs-macros { display: flex; flex-direction: column; gap: 2px; font-variant-numeric: tabular-nums; }
 .hs-macro-row {
   display: flex; align-items: center; justify-content: space-between; gap: 8px;
-  padding: 5px 0; border-bottom: 2px solid var(--line);
+  padding: 5px 0; border-bottom: 1px solid var(--line);
 }
 .hs-macros > .hs-macro-row:last-child { border-bottom: none; }
-.hs-macro-label { display: flex; align-items: center; gap: 6px; font-size: .86rem; font-weight: 600; color: var(--text); }
+.hs-macro-label { display: flex; align-items: center; gap: 6px; font-size: .86rem; font-weight: 500; color: var(--text); }
 .hs-macro-val { font-size: .88rem; color: var(--text-dim); }
-.hs-macros b { color: var(--text); font-weight: 800; font-size: .96rem; }
+.hs-macros b { color: var(--text); font-weight: 700; font-size: .96rem; }
 .hs-macro-ico { font-size: 1.1rem; line-height: 1; }
 .hs-card .bar-fill { background: linear-gradient(90deg, var(--gold-deep), var(--gold)); }
 
@@ -478,20 +555,20 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .goals-card { display: flex; flex-direction: column; gap: 8px; }
 .goals-card .muted {
   padding: 14px; font-size: .85rem;
-  background: var(--bg-elev); border: 2px solid var(--line); border-radius: var(--r-md);
+  background: var(--bg-elev); border: 1px solid var(--line); border-radius: var(--r-md);
 }
 .goal-row {
   display: flex; align-items: center; gap: 12px;
   padding: 12px 14px; border-radius: var(--r-md); overflow: hidden;
-  background: var(--bg-elev); border: 2px solid var(--line);
+  background: var(--bg-elev); border: 1px solid var(--line);
 }
 .goal-num {
   flex: none; width: 30px; height: 30px; border-radius: 10px;
   background: linear-gradient(155deg, rgba(255,255,255,.35), rgba(0,0,0,.06)), linear-gradient(150deg, var(--gold), var(--gold-deep));
   color: var(--gold-ink); box-shadow: 0 2px 6px rgba(29, 107, 111, .35);
-  display: grid; place-items: center; font-size: .82rem; font-weight: 800;
+  display: grid; place-items: center; font-size: .82rem; font-weight: 700;
 }
-.goal-text { font-size: .94rem; font-weight: 600; }
+.goal-text { font-size: .94rem; font-weight: 500; }
 
 /* ---------- כרטיס האתגר (מסך הבית) ---------- */
 /* הכותרת יושבת מחוץ למסגרת, כמו כל section-head אחר בבית — לא בתוך הכרטיס */
@@ -500,14 +577,14 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 }
 .challenge-card {
   position: relative;
-  background: var(--bg-elev); border: 2px solid var(--line);
+  background: var(--bg-elev); border: 1px solid var(--line);
   border-radius: var(--r-md); padding: 12px 14px;
 }
 .challenge-card .bar-fill { background: linear-gradient(90deg, var(--gold-deep), var(--gold)); }
 .challenge-msg { font-size: .8rem; color: var(--text-dim); margin-top: 9px; }
-.challenge-msg.is-praise { font-size: .88rem; font-weight: 700; color: var(--text); }
+.challenge-msg.is-praise { font-size: .88rem; font-weight: 600; color: var(--text); }
 /* תמיד שחור, גם במצב לילה — לא הופך לבן כמו --text כי אורי ביקש שחור קבוע כאן */
-.challenge-msg.is-gentle { font-size: .86rem; font-weight: 600; color: #000; }
+.challenge-msg.is-gentle { font-size: .86rem; font-weight: 500; color: #000; }
 .challenge-actions { display: flex; gap: 8px; margin-top: 10px; }
 .challenge-actions .btn { flex: 1; }
 .challenge-confetti { position: absolute; inset: -10px -10px auto -10px; height: 60px; overflow: visible; pointer-events: none; }
@@ -521,7 +598,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 }
 .badge-tile.is-earned { opacity: 1; background: var(--accent-soft); }
 .badge-icon { font-size: 1.7rem; }
-.badge-name { font-size: .72rem; font-weight: 600; color: var(--text-dim); }
+.badge-name { font-size: .72rem; font-weight: 500; color: var(--text-dim); }
 .badge-tile.is-earned .badge-name { color: var(--text); }
 
 .hs-cardio-list { display: flex; flex-direction: column; gap: 5px; margin-top: 9px; }
@@ -530,7 +607,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
   display: flex; justify-content: space-between; font-size: .8rem;
   color: var(--text-dim); font-variant-numeric: tabular-nums;
 }
-.hs-cardio-row b { color: var(--text); font-weight: 700; }
+.hs-cardio-row b { color: var(--text); font-weight: 600; }
 
 /* ---------- גלריה ---------- */
 /* צומצם מ-32px: מסך התזונה מציג עד שלוש תיבות כאלה זו מתחת לזו
@@ -545,20 +622,20 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 
 /* ---------- טיימר אימון ---------- */
 .timer-card { text-align: center; background: linear-gradient(160deg, var(--bg-elev-2), var(--bg-elev)); }
-.timer-label { color: var(--accent); font-size: .8rem; font-weight: 700; letter-spacing: .06em; }
+.timer-label { color: var(--accent); font-size: .8rem; font-weight: 600; letter-spacing: .06em; }
 .timer-value {
-  font-size: 3.1rem; font-weight: 800; font-variant-numeric: tabular-nums;
+  font-size: 3.1rem; font-weight: 700; font-variant-numeric: tabular-nums;
   letter-spacing: -.02em; margin: 2px 0; direction: ltr;
 }
 .timer-sub { color: var(--text-dim); font-size: .88rem; }
 
 /* ---------- תרגילים ---------- */
 .exercise-card {
-  background: var(--bg-elev); border: 2px solid var(--line);
+  background: var(--bg-elev); border: 1px solid var(--line);
   border-radius: var(--r-lg); padding: 14px; margin-top: 12px;
 }
 .exercise-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.exercise-name { font-weight: 700; font-size: 1rem; }
+.exercise-name { font-weight: 600; font-size: 1rem; }
 .exercise-meta { color: var(--text-faint); font-size: .78rem; }
 
 .set-table { margin-top: 10px; display: flex; flex-direction: column; gap: 7px; }
@@ -568,12 +645,12 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .set-head { color: var(--text-faint); font-size: .72rem; padding: 0 2px; }
 .set-idx {
   background: var(--bg-elev-2); border-radius: 8px; text-align: center;
-  font-size: .82rem; font-weight: 700; color: var(--text-dim); padding: 8px 0;
+  font-size: .82rem; font-weight: 600; color: var(--text-dim); padding: 8px 0;
 }
 .set-row input {
-  width: 100%; background: var(--bg-elev-2); border: 2px solid var(--line);
+  width: 100%; background: var(--bg-elev-2); border: 1px solid var(--line-strong);
   color: var(--text); border-radius: var(--r-sm); padding: 11px 8px;
-  text-align: center; font-size: 1rem; font-weight: 600;
+  text-align: center; font-size: 1rem; font-weight: 500;
   font-variant-numeric: tabular-nums; direction: ltr;
   transition: border-color .15s ease, background .15s ease;
 }
@@ -586,9 +663,9 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 /* תיבת הסימון של הסט — נדלקת לבד כשהשדות מלאים, וגם לחיצה ידנית */
 .set-check {
   width: 36px; height: 36px; padding: 0;
-  border: 2px solid var(--line); border-radius: 10px;
+  border: 1px solid var(--line); border-radius: 10px;
   background: var(--bg-elev-2); color: var(--accent-ink);
-  font-size: 1rem; font-weight: 800; line-height: 1;
+  font-size: 1rem; font-weight: 700; line-height: 1;
   cursor: pointer; font-family: inherit;
   display: grid; place-items: center;
   transition: background .15s ease, border-color .15s ease, transform .1s ease;
@@ -603,7 +680,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .add-set-btn {
   margin-top: 10px; width: 100%; background: transparent;
   border: 1px dashed var(--line); color: var(--text-dim);
-  border-radius: var(--r-sm); padding: 10px; cursor: pointer; font-weight: 600;
+  border-radius: var(--r-sm); padding: 10px; cursor: pointer; font-weight: 500;
 }
 .add-set-btn:active { background: var(--bg-elev-2); }
 
@@ -616,7 +693,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
   margin-top: 18px; padding: 10px;
   background: var(--scrim);
   backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-  border: 2px solid var(--line); border-radius: var(--r-lg);
+  border: 1px solid var(--line); border-radius: var(--r-lg);
   box-shadow: 0 10px 30px var(--shadow-strong);
 }
 
@@ -624,7 +701,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
    ומתחת (ללא הפרדה) איזה יום היום ומה מתוכנן בו ---------- */
 .week-plan-card {
   background: linear-gradient(160deg, var(--bg-elev-2), var(--bg-elev));
-  border: 2px solid var(--line); border-radius: var(--r-lg); overflow: hidden;
+  border: 1px solid var(--line); border-radius: var(--r-lg); overflow: hidden;
 }
 /*
  * לוח הימים במסך האימון הוא סקירה בלבד — מתחתיו יושב כרטיס היום
@@ -632,7 +709,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
  * צרים יותר וממורכזים, וטקסט קטן יותר.
  */
 .week-plan-card .week-strip {
-  padding: 12px 14px 10px; border-bottom: 2px solid var(--line);
+  padding: 12px 14px 10px; border-bottom: 1px solid var(--line);
   gap: 4px; justify-items: center;
 }
 .week-plan-card .day-chip { width: min(100%, 46px); border-radius: 11px; }
@@ -645,7 +722,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .today-card {
   padding: 20px 18px;
 }
-.today-day { color: var(--accent); font-size: .78rem; font-weight: 700; letter-spacing: .05em; }
+.today-day { color: var(--accent); font-size: .78rem; font-weight: 600; letter-spacing: .05em; }
 .today-name { font-size: 1.45rem; margin: 4px 0 6px; }
 .today-sub { color: var(--text-dim); font-size: .88rem; margin-bottom: 16px; }
 /* תגית "בוצע!" שמחליפה לגמרי את כפתור ההתחלה — לא מאפשרים להתחיל
@@ -654,7 +731,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
   width: 100%; padding: 17px; border-radius: var(--r-lg); margin-top: 4px;
   background: var(--ok); color: #fff;
   display: flex; align-items: center; justify-content: center; gap: 9px;
-  font-weight: 800; font-size: 1.08rem;
+  font-weight: 700; font-size: 1.08rem;
 }
 .today-done-icon { width: 20px; height: 20px; flex: none; }
 .today-done-icon polyline {
@@ -672,20 +749,20 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
   display: flex; align-items: center; justify-content: space-between; gap: 10px;
   background: var(--bg-elev); padding: 10px 13px; font-size: .88rem;
 }
-.te-name { font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.te-name { font-weight: 500; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .te-target { color: var(--text-faint); font-size: .78rem; flex: none; font-variant-numeric: tabular-nums; }
 
 /* בחירת אימון ביום שלא שובץ */
 .today-picks { display: flex; flex-direction: column; gap: 9px; margin: 4px 0 2px; }
 .pick-card {
   display: flex; flex-direction: column; gap: 3px; text-align: start;
-  background: var(--bg-elev); border: 2px solid var(--line);
+  background: var(--bg-elev); border: 1px solid var(--line);
   border-radius: var(--r-md); padding: 13px 15px; cursor: pointer;
   font-family: inherit; color: var(--text);
   transition: border-color .15s ease, background .15s ease;
 }
 .pick-card:active { background: var(--bg-elev-2); border-color: var(--accent); }
-.pick-name { font-weight: 700; font-size: 1rem; }
+.pick-name { font-weight: 600; font-size: 1rem; }
 .pick-sub {
   color: var(--text-dim); font-size: .78rem;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
@@ -727,7 +804,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .day-chip:active { background: var(--bg-elev-2); }
 /* האות והתווית מתחתיה היו קטנות מדי לקריאה נוחה — הועלו יחד,
    בדוק שבעה תגים עדיין נכנסים בשורה אחת ברוחב טלפון לפני שינוי חוזר */
-.day-letter { font-weight: 700; font-size: 1.12rem; line-height: 1.1; color: var(--text); }
+.day-letter { font-weight: 600; font-size: 1.12rem; line-height: 1.1; color: var(--text); }
 .day-plan {
   font-size: .61rem; line-height: 1.2; text-align: center;
   max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
@@ -777,7 +854,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .list-item.is-static:active { background: var(--bg-elev); }
 
 .day-select {
-  flex: none; background: var(--bg-elev-2); border: 2px solid var(--line);
+  flex: none; background: var(--bg-elev-2); border: 1px solid var(--line);
   color: var(--text); border-radius: var(--r-sm); padding: 8px 10px;
   font-size: 1rem; font-family: inherit; max-width: 45%;
 }
@@ -790,16 +867,16 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .plan-ex-list { display: flex; flex-direction: column; gap: 9px; }
 .plan-ex {
   display: grid; grid-template-columns: 28px 1fr auto; gap: 9px; align-items: start;
-  background: var(--bg-elev-2); border: 2px solid var(--line);
+  background: var(--bg-elev-2); border: 1px solid var(--line);
   border-radius: var(--r-md); padding: 10px;
 }
 .plan-ex-idx {
   width: 28px; height: 28px; border-radius: 8px; background: var(--bg-elev);
-  display: grid; place-items: center; font-size: .8rem; font-weight: 700; color: var(--text-dim);
+  display: grid; place-items: center; font-size: .8rem; font-weight: 600; color: var(--text-dim);
 }
 .plan-ex-main { display: flex; flex-direction: column; gap: 7px; min-width: 0; }
 .plan-ex-main > input {
-  width: 100%; background: var(--bg-elev); border: 2px solid var(--line);
+  width: 100%; background: var(--bg-elev); border: 1px solid var(--line);
   color: var(--text); border-radius: var(--r-sm); padding: 9px 11px; font-size: 1rem;
   font-family: inherit;
 }
@@ -809,7 +886,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
   color: var(--text-faint); font-size: .78rem;
 }
 .plan-ex-targets input {
-  width: 58px; background: var(--bg-elev); border: 2px solid var(--line);
+  width: 58px; background: var(--bg-elev); border: 1px solid var(--line);
   color: var(--text); border-radius: 8px; padding: 7px 6px; text-align: center;
   font-size: 1rem; font-variant-numeric: tabular-nums; direction: ltr; font-family: inherit;
 }
@@ -821,12 +898,12 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 }
 .macro-cell { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
 .macro-cell-label {
-  font-size: .68rem; font-weight: 700; color: var(--text-dim);
+  font-size: .68rem; font-weight: 600; color: var(--text-dim);
   text-align: center; white-space: nowrap;
   overflow: hidden; text-overflow: ellipsis;
 }
 .macro-cell input {
-  width: 100%; background: var(--bg-elev); border: 2px solid var(--line);
+  width: 100%; background: var(--bg-elev); border: 1px solid var(--line);
   color: var(--text); border-radius: 8px; padding: 8px 4px; text-align: center;
   font-size: 1rem; font-variant-numeric: tabular-nums; direction: ltr; font-family: inherit;
 }
@@ -849,7 +926,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 
 /* ---------- תפריט יומי: סימון "אכלתי" ---------- */
 .plan-meal {
-  background: var(--bg-elev); border: 2px solid var(--line);
+  background: var(--bg-elev); border: 1px solid var(--line);
   border-radius: var(--r-md); padding: 12px 14px;
   display: flex; align-items: center; gap: 12px; cursor: pointer;
   transition: border-color .15s ease, background .15s ease, opacity .15s ease;
@@ -857,8 +934,8 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .plan-meal:active { background: var(--bg-elev-2); }
 .plan-check {
   width: 26px; height: 26px; flex: none; border-radius: 50%;
-  border: 2px solid var(--line); display: grid; place-items: center;
-  font-size: .82rem; font-weight: 800; color: var(--accent-ink);
+  border: 1px solid var(--line); display: grid; place-items: center;
+  font-size: .82rem; font-weight: 700; color: var(--accent-ink);
   transition: background .15s ease, border-color .15s ease;
 }
 .plan-meal.is-eaten { border-color: var(--ok); }
@@ -876,8 +953,8 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
    לגעת בסימון "אכלתי" של השורה */
 .plan-note-btn {
   display: inline-block; margin-top: 7px;
-  background: var(--accent-soft); border: 2px solid var(--line); color: var(--text-dim);
-  border-radius: 999px; padding: 3px 11px; font-size: .72rem; font-weight: 700;
+  background: var(--accent-soft); border: 1px solid var(--line); color: var(--text-dim);
+  border-radius: 999px; padding: 3px 11px; font-size: .72rem; font-weight: 600;
   cursor: pointer; font-family: inherit;
 }
 .plan-note-btn:active { border-color: var(--accent); color: var(--accent); }
@@ -892,7 +969,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 /* התפריט המלא — הערה תמידית וגלויה בראש מסך התזונה, למי ששוכח מה לאכול */
 .full-menu-card {
   white-space: pre-wrap; line-height: 1.55; font-size: .9rem;
-  background: var(--bg-elev); border: 2px solid var(--line);
+  background: var(--bg-elev); border: 1px solid var(--line);
   border-radius: var(--r-md); padding: 13px 14px;
 }
 .full-menu-card.is-empty { color: var(--text-faint); font-style: italic; }
@@ -900,14 +977,14 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 /* תזכורת מוטיבציה/הבטחה בתוך האימון הפעיל — אותו ציטוט שמתחלף בבית */
 .workout-reminder {
   margin: 14px 0 0; padding: 11px 14px;
-  background: var(--accent-soft); border: 2px solid var(--line);
+  background: var(--accent-soft); border: 1px solid var(--line);
   border-radius: var(--r-md); text-align: center;
   color: var(--text-dim); font-size: .86rem; font-style: italic; line-height: 1.5;
 }
 
 .session-note {
   margin: 14px 0 0; padding: 10px 13px;
-  background: var(--bg-elev-2); border: 2px solid var(--line);
+  background: var(--bg-elev-2); border: 1px solid var(--line);
   border-radius: var(--r-md);
   color: var(--text-dim); font-size: .78rem; line-height: 1.55;
 }
@@ -919,9 +996,9 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
   font-variant-numeric: tabular-nums; direction: rtl;
 }
 .last-time-tag {
-  background: var(--bg-elev-2); border: 2px solid var(--line);
+  background: var(--bg-elev-2); border: 1px solid var(--line);
   color: var(--text-faint); border-radius: 999px;
-  padding: 2px 8px; font-size: .68rem; font-weight: 700; flex: none;
+  padding: 2px 8px; font-size: .68rem; font-weight: 600; flex: none;
 }
 
 /* ---------- אירובי — יעד שבועי (עיגולים לחיצים בתוך שורת האירובי עצמה,
@@ -929,7 +1006,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .wg-dots { display: flex; gap: 6px; flex: none; }
 .wg-dot {
   width: 22px; height: 22px; border-radius: 50%;
-  border: 2px solid var(--line); flex: none; padding: 0;
+  border: 1px solid var(--line); flex: none; padding: 0;
   background: var(--bg-elev-2); cursor: pointer;
   transition: background .2s ease, border-color .2s ease;
 }
@@ -947,7 +1024,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .goal-burst.is-out { background: rgba(0,0,0,0); }
 .goal-burst-confetti { position: absolute; inset: 0; overflow: hidden; }
 .goal-burst-card {
-  position: relative; background: var(--bg-elev); border: 2px solid var(--line);
+  position: relative; background: var(--bg-elev); border: 1px solid var(--line);
   border-radius: var(--r-lg); padding: 26px 24px; text-align: center;
   max-width: 320px; box-shadow: 0 20px 60px var(--shadow-strong);
   transform: scale(.75) translateY(10px); opacity: 0;
@@ -956,12 +1033,12 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .goal-burst.is-in .goal-burst-card { transform: scale(1) translateY(0); opacity: 1; }
 .goal-burst.is-out .goal-burst-card { transform: scale(.9) translateY(-6px); opacity: 0; }
 .goal-burst-emoji { font-size: 2.6rem; }
-.goal-burst-title { font-size: 1.3rem; font-weight: 800; margin-top: 6px; }
+.goal-burst-title { font-size: 1.3rem; font-weight: 700; margin-top: 6px; }
 .goal-burst-sub { color: var(--text-dim); font-size: .86rem; margin-top: 8px; line-height: 1.5; }
 
 /* ---------- אירובי ---------- */
 .cardio-row {
-  background: var(--bg-elev); border: 2px solid var(--line);
+  background: var(--bg-elev); border: 1px solid var(--line);
   border-radius: var(--r-md); padding: 12px 14px;
   display: flex; align-items: center; gap: 12px; cursor: pointer;
   transition: border-color .15s ease, background .15s ease;
@@ -972,12 +1049,12 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .cardio-plus {
   flex: none; width: 30px; height: 30px; border-radius: 50%;
   border: 1px dashed var(--line); color: var(--text-faint);
-  display: grid; place-items: center; font-size: 1.05rem; font-weight: 700;
+  display: grid; place-items: center; font-size: 1.05rem; font-weight: 600;
 }
 .cardio-count {
   flex: none; background: var(--ok); color: var(--accent-ink);
   border-radius: 999px; padding: 4px 11px;
-  font-weight: 800; font-size: .85rem; font-variant-numeric: tabular-nums;
+  font-weight: 700; font-size: .85rem; font-variant-numeric: tabular-nums;
 }
 /* ---------- מסך הגדרות ---------- */
 .settings-intro { margin-bottom: 6px; }
@@ -986,12 +1063,12 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 
 .settings-group {
   display: flex; flex-direction: column;
-  background: var(--bg-elev); border: 2px solid var(--line);
+  background: var(--bg-elev); border: 1px solid var(--line);
   border-radius: var(--r-lg); overflow: hidden;
 }
 .settings-item {
   display: flex; align-items: center; gap: 13px;
-  background: none; border: none; border-bottom: 2px solid var(--line);
+  background: none; border: none; border-bottom: 1px solid var(--line);
   color: var(--text); padding: 14px 16px; cursor: pointer; text-align: start;
   font-family: inherit; width: 100%;
 }
@@ -999,7 +1076,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .settings-item:active { background: var(--bg-elev-2); }
 .si-ico { font-size: 1.25rem; flex: none; width: 26px; text-align: center; }
 .si-main { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.si-main b { font-size: .95rem; font-weight: 700; }
+.si-main b { font-size: .95rem; font-weight: 600; }
 .si-main small {
   color: var(--text-dim); font-size: .78rem;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
@@ -1015,7 +1092,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
   animation: fadeIn .25s ease;
 }
 .wizard-card {
-  background: var(--bg-elev); border: 2px solid var(--line);
+  background: var(--bg-elev); border: 1px solid var(--line);
   border-radius: var(--r-lg); width: 100%; max-width: 440px;
   max-height: 88dvh; display: flex; flex-direction: column;
   animation: popIn .35s cubic-bezier(.2, 1.2, .4, 1);
@@ -1036,7 +1113,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .wizard-emoji { font-size: 2.6rem; line-height: 1; margin-bottom: 10px; }
 .wizard-actions {
   display: flex; align-items: center; gap: 9px;
-  padding: 14px 20px 18px; border-top: 2px solid var(--line); margin-top: 12px;
+  padding: 14px 20px 18px; border-top: 1px solid var(--line); margin-top: 12px;
 }
 .wizard-actions #wizardNext { flex: 1; }
 .wizard-actions .btn-ghost { border: none; }
@@ -1047,10 +1124,10 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
   gap: 14px; cursor: pointer;
 }
 .setting-row > span { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
-.setting-row b { font-size: .95rem; font-weight: 700; }
+.setting-row b { font-size: .95rem; font-weight: 600; }
 .setting-row small { color: var(--text-dim); font-size: .78rem; line-height: 1.4; }
 .setting-row select {
-  flex: none; background: var(--bg-elev-2); border: 2px solid var(--line);
+  flex: none; background: var(--bg-elev-2); border: 1px solid var(--line);
   color: var(--text); border-radius: var(--r-sm); padding: 9px 11px;
   font-size: 1rem; font-family: inherit;
 }
@@ -1061,7 +1138,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .danger-zone {
   margin-top: 56px;
   padding-top: 18px;
-  border-top: 2px solid var(--line);
+  border-top: 1px solid var(--line);
   text-align: center;
 }
 .danger-zone-link {
@@ -1072,7 +1149,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .danger-zone-link:active { color: var(--danger); }
 
 .reset-confirm-input {
-  width: 100%; background: var(--bg-elev-2); border: 2px solid var(--line);
+  width: 100%; background: var(--bg-elev-2); border: 1px solid var(--line-strong);
   color: var(--text); border-radius: var(--r-md); padding: 13px 14px;
   font-size: 1rem; font-family: inherit; text-align: center;
   margin-top: 6px;
@@ -1080,7 +1157,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .reset-confirm-input:focus { outline: none; border-color: var(--danger); }
 
 .sheet-body textarea {
-  width: 100%; background: var(--bg-elev-2); border: 2px solid var(--line);
+  width: 100%; background: var(--bg-elev-2); border: 1px solid var(--line-strong);
   color: var(--text-dim); border-radius: var(--r-md); padding: 11px 12px;
   resize: vertical; line-height: 1.4;
 }
@@ -1089,8 +1166,8 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 /* ---------- שבבי בחירה ---------- */
 .chip-row { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 14px; }
 .chip {
-  background: var(--bg-elev-2); border: 2px solid var(--line); color: var(--text-dim);
-  border-radius: 999px; padding: 7px 13px; font-size: .84rem; font-weight: 600;
+  background: var(--bg-elev-2); border: 1px solid var(--line); color: var(--text-dim);
+  border-radius: 999px; padding: 7px 13px; font-size: .84rem; font-weight: 500;
   cursor: pointer; font-family: inherit;
 }
 .chip:active { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
@@ -1098,28 +1175,28 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 /* ---------- רשימות ---------- */
 .list { display: flex; flex-direction: column; gap: 9px; }
 .list-item {
-  background: var(--bg-elev); border: 2px solid var(--line);
+  background: var(--bg-elev); border: 1px solid var(--line);
   border-radius: var(--r-md); padding: 13px 14px;
   display: flex; align-items: center; gap: 12px; cursor: pointer;
 }
 .list-item:active { background: var(--bg-elev-2); }
 .li-main { flex: 1; min-width: 0; }
-.li-title { font-weight: 700; font-size: .96rem; }
+.li-title { font-weight: 600; font-size: .96rem; }
 .li-sub { color: var(--text-dim); font-size: .8rem; margin-top: 2px; }
-.li-side { text-align: end; font-weight: 700; font-variant-numeric: tabular-nums; }
+.li-side { text-align: end; font-weight: 600; font-variant-numeric: tabular-nums; }
 .li-side small { display: block; color: var(--text-faint); font-weight: 500; font-size: .72rem; }
 .li-thumb { width: 46px; height: 46px; border-radius: 10px; object-fit: cover; flex: none; background: var(--bg-elev-2); }
 
 /* ---------- יומן שקילות ---------- */
 .weight-log-row {
   display: flex; align-items: center; gap: 10px;
-  background: var(--bg-elev); border: 2px solid var(--line);
+  background: var(--bg-elev); border: 1px solid var(--line);
   border-radius: var(--r-md); padding: 10px 12px;
 }
 .weight-log-row input {
-  flex: 1; min-width: 0; background: var(--bg-elev-2); border: 2px solid var(--line);
+  flex: 1; min-width: 0; background: var(--bg-elev-2); border: 1px solid var(--line);
   color: var(--text); border-radius: var(--r-sm); padding: 11px 12px; font-size: 1.1rem;
-  font-weight: 700; direction: ltr; text-align: center; font-variant-numeric: tabular-nums;
+  font-weight: 600; direction: ltr; text-align: center; font-variant-numeric: tabular-nums;
 }
 .weight-log-row input:focus { outline: none; border-color: var(--accent); }
 .weight-log-unit { color: var(--text-dim); font-size: .84rem; flex: none; }
@@ -1129,8 +1206,8 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 /* ---------- ניווט תאריך ---------- */
 .date-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
 .date-label {
-  background: var(--bg-elev); border: 2px solid var(--line); color: var(--text);
-  border-radius: 999px; padding: 8px 20px; font-weight: 700; cursor: pointer;
+  background: var(--bg-elev); border: 1px solid var(--line); color: var(--text);
+  border-radius: 999px; padding: 8px 20px; font-weight: 600; cursor: pointer;
 }
 .hidden-date { position: fixed; opacity: 0; pointer-events: none; width: 1px; height: 1px; }
 
@@ -1149,9 +1226,9 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
   font-size: .92rem;
 }
 /* מאז שהטבעת ירדה זה המספר הראשי של המסך, ולכן הוא גדול בהתאם */
-.kcal-foot-label { font-weight: 700; color: var(--text-dim); }
+.kcal-foot-label { font-weight: 600; color: var(--text-dim); }
 .kcal-foot-val { color: var(--text-dim); font-variant-numeric: tabular-nums; }
-.kcal-foot-val b { color: var(--text); font-size: 1.5rem; font-weight: 800; margin-inline-end: 3px; }
+.kcal-foot-val b { color: var(--text); font-size: 1.5rem; font-weight: 700; margin-inline-end: 3px; }
 .kcal-card.over .kcal-foot-val b { color: var(--danger); }
 /*
  * מאקרו — שורה אחת לכל אחד: שם, פס, ומספר.
@@ -1168,7 +1245,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 }
 .macro { display: contents; }
 .macro-name {
-  font-size: .92rem; font-weight: 600; color: var(--text-dim);
+  font-size: .92rem; font-weight: 500; color: var(--text-dim);
   white-space: nowrap;
 }
 .bar { height: 7px; background: var(--bg-elev-2); border-radius: 999px; overflow: hidden; }
@@ -1188,23 +1265,23 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
  * ה-HTML: יחידה, ואז המספרים.
  */
 .macro-val {
-  font-size: .92rem; color: var(--text); font-weight: 700;
+  font-size: .92rem; color: var(--text); font-weight: 600;
   font-variant-numeric: tabular-nums; white-space: nowrap;
   justify-self: end;
   display: flex; align-items: baseline; direction: ltr;
 }
-.macro-val .m-sep, .macro-val .m-goal { color: var(--text-dim); font-weight: 600; }
+.macro-val .m-sep, .macro-val .m-goal { color: var(--text-dim); font-weight: 500; }
 /* היחידה ראשונה בסדר ה-LTR, כלומר בקצה השמאלי — כך שלוש היחידות
    יושבות בטור אחד ולא רודפות אחרי מספרים באורך משתנה */
-.macro-val .m-unit { color: var(--text-faint); font-weight: 600; font-size: .8em; margin-inline-end: 5px; }
+.macro-val .m-unit { color: var(--text-faint); font-weight: 500; font-size: .8em; margin-inline-end: 5px; }
 .macro.is-done .macro-val b { color: var(--ok); }
 .macro.is-over .macro-val b { color: var(--danger); }
 .macro.is-over .bar-fill { background: var(--danger) !important; }
 
 .head-badge {
-  background: var(--bg-elev-2); border: 2px solid var(--line);
+  background: var(--bg-elev-2); border: 1px solid var(--line);
   color: var(--text-dim); border-radius: 999px;
-  padding: 4px 11px; font-size: .76rem; font-weight: 700;
+  padding: 4px 11px; font-size: .76rem; font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
 .head-badge.is-complete {
@@ -1215,7 +1292,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .field { margin-bottom: 14px; }
 .field label { display: block; font-size: .82rem; color: var(--text-dim); margin-bottom: 6px; }
 .field input, .field select, .field textarea {
-  width: 100%; background: var(--bg-elev-2); border: 2px solid var(--line);
+  width: 100%; background: var(--bg-elev-2); border: 1px solid var(--line-strong);
   color: var(--text); border-radius: var(--r-md); padding: 13px 14px; font-size: 1rem;
   font-family: inherit;
 }
@@ -1235,7 +1312,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 /* ---------- גרפים ---------- */
 .chart-card { padding: 16px 12px; }
 .chart-title { font-size: .86rem; color: var(--text-dim); margin: 0 4px 10px; }
-.chart-subtitle { font-size: .74rem; color: var(--accent); font-weight: 700; margin: -6px 4px 10px; }
+.chart-subtitle { font-size: .74rem; color: var(--accent); font-weight: 600; margin: -6px 4px 10px; }
 .chart-subtitle:empty { display: none; }
 
 /* ---------- ניווט בגרף — לדפדף אחורה בהיסטוריה, לא רק חלון קבוע ---------- */
@@ -1268,7 +1345,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
   display: grid; grid-template-columns: repeat(4, 1fr);
   background: var(--scrim);
   backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
-  border-top: 2px solid var(--line);
+  border-top: 1px solid var(--line);
   padding-bottom: var(--safe-bottom);
 }
 .tab {
@@ -1278,7 +1355,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
   transition: color .15s ease;
 }
 .tab-ico { font-size: 1.24rem; line-height: 1; filter: grayscale(1) opacity(.6); transition: filter .15s ease; }
-.tab-txt { font-size: .68rem; font-weight: 600; }
+.tab-txt { font-size: .68rem; font-weight: 500; }
 .tab.active { color: var(--accent); }
 .tab.active .tab-ico { filter: none; }
 
@@ -1290,7 +1367,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .sheet {
   position: fixed; inset-inline: 0; inset-block-end: 0; z-index: 51;
   background: var(--bg-elev); border-radius: var(--r-lg) var(--r-lg) 0 0;
-  border-top: 2px solid var(--line);
+  border-top: 1px solid var(--line);
   max-height: 88dvh; display: flex; flex-direction: column;
   padding-bottom: var(--safe-bottom);
   animation: slideUp .25s cubic-bezier(.2,.8,.3,1);
@@ -1321,7 +1398,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
   animation: fadeIn .25s ease;
 }
 .celebration-card {
-  background: var(--bg-elev); border: 2px solid var(--line);
+  background: var(--bg-elev); border: 1px solid var(--line);
   border-radius: var(--r-lg); padding: 26px 20px; text-align: center;
   width: 100%; max-width: 380px;
   animation: popIn .4s cubic-bezier(.2,1.3,.4,1);
@@ -1375,9 +1452,9 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
   60% { transform: rotate(9deg) scale(1.08); }
 }
 .pr-text { min-width: 0; }
-.pr-kicker { font-size: .72rem; font-weight: 800; letter-spacing: .03em; color: var(--warn); }
-.pr-ex { font-weight: 700; font-size: 1rem; margin-top: 1px; overflow-wrap: anywhere; }
-.pr-weight { font-size: 1.3rem; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1.25; }
+.pr-kicker { font-size: .72rem; font-weight: 700; letter-spacing: .03em; color: var(--warn); }
+.pr-ex { font-weight: 600; font-size: 1rem; margin-top: 1px; overflow-wrap: anywhere; }
+.pr-weight { font-size: 1.3rem; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.25; }
 .pr-prev { font-size: .75rem; color: var(--text-dim); font-variant-numeric: tabular-nums; direction: rtl; }
 
 /* סימון הסט ששבר שיא — במהלך האימון וגם בפרטי אימון בהיסטוריה */
@@ -1391,18 +1468,18 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
   display: inline-block; margin-inline-start: 7px; vertical-align: 1px;
   background: var(--accent-soft); border: 1px solid var(--warn); color: var(--warn);
   border-radius: 999px; padding: 1px 8px;
-  font-size: .68rem; font-weight: 800; white-space: nowrap;
+  font-size: .68rem; font-weight: 700; white-space: nowrap;
 }
 .li-tag {
   display: inline-block; margin-inline-start: 7px; vertical-align: 1px;
   background: rgba(29, 107, 111, .1); border: 1px solid rgba(29, 107, 111, .35); color: var(--gold-deep);
   border-radius: 999px; padding: 1px 8px;
-  font-size: .68rem; font-weight: 700; white-space: nowrap;
+  font-size: .68rem; font-weight: 600; white-space: nowrap;
 }
 .pr-note {
   background: var(--accent-soft); border: 1px solid var(--warn); color: var(--warn);
   border-radius: var(--r-sm); padding: 9px 12px; margin-bottom: 14px;
-  font-size: .84rem; font-weight: 700;
+  font-size: .84rem; font-weight: 600;
 }
 
 /* ---------- Toast ---------- */
@@ -1413,9 +1490,9 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
   pointer-events: none; padding: 0 16px;
 }
 .toast {
-  background: var(--bg-elev-2); border: 2px solid var(--line);
+  background: var(--bg-elev-2); border: 1px solid var(--line);
   color: var(--text); padding: 11px 18px; border-radius: 999px;
-  font-size: .88rem; font-weight: 600; max-width: 100%;
+  font-size: .88rem; font-weight: 500; max-width: 100%;
   box-shadow: 0 8px 24px var(--shadow-strong);
   animation: toastIn .25s ease;
 }
@@ -1443,7 +1520,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 }
 .reminder-ico { font-size: 1.5rem; line-height: 1; flex: none; }
 .reminder-main { flex: 1; min-width: 0; }
-.reminder-title { font-weight: 700; font-size: .95rem; }
+.reminder-title { font-weight: 600; font-size: .95rem; }
 .reminder-text { font-size: .8rem; color: var(--text-dim); margin-top: 2px; }
 .reminder-x {
   flex: none; background: transparent; border: none; color: var(--text-faint);
@@ -1461,23 +1538,23 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .snack-row {
   display: flex; align-items: center; gap: 10px;
   padding: 9px 12px; margin-bottom: 7px;
-  background: var(--bg-elev); border: 2px solid var(--line); border-radius: var(--r-md);
+  background: var(--bg-elev); border: 1px solid var(--line); border-radius: var(--r-md);
 }
 .snack-row.is-on { border-color: var(--gold); background: var(--bg-elev-2); }
 .snack-main { min-width: 0; flex: 1; }
-.snack-name { font-weight: 700; font-size: .98rem; }
+.snack-name { font-weight: 600; font-size: .98rem; }
 .snack-sub { font-size: .78rem; color: var(--text-dim); margin-top: 2px; }
 .snack-stepper { display: flex; align-items: center; gap: 4px; }
 .snack-btn {
   width: 38px; height: 38px; flex: none;
-  border: 2px solid var(--line); border-radius: 10px;
+  border: 1px solid var(--line); border-radius: 10px;
   background: var(--bg-elev-2); color: var(--text);
-  font-size: 1.25rem; font-weight: 700; line-height: 1; cursor: pointer;
+  font-size: 1.25rem; font-weight: 600; line-height: 1; cursor: pointer;
 }
 .snack-btn:active { transform: scale(.94); }
 .snack-count { min-width: 26px; text-align: center; font-size: 1.05rem; }
 .snack-total {
-  text-align: center; font-weight: 700; margin-bottom: 10px;
+  text-align: center; font-weight: 600; margin-bottom: 10px;
   color: var(--gold-deep);
 }
 .snack-total.is-empty { color: var(--text-dim); font-weight: 400; }
@@ -1508,7 +1585,7 @@ body.bc-open { overflow: hidden; }
 }
 .bc-hint {
   position: relative; z-index: 1; margin-top: 22px;
-  color: #fff; font-weight: 700; font-size: 1.05rem;
+  color: #fff; font-weight: 600; font-size: 1.05rem;
   text-shadow: 0 1px 8px rgba(0, 0, 0, .9);
 }
 .bc-actions {
@@ -1523,11 +1600,11 @@ body.bc-open { overflow: hidden; }
 .bc-name { display: block; font-size: 1rem; margin-bottom: 3px; }
 .bc-preview {
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  background: var(--bg-elev-2); border: 2px solid var(--line);
+  background: var(--bg-elev-2); border: 1px solid var(--line);
   border-radius: var(--r-md); padding: 13px 15px; margin: 14px 0;
 }
 .bc-kcal { display: flex; align-items: baseline; gap: 6px; }
-.bc-kcal b { font-size: 1.5rem; font-weight: 800; }
+.bc-kcal b { font-size: 1.5rem; font-weight: 700; }
 .bc-kcal span { font-size: .82rem; color: var(--text-dim); }
 .bc-macros { display: flex; gap: 10px; font-size: .84rem; color: var(--text-dim); }
 
@@ -1559,9 +1636,9 @@ body.gate-open main { display: none !important; }
   box-shadow: 0 14px 30px -10px var(--shadow-strong);
 }
 .gate-eyebrow {
-  display: inline-block; background: var(--bg-elev); border: 2px solid var(--line);
+  display: inline-block; background: var(--bg-elev); border: 1px solid var(--line);
   padding: 6px 14px; border-radius: 999px;
-  font-size: .8rem; font-weight: 700; color: var(--text-dim); margin-bottom: 18px;
+  font-size: .8rem; font-weight: 600; color: var(--text-dim); margin-bottom: 18px;
 }
 .gate-title { font-size: 1.9rem; line-height: 1.2; margin-bottom: 14px; text-wrap: balance; }
 .gate-title span { color: var(--gold-deep); }
@@ -1569,13 +1646,13 @@ body.gate-open main { display: none !important; }
 
 .gate-auth { margin-bottom: 34px; }
 .gate-note { font-size: .85rem; color: var(--text-dim); margin-top: 12px; }
-.gate-note.is-pending { color: var(--warn); font-weight: 700; }
-.gate-note.is-denied { color: var(--danger); font-weight: 700; }
+.gate-note.is-pending { color: var(--warn); font-weight: 600; }
+.gate-note.is-denied { color: var(--danger); font-weight: 600; }
 
 .gate-features { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 @media (max-width: 430px) { .gate-features { grid-template-columns: 1fr; } }
 .gate-feature {
-  background: var(--bg-elev); border: 2px solid var(--line); border-radius: var(--r-md);
+  background: var(--bg-elev); border: 1px solid var(--line); border-radius: var(--r-md);
   padding: 15px 14px; text-align: start;
   box-shadow: 0 1px 2px var(--shadow-strong);
 }
@@ -1592,7 +1669,7 @@ body.gate-open main { display: none !important; }
 
 .user-group + .user-group { margin-top: 20px; }
 .user-group-head {
-  font-size: .82rem; font-weight: 700; color: var(--text-dim);
+  font-size: .82rem; font-weight: 600; color: var(--text-dim);
   margin-bottom: 8px;
 }
 .user-row { align-items: center; gap: 11px; }
@@ -1616,14 +1693,52 @@ body.gate-open main { display: none !important; }
   color: var(--gold-ink);
   border-radius: var(--r-md); padding: 11px 14px;
   box-shadow: 0 10px 24px -8px rgba(0, 0, 0, .45);
-  font-size: .9rem; font-weight: 600;
+  font-size: .9rem; font-weight: 500;
 }
 .update-bar button {
   background: var(--gold-ink); color: var(--gold-deep);
-  border: 0; font-weight: 800; flex: none;
+  border: 0; font-weight: 700; flex: none;
 }
 
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+
+/* ===================================================================
+   מעבר "נקי" — פחות קווים, יותר אוויר.
+
+   הקווים הכהים סביב כל אלמנט הוחלפו בקו שיער בהיר (--line), וכאן
+   מוחזר מה שאסור היה להיחלש איתם: מצב נבחר, מצב שהושלם, ופוקוס.
+   אלה נושאים מידע ולא רק גבול, ולכן הם נשארים בעובי 2px.
+   =================================================================== */
+
+.set-row input.filled,
+.set-row.is-done input,
+.set-check.is-done,
+.day-chip.has-plan,
+.day-chip.is-today,
+.day-chip.is-done,
+.list-item.is-selected,
+.chip.is-on,
+.plan-meal.is-eaten,
+.plan-meal.is-eaten .plan-check,
+.cardio-row.is-done,
+.snack-row.is-on,
+.wg-dot.filled {
+  border-width: 2px;
+}
+
+.field input:focus, .field select:focus, .field textarea:focus,
+.set-row input:focus,
+.plan-ex-main > input:focus,
+.plan-ex-targets input:focus,
+.macro-cell input:focus,
+.day-select:focus {
+  border-width: 2px;
+}
+
+/* צל רך במקום קו כהה: הכרטיס עדיין "מורם" מהרקע, בלי מסגרת שצועקת */
+.hs-card, .challenge-card, .goal-row {
+  box-shadow: 0 1px 2px var(--shadow-soft), 0 8px 20px -12px var(--shadow-soft);
 }
