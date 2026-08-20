@@ -222,12 +222,47 @@ async function initThemeSetting() {
 
   const select = $('#themeSelect');
   select.value = saved;
-  select.addEventListener('change', async () => {
-    applyTheme(select.value);
-    await db.setSetting(THEME_KEY, select.value);
+
+  /*
+   * כפתור הירח בראש המסך.
+   *
+   * ההגדרה כבר הייתה קיימת, אבל היא קבורה בתוך מסך ההגדרות — ובלילה,
+   * כשרוצים להחשיך מסך, זה שלוש פעולות במקום אחת. הכפתור הזה הופך את
+   * זה ללחיצה אחת מכל מסך, ומסונכרן עם הבורר בהגדרות לשני הכיוונים.
+   */
+  const themeBtn = $('#themeBtn');
+
+  /** האם המסך כרגע כהה בפועל — כולל המקרה של "לפי המכשיר" */
+  const isDarkNow = () => document.documentElement.getAttribute('data-theme') === 'dark'
+    || (!document.documentElement.hasAttribute('data-theme')
+        && matchMedia('(prefers-color-scheme: dark)').matches);
+
+  function refreshThemeBtn() {
+    if (!themeBtn) return;
+    const dark = isDarkNow();
+    // הכפתור מראה לאן הוא ייקח אותך, לא איפה אתה נמצא
+    themeBtn.textContent = dark ? '☀️' : '🌙';
+    themeBtn.setAttribute('aria-label', dark ? 'מצב יום' : 'מצב לילה');
+  }
+
+  async function setTheme(value) {
+    applyTheme(value);
+    select.value = value;
+    refreshThemeBtn();
+    await db.setSetting(THEME_KEY, value);
     // הגרפים מציירים את הצבעים שלהם פעם אחת - צריך רינדור מחדש כדי שיתעדכנו
     if (currentScreen === 'progress') renderProgress();
+  }
+
+  themeBtn?.addEventListener('click', () => setTheme(isDarkNow() ? 'light' : 'dark'));
+  select.addEventListener('change', () => setTheme(select.value));
+
+  // "לפי המכשיר" — הטלפון עובר ללילה וגם האפליקציה, בלי לרענן
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+    if (select.value === 'system') { applyTheme('system'); refreshThemeBtn(); }
   });
+
+  refreshThemeBtn();
 }
 
 /* ---------- הגדרות ---------- */
