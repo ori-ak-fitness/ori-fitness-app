@@ -231,7 +231,7 @@ body {
   padding-bottom: calc(var(--tabbar-h) + var(--safe-bottom));
 }
 
-h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -.01em; }
+h1, h2, h3 { margin: 0; font-weight: 700; letter-spacing: -.01em; }
 p { margin: 0; }
 button { font-family: inherit; font-size: inherit; }
 .hidden { display: none !important; }
@@ -253,14 +253,14 @@ button { font-family: inherit; font-size: inherit; }
 }
 .brand { display: flex; align-items: center; gap: 9px; }
 .brand-logo { width: 28px; height: 28px; border-radius: 8px; display: block; }
-.brand-name { font-weight: 700; font-size: 1.05rem; letter-spacing: -.02em; }
+.brand-name { font-weight: 800; font-size: 1.05rem; letter-spacing: -.02em; }
 
 .live-timer {
   display: flex; align-items: center; gap: 7px;
   background: var(--accent-soft); color: var(--accent);
   border: 1px solid var(--accent);
   padding: 5px 11px; border-radius: 999px;
-  font-variant-numeric: tabular-nums; font-weight: 600; font-size: .9rem;
+  font-variant-numeric: tabular-nums; font-weight: 700; font-size: .9rem;
 }
 .pulse-dot {
   width: 7px; height: 7px; border-radius: 50%; background: var(--accent);
@@ -299,7 +299,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 /* ---------- תת-קטגוריות אימונים: כוח / אירובי, תחת כותרת "אימונים" אחת ---------- */
 .workout-categories { display: flex; flex-direction: column; gap: 22px; }
 .workout-category h3 {
-  font-size: .86rem; font-weight: 600; color: var(--text-dim);
+  font-size: .86rem; font-weight: 700; color: var(--text-dim);
   margin: 0 0 9px; padding: 0 2px;
 }
 /* דחיפה לקצה השני של השורה — כדי שהאייקון+הכותרת יישארו צמודים בהתחלה
@@ -320,7 +320,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .food-action {
   display: flex; flex-direction: column; align-items: center; gap: 4px;
   background: var(--bg-elev); border: 1px solid var(--line); color: var(--text-dim);
-  border-radius: var(--r-md); padding: 10px 2px; font-size: .72rem; font-weight: 600;
+  border-radius: var(--r-md); padding: 10px 2px; font-size: .72rem; font-weight: 700;
   cursor: pointer; transition: transform .08s ease, border-color .15s ease;
 }
 .food-action:active { transform: scale(.96); }
@@ -340,7 +340,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 /* ---------- כפתורים ---------- */
 .btn {
   border: none; border-radius: var(--r-md); padding: 13px 18px;
-  font-weight: 600; color: var(--text); background: var(--bg-elev-2);
+  font-weight: 700; color: var(--text); background: var(--bg-elev-2);
   cursor: pointer; transition: transform .08s ease, filter .15s ease, background .15s ease;
   display: inline-flex; align-items: center; justify-content: center; gap: 7px;
 }
@@ -378,17 +378,17 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .home-heading { margin: 2px 4px 20px; }
 /* שחור קבוע, לא הופך צבע לפי ערכת נושא — אורי ביקש שחור תמיד כאן */
 .greeting {
-  font-size: 1.65rem; font-weight: 600; letter-spacing: -.01em;
+  font-size: 1.65rem; font-weight: 700; letter-spacing: -.01em;
   margin: 0; text-wrap: balance; color: #000;
 }
 .home-date {
-  margin: 5px 0 0; font-size: .85rem; font-weight: 500;
+  margin: 5px 0 0; font-size: .85rem; font-weight: 600;
   color: #000; opacity: .75;
 }
 
 /* כותרות המקטעים במסך הבית — פונט רגיל, נקי, עקבי עם שאר האפליקציה */
 #screen-home .section-head h2 {
-  font-weight: 600; font-size: 1.05rem;
+  font-weight: 700; font-size: 1.05rem;
 }
 
 /* כרטיס הציטוט — תמונה מהגלריה שלך ברקע, מתחלפת מדי יום עם הציטוט */
@@ -424,7 +424,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 /* הטקסט (עם הגרשיים) ממורכז אנכית ואופקית בכרטיס */
 .quote-body { position: relative; z-index: 1; padding: 18px 18px 44px; width: 100%; text-align: center; }
 .quote-text {
-  font-size: 1.06rem; font-weight: 500; text-wrap: balance;
+  font-size: 1.06rem; font-weight: 600; text-wrap: balance;
   text-shadow: 0 1px 12px rgba(0,0,0,.6);
 }
 /* שורת המקור — צמודה לתחתית הכרטיס, קטנה ונפרדת מהציטוט הממורכז */
@@ -437,10 +437,10 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
   flex: none; width: 24px; height: 24px; border-radius: 50%;
   background: var(--accent); color: var(--accent-ink);
   display: grid; place-items: center;
-  font-size: .68rem; font-weight: 700; letter-spacing: -.02em;
+  font-size: .68rem; font-weight: 800; letter-spacing: -.02em;
 }
 .quote-badge:empty { display: none; }
-.quote-author { color: rgba(255, 255, 255, .84); font-size: .82rem; font-weight: 500; }
+.quote-author { color: rgba(255, 255, 255, .84); font-size: .82rem; font-weight: 600; }
 
 /* כפתור מצלמה קבוע — תמיד זמין להוספת עוד תמונות, גם כשכבר יש רקע */
 .quote-photo-btn {
@@ -474,11 +474,11 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
   border-radius: var(--r-md); padding: 13px 14px; overflow: hidden;
 }
 .hs-value { font-size: .92rem; font-variant-numeric: tabular-nums; }
-.hs-value b { font-size: 1.15rem; font-weight: 700; }
+.hs-value b { font-size: 1.15rem; font-weight: 800; }
 .hs-kcal-row {
   margin: 8px 0 9px; font-size: .95rem; font-variant-numeric: tabular-nums;
 }
-.hs-kcal-row b { font-size: 1.15rem; font-weight: 700; }
+.hs-kcal-row b { font-size: 1.15rem; font-weight: 800; }
 /* שורת מאקרו בבית — טור קומפקטי במקום שלוש עמודות, כדי לתפוס פחות מקום */
 .hs-macros { display: flex; flex-direction: column; gap: 2px; font-variant-numeric: tabular-nums; }
 .hs-macro-row {
@@ -486,9 +486,9 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
   padding: 5px 0; border-bottom: 1px solid var(--line);
 }
 .hs-macros > .hs-macro-row:last-child { border-bottom: none; }
-.hs-macro-label { display: flex; align-items: center; gap: 6px; font-size: .86rem; font-weight: 500; color: var(--text); }
+.hs-macro-label { display: flex; align-items: center; gap: 6px; font-size: .86rem; font-weight: 600; color: var(--text); }
 .hs-macro-val { font-size: .88rem; color: var(--text-dim); }
-.hs-macros b { color: var(--text); font-weight: 700; font-size: .96rem; }
+.hs-macros b { color: var(--text); font-weight: 800; font-size: .96rem; }
 .hs-macro-ico { font-size: 1.1rem; line-height: 1; }
 .hs-card .bar-fill { background: linear-gradient(90deg, var(--gold-deep), var(--gold)); }
 
@@ -509,9 +509,9 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
   flex: none; width: 30px; height: 30px; border-radius: 10px;
   background: linear-gradient(155deg, rgba(255,255,255,.35), rgba(0,0,0,.06)), linear-gradient(150deg, var(--gold), var(--gold-deep));
   color: var(--gold-ink); box-shadow: 0 2px 6px rgba(29, 107, 111, .35);
-  display: grid; place-items: center; font-size: .82rem; font-weight: 700;
+  display: grid; place-items: center; font-size: .82rem; font-weight: 800;
 }
-.goal-text { font-size: .94rem; font-weight: 500; }
+.goal-text { font-size: .94rem; font-weight: 600; }
 
 /* ---------- כרטיס האתגר (מסך הבית) ---------- */
 /* הכותרת יושבת מחוץ למסגרת, כמו כל section-head אחר בבית — לא בתוך הכרטיס */
@@ -525,9 +525,9 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 }
 .challenge-card .bar-fill { background: linear-gradient(90deg, var(--gold-deep), var(--gold)); }
 .challenge-msg { font-size: .8rem; color: var(--text-dim); margin-top: 9px; }
-.challenge-msg.is-praise { font-size: .88rem; font-weight: 600; color: var(--text); }
+.challenge-msg.is-praise { font-size: .88rem; font-weight: 700; color: var(--text); }
 /* תמיד שחור, גם במצב לילה — לא הופך לבן כמו --text כי אורי ביקש שחור קבוע כאן */
-.challenge-msg.is-gentle { font-size: .86rem; font-weight: 500; color: #000; }
+.challenge-msg.is-gentle { font-size: .86rem; font-weight: 600; color: #000; }
 .challenge-actions { display: flex; gap: 8px; margin-top: 10px; }
 .challenge-actions .btn { flex: 1; }
 .challenge-confetti { position: absolute; inset: -10px -10px auto -10px; height: 60px; overflow: visible; pointer-events: none; }
@@ -541,7 +541,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 }
 .badge-tile.is-earned { opacity: 1; background: var(--accent-soft); }
 .badge-icon { font-size: 1.7rem; }
-.badge-name { font-size: .72rem; font-weight: 500; color: var(--text-dim); }
+.badge-name { font-size: .72rem; font-weight: 600; color: var(--text-dim); }
 .badge-tile.is-earned .badge-name { color: var(--text); }
 
 .hs-cardio-list { display: flex; flex-direction: column; gap: 5px; margin-top: 9px; }
@@ -550,7 +550,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
   display: flex; justify-content: space-between; font-size: .8rem;
   color: var(--text-dim); font-variant-numeric: tabular-nums;
 }
-.hs-cardio-row b { color: var(--text); font-weight: 600; }
+.hs-cardio-row b { color: var(--text); font-weight: 700; }
 
 /* ---------- גלריה ---------- */
 /* צומצם מ-32px: מסך התזונה מציג עד שלוש תיבות כאלה זו מתחת לזו
@@ -565,9 +565,9 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 
 /* ---------- טיימר אימון ---------- */
 .timer-card { text-align: center; background: linear-gradient(160deg, var(--bg-elev-2), var(--bg-elev)); }
-.timer-label { color: var(--accent); font-size: .8rem; font-weight: 600; letter-spacing: .06em; }
+.timer-label { color: var(--accent); font-size: .8rem; font-weight: 700; letter-spacing: .06em; }
 .timer-value {
-  font-size: 3.1rem; font-weight: 700; font-variant-numeric: tabular-nums;
+  font-size: 3.1rem; font-weight: 800; font-variant-numeric: tabular-nums;
   letter-spacing: -.02em; margin: 2px 0; direction: ltr;
 }
 .timer-sub { color: var(--text-dim); font-size: .88rem; }
@@ -578,7 +578,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
   border-radius: var(--r-lg); padding: 14px; margin-top: 12px;
 }
 .exercise-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.exercise-name { font-weight: 600; font-size: 1rem; }
+.exercise-name { font-weight: 700; font-size: 1rem; }
 .exercise-meta { color: var(--text-faint); font-size: .78rem; }
 
 .set-table { margin-top: 10px; display: flex; flex-direction: column; gap: 7px; }
@@ -588,12 +588,12 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .set-head { color: var(--text-faint); font-size: .72rem; padding: 0 2px; }
 .set-idx {
   background: var(--bg-elev-2); border-radius: 8px; text-align: center;
-  font-size: .82rem; font-weight: 600; color: var(--text-dim); padding: 8px 0;
+  font-size: .82rem; font-weight: 700; color: var(--text-dim); padding: 8px 0;
 }
 .set-row input {
   width: 100%; background: var(--bg-elev-2); border: 1px solid var(--line-strong);
   color: var(--text); border-radius: var(--r-sm); padding: 11px 8px;
-  text-align: center; font-size: 1rem; font-weight: 500;
+  text-align: center; font-size: 1rem; font-weight: 600;
   font-variant-numeric: tabular-nums; direction: ltr;
   transition: border-color .15s ease, background .15s ease;
 }
@@ -608,7 +608,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
   width: 36px; height: 36px; padding: 0;
   border: 1px solid var(--line); border-radius: 10px;
   background: var(--bg-elev-2); color: var(--accent-ink);
-  font-size: 1rem; font-weight: 700; line-height: 1;
+  font-size: 1rem; font-weight: 800; line-height: 1;
   cursor: pointer; font-family: inherit;
   display: grid; place-items: center;
   transition: background .15s ease, border-color .15s ease, transform .1s ease;
@@ -623,7 +623,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .add-set-btn {
   margin-top: 10px; width: 100%; background: transparent;
   border: 1px dashed var(--line); color: var(--text-dim);
-  border-radius: var(--r-sm); padding: 10px; cursor: pointer; font-weight: 500;
+  border-radius: var(--r-sm); padding: 10px; cursor: pointer; font-weight: 600;
 }
 .add-set-btn:active { background: var(--bg-elev-2); }
 
@@ -665,7 +665,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .today-card {
   padding: 20px 18px;
 }
-.today-day { color: var(--accent); font-size: .78rem; font-weight: 600; letter-spacing: .05em; }
+.today-day { color: var(--accent); font-size: .78rem; font-weight: 700; letter-spacing: .05em; }
 .today-name { font-size: 1.45rem; margin: 4px 0 6px; }
 .today-sub { color: var(--text-dim); font-size: .88rem; margin-bottom: 16px; }
 /* תגית "בוצע!" שמחליפה לגמרי את כפתור ההתחלה — לא מאפשרים להתחיל
@@ -674,7 +674,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
   width: 100%; padding: 17px; border-radius: var(--r-lg); margin-top: 4px;
   background: var(--ok); color: #fff;
   display: flex; align-items: center; justify-content: center; gap: 9px;
-  font-weight: 700; font-size: 1.08rem;
+  font-weight: 800; font-size: 1.08rem;
 }
 .today-done-icon { width: 20px; height: 20px; flex: none; }
 .today-done-icon polyline {
@@ -692,7 +692,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
   display: flex; align-items: center; justify-content: space-between; gap: 10px;
   background: var(--bg-elev); padding: 10px 13px; font-size: .88rem;
 }
-.te-name { font-weight: 500; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.te-name { font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .te-target { color: var(--text-faint); font-size: .78rem; flex: none; font-variant-numeric: tabular-nums; }
 
 /* בחירת אימון ביום שלא שובץ */
@@ -705,7 +705,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
   transition: border-color .15s ease, background .15s ease;
 }
 .pick-card:active { background: var(--bg-elev-2); border-color: var(--accent); }
-.pick-name { font-weight: 600; font-size: 1rem; }
+.pick-name { font-weight: 700; font-size: 1rem; }
 .pick-sub {
   color: var(--text-dim); font-size: .78rem;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
@@ -747,7 +747,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .day-chip:active { background: var(--bg-elev-2); }
 /* האות והתווית מתחתיה היו קטנות מדי לקריאה נוחה — הועלו יחד,
    בדוק שבעה תגים עדיין נכנסים בשורה אחת ברוחב טלפון לפני שינוי חוזר */
-.day-letter { font-weight: 600; font-size: 1.12rem; line-height: 1.1; color: var(--text); }
+.day-letter { font-weight: 700; font-size: 1.12rem; line-height: 1.1; color: var(--text); }
 .day-plan {
   font-size: .61rem; line-height: 1.2; text-align: center;
   max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
@@ -815,7 +815,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 }
 .plan-ex-idx {
   width: 28px; height: 28px; border-radius: 8px; background: var(--bg-elev);
-  display: grid; place-items: center; font-size: .8rem; font-weight: 600; color: var(--text-dim);
+  display: grid; place-items: center; font-size: .8rem; font-weight: 700; color: var(--text-dim);
 }
 .plan-ex-main { display: flex; flex-direction: column; gap: 7px; min-width: 0; }
 .plan-ex-main > input {
@@ -841,7 +841,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 }
 .macro-cell { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
 .macro-cell-label {
-  font-size: .68rem; font-weight: 600; color: var(--text-dim);
+  font-size: .68rem; font-weight: 700; color: var(--text-dim);
   text-align: center; white-space: nowrap;
   overflow: hidden; text-overflow: ellipsis;
 }
@@ -878,7 +878,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .plan-check {
   width: 26px; height: 26px; flex: none; border-radius: 50%;
   border: 1px solid var(--line); display: grid; place-items: center;
-  font-size: .82rem; font-weight: 700; color: var(--accent-ink);
+  font-size: .82rem; font-weight: 800; color: var(--accent-ink);
   transition: background .15s ease, border-color .15s ease;
 }
 .plan-meal.is-eaten { border-color: var(--ok); }
@@ -897,7 +897,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .plan-note-btn {
   display: inline-block; margin-top: 7px;
   background: var(--accent-soft); border: 1px solid var(--line); color: var(--text-dim);
-  border-radius: 999px; padding: 3px 11px; font-size: .72rem; font-weight: 600;
+  border-radius: 999px; padding: 3px 11px; font-size: .72rem; font-weight: 700;
   cursor: pointer; font-family: inherit;
 }
 .plan-note-btn:active { border-color: var(--accent); color: var(--accent); }
@@ -941,7 +941,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .last-time-tag {
   background: var(--bg-elev-2); border: 1px solid var(--line);
   color: var(--text-faint); border-radius: 999px;
-  padding: 2px 8px; font-size: .68rem; font-weight: 600; flex: none;
+  padding: 2px 8px; font-size: .68rem; font-weight: 700; flex: none;
 }
 
 /* ---------- אירובי — יעד שבועי (עיגולים לחיצים בתוך שורת האירובי עצמה,
@@ -976,7 +976,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .goal-burst.is-in .goal-burst-card { transform: scale(1) translateY(0); opacity: 1; }
 .goal-burst.is-out .goal-burst-card { transform: scale(.9) translateY(-6px); opacity: 0; }
 .goal-burst-emoji { font-size: 2.6rem; }
-.goal-burst-title { font-size: 1.3rem; font-weight: 700; margin-top: 6px; }
+.goal-burst-title { font-size: 1.3rem; font-weight: 800; margin-top: 6px; }
 .goal-burst-sub { color: var(--text-dim); font-size: .86rem; margin-top: 8px; line-height: 1.5; }
 
 /* ---------- אירובי ---------- */
@@ -992,12 +992,12 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .cardio-plus {
   flex: none; width: 30px; height: 30px; border-radius: 50%;
   border: 1px dashed var(--line); color: var(--text-faint);
-  display: grid; place-items: center; font-size: 1.05rem; font-weight: 600;
+  display: grid; place-items: center; font-size: 1.05rem; font-weight: 700;
 }
 .cardio-count {
   flex: none; background: var(--ok); color: var(--accent-ink);
   border-radius: 999px; padding: 4px 11px;
-  font-weight: 700; font-size: .85rem; font-variant-numeric: tabular-nums;
+  font-weight: 800; font-size: .85rem; font-variant-numeric: tabular-nums;
 }
 /* ---------- מסך הגדרות ---------- */
 .settings-intro { margin-bottom: 6px; }
@@ -1019,7 +1019,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .settings-item:active { background: var(--bg-elev-2); }
 .si-ico { font-size: 1.25rem; flex: none; width: 26px; text-align: center; }
 .si-main { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.si-main b { font-size: .95rem; font-weight: 600; }
+.si-main b { font-size: .95rem; font-weight: 700; }
 .si-main small {
   color: var(--text-dim); font-size: .78rem;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
@@ -1067,7 +1067,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
   gap: 14px; cursor: pointer;
 }
 .setting-row > span { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
-.setting-row b { font-size: .95rem; font-weight: 600; }
+.setting-row b { font-size: .95rem; font-weight: 700; }
 .setting-row small { color: var(--text-dim); font-size: .78rem; line-height: 1.4; }
 .setting-row select {
   flex: none; background: var(--bg-elev-2); border: 1px solid var(--line);
@@ -1110,7 +1110,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .chip-row { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 14px; }
 .chip {
   background: var(--bg-elev-2); border: 1px solid var(--line); color: var(--text-dim);
-  border-radius: 999px; padding: 7px 13px; font-size: .84rem; font-weight: 500;
+  border-radius: 999px; padding: 7px 13px; font-size: .84rem; font-weight: 600;
   cursor: pointer; font-family: inherit;
 }
 .chip:active { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
@@ -1124,9 +1124,9 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 }
 .list-item:active { background: var(--bg-elev-2); }
 .li-main { flex: 1; min-width: 0; }
-.li-title { font-weight: 600; font-size: .96rem; }
+.li-title { font-weight: 700; font-size: .96rem; }
 .li-sub { color: var(--text-dim); font-size: .8rem; margin-top: 2px; }
-.li-side { text-align: end; font-weight: 600; font-variant-numeric: tabular-nums; }
+.li-side { text-align: end; font-weight: 700; font-variant-numeric: tabular-nums; }
 .li-side small { display: block; color: var(--text-faint); font-weight: 500; font-size: .72rem; }
 .li-thumb { width: 46px; height: 46px; border-radius: 10px; object-fit: cover; flex: none; background: var(--bg-elev-2); }
 
@@ -1139,7 +1139,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .weight-log-row input {
   flex: 1; min-width: 0; background: var(--bg-elev-2); border: 1px solid var(--line);
   color: var(--text); border-radius: var(--r-sm); padding: 11px 12px; font-size: 1.1rem;
-  font-weight: 600; direction: ltr; text-align: center; font-variant-numeric: tabular-nums;
+  font-weight: 700; direction: ltr; text-align: center; font-variant-numeric: tabular-nums;
 }
 .weight-log-row input:focus { outline: none; border-color: var(--accent); }
 .weight-log-unit { color: var(--text-dim); font-size: .84rem; flex: none; }
@@ -1150,7 +1150,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .date-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
 .date-label {
   background: var(--bg-elev); border: 1px solid var(--line); color: var(--text);
-  border-radius: 999px; padding: 8px 20px; font-weight: 600; cursor: pointer;
+  border-radius: 999px; padding: 8px 20px; font-weight: 700; cursor: pointer;
 }
 .hidden-date { position: fixed; opacity: 0; pointer-events: none; width: 1px; height: 1px; }
 
@@ -1169,9 +1169,9 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
   font-size: .92rem;
 }
 /* מאז שהטבעת ירדה זה המספר הראשי של המסך, ולכן הוא גדול בהתאם */
-.kcal-foot-label { font-weight: 600; color: var(--text-dim); }
+.kcal-foot-label { font-weight: 700; color: var(--text-dim); }
 .kcal-foot-val { color: var(--text-dim); font-variant-numeric: tabular-nums; }
-.kcal-foot-val b { color: var(--text); font-size: 1.5rem; font-weight: 700; margin-inline-end: 3px; }
+.kcal-foot-val b { color: var(--text); font-size: 1.5rem; font-weight: 800; margin-inline-end: 3px; }
 .kcal-card.over .kcal-foot-val b { color: var(--danger); }
 /*
  * מאקרו — שורה אחת לכל אחד: שם, פס, ומספר.
@@ -1188,7 +1188,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 }
 .macro { display: contents; }
 .macro-name {
-  font-size: .92rem; font-weight: 500; color: var(--text-dim);
+  font-size: .92rem; font-weight: 600; color: var(--text-dim);
   white-space: nowrap;
 }
 .bar { height: 7px; background: var(--bg-elev-2); border-radius: 999px; overflow: hidden; }
@@ -1208,15 +1208,15 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
  * ה-HTML: יחידה, ואז המספרים.
  */
 .macro-val {
-  font-size: .92rem; color: var(--text); font-weight: 600;
+  font-size: .92rem; color: var(--text); font-weight: 700;
   font-variant-numeric: tabular-nums; white-space: nowrap;
   justify-self: end;
   display: flex; align-items: baseline; direction: ltr;
 }
-.macro-val .m-sep, .macro-val .m-goal { color: var(--text-dim); font-weight: 500; }
+.macro-val .m-sep, .macro-val .m-goal { color: var(--text-dim); font-weight: 600; }
 /* היחידה ראשונה בסדר ה-LTR, כלומר בקצה השמאלי — כך שלוש היחידות
    יושבות בטור אחד ולא רודפות אחרי מספרים באורך משתנה */
-.macro-val .m-unit { color: var(--text-faint); font-weight: 500; font-size: .8em; margin-inline-end: 5px; }
+.macro-val .m-unit { color: var(--text-faint); font-weight: 600; font-size: .8em; margin-inline-end: 5px; }
 .macro.is-done .macro-val b { color: var(--ok); }
 .macro.is-over .macro-val b { color: var(--danger); }
 .macro.is-over .bar-fill { background: var(--danger) !important; }
@@ -1224,7 +1224,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .head-badge {
   background: var(--bg-elev-2); border: 1px solid var(--line);
   color: var(--text-dim); border-radius: 999px;
-  padding: 4px 11px; font-size: .76rem; font-weight: 600;
+  padding: 4px 11px; font-size: .76rem; font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
 .head-badge.is-complete {
@@ -1255,7 +1255,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 /* ---------- גרפים ---------- */
 .chart-card { padding: 16px 12px; }
 .chart-title { font-size: .86rem; color: var(--text-dim); margin: 0 4px 10px; }
-.chart-subtitle { font-size: .74rem; color: var(--accent); font-weight: 600; margin: -6px 4px 10px; }
+.chart-subtitle { font-size: .74rem; color: var(--accent); font-weight: 700; margin: -6px 4px 10px; }
 .chart-subtitle:empty { display: none; }
 
 /* ---------- ניווט בגרף — לדפדף אחורה בהיסטוריה, לא רק חלון קבוע ---------- */
@@ -1298,7 +1298,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
   transition: color .15s ease;
 }
 .tab-ico { font-size: 1.24rem; line-height: 1; filter: grayscale(1) opacity(.6); transition: filter .15s ease; }
-.tab-txt { font-size: .68rem; font-weight: 500; }
+.tab-txt { font-size: .68rem; font-weight: 600; }
 .tab.active { color: var(--accent); }
 .tab.active .tab-ico { filter: none; }
 
@@ -1395,9 +1395,9 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
   60% { transform: rotate(9deg) scale(1.08); }
 }
 .pr-text { min-width: 0; }
-.pr-kicker { font-size: .72rem; font-weight: 700; letter-spacing: .03em; color: var(--warn); }
-.pr-ex { font-weight: 600; font-size: 1rem; margin-top: 1px; overflow-wrap: anywhere; }
-.pr-weight { font-size: 1.3rem; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.25; }
+.pr-kicker { font-size: .72rem; font-weight: 800; letter-spacing: .03em; color: var(--warn); }
+.pr-ex { font-weight: 700; font-size: 1rem; margin-top: 1px; overflow-wrap: anywhere; }
+.pr-weight { font-size: 1.3rem; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1.25; }
 .pr-prev { font-size: .75rem; color: var(--text-dim); font-variant-numeric: tabular-nums; direction: rtl; }
 
 /* סימון הסט ששבר שיא — במהלך האימון וגם בפרטי אימון בהיסטוריה */
@@ -1411,18 +1411,18 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
   display: inline-block; margin-inline-start: 7px; vertical-align: 1px;
   background: var(--accent-soft); border: 1px solid var(--warn); color: var(--warn);
   border-radius: 999px; padding: 1px 8px;
-  font-size: .68rem; font-weight: 700; white-space: nowrap;
+  font-size: .68rem; font-weight: 800; white-space: nowrap;
 }
 .li-tag {
   display: inline-block; margin-inline-start: 7px; vertical-align: 1px;
   background: rgba(29, 107, 111, .1); border: 1px solid rgba(29, 107, 111, .35); color: var(--gold-deep);
   border-radius: 999px; padding: 1px 8px;
-  font-size: .68rem; font-weight: 600; white-space: nowrap;
+  font-size: .68rem; font-weight: 700; white-space: nowrap;
 }
 .pr-note {
   background: var(--accent-soft); border: 1px solid var(--warn); color: var(--warn);
   border-radius: var(--r-sm); padding: 9px 12px; margin-bottom: 14px;
-  font-size: .84rem; font-weight: 600;
+  font-size: .84rem; font-weight: 700;
 }
 
 /* ---------- Toast ---------- */
@@ -1435,7 +1435,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .toast {
   background: var(--bg-elev-2); border: 1px solid var(--line);
   color: var(--text); padding: 11px 18px; border-radius: 999px;
-  font-size: .88rem; font-weight: 500; max-width: 100%;
+  font-size: .88rem; font-weight: 600; max-width: 100%;
   box-shadow: 0 8px 24px var(--shadow-strong);
   animation: toastIn .25s ease;
 }
@@ -1463,7 +1463,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 }
 .reminder-ico { font-size: 1.5rem; line-height: 1; flex: none; }
 .reminder-main { flex: 1; min-width: 0; }
-.reminder-title { font-weight: 600; font-size: .95rem; }
+.reminder-title { font-weight: 700; font-size: .95rem; }
 .reminder-text { font-size: .8rem; color: var(--text-dim); margin-top: 2px; }
 .reminder-x {
   flex: none; background: transparent; border: none; color: var(--text-faint);
@@ -1485,19 +1485,19 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 }
 .snack-row.is-on { border-color: var(--gold); background: var(--bg-elev-2); }
 .snack-main { min-width: 0; flex: 1; }
-.snack-name { font-weight: 600; font-size: .98rem; }
+.snack-name { font-weight: 700; font-size: .98rem; }
 .snack-sub { font-size: .78rem; color: var(--text-dim); margin-top: 2px; }
 .snack-stepper { display: flex; align-items: center; gap: 4px; }
 .snack-btn {
   width: 38px; height: 38px; flex: none;
   border: 1px solid var(--line); border-radius: 10px;
   background: var(--bg-elev-2); color: var(--text);
-  font-size: 1.25rem; font-weight: 600; line-height: 1; cursor: pointer;
+  font-size: 1.25rem; font-weight: 700; line-height: 1; cursor: pointer;
 }
 .snack-btn:active { transform: scale(.94); }
 .snack-count { min-width: 26px; text-align: center; font-size: 1.05rem; }
 .snack-total {
-  text-align: center; font-weight: 600; margin-bottom: 10px;
+  text-align: center; font-weight: 700; margin-bottom: 10px;
   color: var(--gold-deep);
 }
 .snack-total.is-empty { color: var(--text-dim); font-weight: 400; }
@@ -1528,7 +1528,7 @@ body.bc-open { overflow: hidden; }
 }
 .bc-hint {
   position: relative; z-index: 1; margin-top: 22px;
-  color: #fff; font-weight: 600; font-size: 1.05rem;
+  color: #fff; font-weight: 700; font-size: 1.05rem;
   text-shadow: 0 1px 8px rgba(0, 0, 0, .9);
 }
 .bc-actions {
@@ -1547,7 +1547,7 @@ body.bc-open { overflow: hidden; }
   border-radius: var(--r-md); padding: 13px 15px; margin: 14px 0;
 }
 .bc-kcal { display: flex; align-items: baseline; gap: 6px; }
-.bc-kcal b { font-size: 1.5rem; font-weight: 700; }
+.bc-kcal b { font-size: 1.5rem; font-weight: 800; }
 .bc-kcal span { font-size: .82rem; color: var(--text-dim); }
 .bc-macros { display: flex; gap: 10px; font-size: .84rem; color: var(--text-dim); }
 
@@ -1581,7 +1581,7 @@ body.gate-open main { display: none !important; }
 .gate-eyebrow {
   display: inline-block; background: var(--bg-elev); border: 1px solid var(--line);
   padding: 6px 14px; border-radius: 999px;
-  font-size: .8rem; font-weight: 600; color: var(--text-dim); margin-bottom: 18px;
+  font-size: .8rem; font-weight: 700; color: var(--text-dim); margin-bottom: 18px;
 }
 .gate-title { font-size: 1.9rem; line-height: 1.2; margin-bottom: 14px; text-wrap: balance; }
 .gate-title span { color: var(--gold-deep); }
@@ -1589,8 +1589,8 @@ body.gate-open main { display: none !important; }
 
 .gate-auth { margin-bottom: 34px; }
 .gate-note { font-size: .85rem; color: var(--text-dim); margin-top: 12px; }
-.gate-note.is-pending { color: var(--warn); font-weight: 600; }
-.gate-note.is-denied { color: var(--danger); font-weight: 600; }
+.gate-note.is-pending { color: var(--warn); font-weight: 700; }
+.gate-note.is-denied { color: var(--danger); font-weight: 700; }
 
 .gate-features { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 @media (max-width: 430px) { .gate-features { grid-template-columns: 1fr; } }
@@ -1612,7 +1612,7 @@ body.gate-open main { display: none !important; }
 
 .user-group + .user-group { margin-top: 20px; }
 .user-group-head {
-  font-size: .82rem; font-weight: 600; color: var(--text-dim);
+  font-size: .82rem; font-weight: 700; color: var(--text-dim);
   margin-bottom: 8px;
 }
 .user-row { align-items: center; gap: 11px; }
@@ -1636,11 +1636,11 @@ body.gate-open main { display: none !important; }
   color: var(--gold-ink);
   border-radius: var(--r-md); padding: 11px 14px;
   box-shadow: 0 10px 24px -8px rgba(0, 0, 0, .45);
-  font-size: .9rem; font-weight: 500;
+  font-size: .9rem; font-weight: 600;
 }
 .update-bar button {
   background: var(--gold-ink); color: var(--gold-deep);
-  border: 0; font-weight: 700; flex: none;
+  border: 0; font-weight: 800; flex: none;
 }
 
 

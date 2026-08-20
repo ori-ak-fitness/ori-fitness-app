@@ -207,7 +207,17 @@ function applyTheme(value) {
 }
 
 async function initThemeSetting() {
-  const saved = await db.getSetting(THEME_KEY, 'light');
+  /*
+   * ברירת המחדל היא "לפי המכשיר" ולא "בהיר".
+   *
+   * קודם האפליקציה נפתחה בקרם בהיר גם בשתיים בלילה, כשכל שאר הטלפון
+   * כבר במצב כהה — וזה אומר שכדי להתאמן בערב צריך לזכור להיכנס
+   * להגדרות ולהחליף ידנית, ואז להחליף בחזרה בבוקר. הטלפון כבר יודע
+   * אם עכשיו לילה; אין סיבה לשאול על זה שוב.
+   *
+   * מי שכבר בחר ידנית — הבחירה שלו שמורה וגוברת, כאן ובהמשך.
+   */
+  const saved = await db.getSetting(THEME_KEY, 'system');
   applyTheme(saved);
 
   const select = $('#themeSelect');
