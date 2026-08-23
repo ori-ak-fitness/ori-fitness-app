@@ -722,9 +722,14 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
  * אחת הם דבר צר מטבעו, ולכן הרווחים ביניהם מצומצמים והרצועה נמשכת
  * עד הקצוות — זה כל מה שאפשר להוציא בלי לוותר על יום או לגלוש.
  */
-#hsWeekStrip { gap: 4px; margin-inline: -10px; }
-#hsWeekStrip .day-letter { font-size: 1.24rem; }
-#hsWeekStrip .day-plan { font-size: .63rem; }
+/*
+ * שבעה ריבועים בשורה אחת חסומים ברוחב המסך: כל אחד יכול להיות לכל
+ * היותר שביעית ממנו. לכן ה"גדול יותר" מגיע משלושה מקומות קטנים —
+ * הרצועה נמתחת עד קצוות המסך, הרווחים מצטמצמים, והאות בפנים גדלה.
+ */
+#hsWeekStrip { gap: 3px; margin-inline: -16px; }
+#hsWeekStrip .day-letter { font-size: 1.38rem; }
+#hsWeekStrip .day-plan { font-size: .64rem; }
 .day-chip {
   position: relative; aspect-ratio: 1;
   /*
