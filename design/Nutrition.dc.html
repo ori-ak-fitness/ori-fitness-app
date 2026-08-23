@@ -1,0 +1,156 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+    body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+    a { color: #1d6b6f; } a:hover { color: #2f9298; }
+    * { box-sizing: border-box; }
+  </style>
+</helmet>
+
+<div dir="rtl" style="width: 430px; height: 1020px; display: flex; flex-direction: column; background: #f4efe4; color: #221e18; font-size: 16px; overflow: hidden">
+
+  <div style="height: 54px; flex: none; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; background: rgba(255,253,247,.82); border-bottom: 1px solid rgba(20,18,14,.14)">
+    <div style="display: flex; align-items: center; gap: 9px">
+      <div style="width: 28px; height: 28px; border-radius: 8px; background: linear-gradient(150deg, #2f9298, #1d6b6f); display: grid; place-items: center; color: #eaf6f6; font-size: .62rem; font-weight: 800; letter-spacing: -.02em">AK</div>
+      <div style="font-weight: 800; font-size: 1.05rem; letter-spacing: -.02em">Ori AK Fitness</div>
+    </div>
+    <div style="width: 38px; height: 38px; display: grid; place-items: center; font-size: 1.25rem">⚙️</div>
+  </div>
+
+  <div style="flex: 1; min-height: 0; padding: 16px; display: flex; flex-direction: column">
+
+    <!-- ניווט תאריכים -->
+    <div style="display: flex; align-items: center; justify-content: center; gap: 14px; margin-bottom: 16px">
+      <div style="width: 34px; height: 34px; display: grid; place-items: center; color: #6b6253; font-size: 1.2rem">›</div>
+      <div style="padding: 7px 22px; border-radius: 999px; background: #fffdf7; border: 1px solid rgba(20,18,14,.14); font-weight: 700; font-size: .95rem">היום</div>
+      <div style="width: 34px; height: 34px; display: grid; place-items: center; color: #6b6253; font-size: 1.2rem">‹</div>
+    </div>
+
+    <!-- כרטיס המאקרו -->
+    <div style="background: #fffdf7; border: 1px solid rgba(20,18,14,.14); border-radius: 22px; padding: 18px">
+      <div style="display: grid; grid-template-columns: auto 1fr auto; align-items: center; column-gap: 10px; row-gap: 9px">
+
+        <div style="font-size: .92rem; font-weight: 600; color: #6b6253; white-space: nowrap">🥩 חלבון</div>
+        <div style="height: 7px; background: #eae3d4; border-radius: 999px; overflow: hidden"><div style="height: 100%; width: 63%; border-radius: 999px; background: #1d6f8f"></div></div>
+        <div style="font-size: .92rem; font-weight: 700; justify-self: end; display: flex; align-items: baseline; direction: ltr; white-space: nowrap">
+          <span style="color: #9b9284; font-weight: 600; font-size: .8em; margin-inline-end: 5px">ג'</span><b>94</b><span style="color: #6b6253; font-weight: 600">/</span><span style="color: #6b6253; font-weight: 600">150</span>
+        </div>
+
+        <div style="font-size: .92rem; font-weight: 600; color: #6b6253; white-space: nowrap">🍞 פחמימות</div>
+        <div style="height: 7px; background: #eae3d4; border-radius: 999px; overflow: hidden"><div style="height: 100%; width: 45%; border-radius: 999px; background: #9a6400"></div></div>
+        <div style="font-size: .92rem; font-weight: 700; justify-self: end; display: flex; align-items: baseline; direction: ltr; white-space: nowrap">
+          <span style="color: #9b9284; font-weight: 600; font-size: .8em; margin-inline-end: 5px">ג'</span><b>100</b><span style="color: #6b6253; font-weight: 600">/</span><span style="color: #6b6253; font-weight: 600">220</span>
+        </div>
+
+        <div style="font-size: .92rem; font-weight: 600; color: #6b6253; white-space: nowrap">🥑 שומן</div>
+        <div style="height: 7px; background: #eae3d4; border-radius: 999px; overflow: hidden"><div style="height: 100%; width: 57%; border-radius: 999px; background: #6d4bab"></div></div>
+        <div style="font-size: .92rem; font-weight: 700; justify-self: end; display: flex; align-items: baseline; direction: ltr; white-space: nowrap">
+          <span style="color: #9b9284; font-weight: 600; font-size: .8em; margin-inline-end: 5px">ג'</span><b>40</b><span style="color: #6b6253; font-weight: 600">/</span><span style="color: #6b6253; font-weight: 600">70</span>
+        </div>
+
+      </div>
+      <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(20,18,14,.14); font-size: .92rem">
+        <div style="font-weight: 700; color: #6b6253">נותרו</div>
+        <div style="color: #6b6253"><b style="color: #221e18; font-size: 1.5rem; font-weight: 800; margin-inline-end: 3px">980</b> מתוך 2,200 קק"ל</div>
+      </div>
+    </div>
+
+    <!-- התפריט של היום -->
+    <div style="display: flex; align-items: center; gap: 10px; margin: 34px 0 12px">
+      <span style="font-size: 1.15rem; line-height: 1">🍎</span>
+      <div style="font-weight: 700; font-size: 1.05rem; letter-spacing: -.01em">התפריט של היום</div>
+      <div style="margin-inline-start: auto; background: #eae3d4; border: 1px solid rgba(20,18,14,.14); color: #6b6253; border-radius: 999px; padding: 4px 11px; font-size: .76rem; font-weight: 700">1,220 קק"ל היום</div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 8px">
+      <div style="background: #fffdf7; border: 1px solid rgba(20,18,14,.14); border-radius: 16px; padding: 12px 14px; display: flex; align-items: center; gap: 12px">
+        <div style="flex: none; width: 30px; height: 30px; border-radius: 50%; background: #25D366; display: grid; place-items: center">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3.2"><polyline points="5,12 10,17 19,7"></polyline></svg>
+        </div>
+        <div style="flex: 1; min-width: 0">
+          <div style="font-weight: 700; font-size: .96rem; text-decoration: line-through; color: #6b6253">ארוחת בוקר</div>
+          <div style="color: #6b6253; font-size: .8rem; margin-top: 2px">🥩 39ג' · 🍞 40ג' · 🥑 20ג'</div>
+        </div>
+        <div style="text-align: end; font-weight: 700">520<small style="display: block; color: #9b9284; font-weight: 500; font-size: .72rem">קק"ל</small></div>
+      </div>
+
+      <div style="background: #fffdf7; border: 1px solid rgba(20,18,14,.14); border-radius: 16px; padding: 12px 14px; display: flex; align-items: center; gap: 12px">
+        <div style="flex: none; width: 30px; height: 30px; border-radius: 50%; background: #25D366; display: grid; place-items: center">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3.2"><polyline points="5,12 10,17 19,7"></polyline></svg>
+        </div>
+        <div style="flex: 1; min-width: 0">
+          <div style="font-weight: 700; font-size: .96rem; text-decoration: line-through; color: #6b6253">ארוחת ביניים</div>
+          <div style="color: #6b6253; font-size: .8rem; margin-top: 2px">🥩 23ג' · 🍞 40ג' · 🥑 9ג'</div>
+        </div>
+        <div style="text-align: end; font-weight: 700">350<small style="display: block; color: #9b9284; font-weight: 500; font-size: .72rem">קק"ל</small></div>
+      </div>
+
+      <div style="background: #fffdf7; border: 1px solid rgba(20,18,14,.14); border-radius: 16px; padding: 12px 14px; display: flex; align-items: center; gap: 12px">
+        <div style="flex: none; width: 30px; height: 30px; border-radius: 50%; border: 1px solid rgba(20,18,14,.14); background: #eae3d4"></div>
+        <div style="flex: 1; min-width: 0">
+          <div style="font-weight: 700; font-size: .96rem">צהריים</div>
+          <div style="color: #6b6253; font-size: .8rem; margin-top: 2px">🥩 55ג' · 🍞 60ג' · 🥑 20ג'</div>
+        </div>
+        <div style="text-align: end; font-weight: 700">700<small style="display: block; color: #9b9284; font-weight: 500; font-size: .72rem">קק"ל</small></div>
+      </div>
+
+      <div style="background: #fffdf7; border: 1px solid rgba(20,18,14,.14); border-radius: 16px; padding: 12px 14px; display: flex; align-items: center; gap: 12px">
+        <div style="flex: none; width: 30px; height: 30px; border-radius: 50%; border: 1px solid rgba(20,18,14,.14); background: #eae3d4"></div>
+        <div style="flex: 1; min-width: 0">
+          <div style="font-weight: 700; font-size: .96rem">ערב</div>
+          <div style="color: #6b6253; font-size: .8rem; margin-top: 2px">🥩 42ג' · 🍞 35ג' · 🥑 16ג'</div>
+        </div>
+        <div style="text-align: end; font-weight: 700">480<small style="display: block; color: #9b9284; font-weight: 500; font-size: .72rem">קק"ל</small></div>
+      </div>
+    </div>
+
+    <!-- מה עוד אכלתי -->
+    <div style="display: flex; align-items: center; gap: 10px; margin: 34px 0 12px">
+      <span style="font-size: 1.15rem; line-height: 1">🍴</span>
+      <div style="font-weight: 700; font-size: 1.05rem; letter-spacing: -.01em">מה עוד אכלתי היום</div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 2px 0 16px">
+      <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; background: #fffdf7; border: 1px solid rgba(20,18,14,.14); color: #6b6253; border-radius: 16px; padding: 10px 2px; font-size: .72rem; font-weight: 700"><span style="font-size: 1.2rem; line-height: 1">🔎</span>חיפוש</div>
+      <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; background: #fffdf7; border: 1px solid rgba(20,18,14,.14); color: #6b6253; border-radius: 16px; padding: 10px 2px; font-size: .72rem; font-weight: 700"><span style="font-size: 1.2rem; line-height: 1">📷</span>ברקוד</div>
+      <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; background: #fffdf7; border: 1px solid rgba(20,18,14,.14); color: #6b6253; border-radius: 16px; padding: 10px 2px; font-size: .72rem; font-weight: 700"><span style="font-size: 1.2rem; line-height: 1">🍿</span>נשנוש</div>
+      <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; background: #fffdf7; border: 1px solid rgba(20,18,14,.14); color: #6b6253; border-radius: 16px; padding: 10px 2px; font-size: .72rem; font-weight: 700"><span style="font-size: 1.2rem; line-height: 1">✏️</span>חדש</div>
+      <div style="display: flex; flex-direction: column; align-items: center; gap: 4px; border: 1px solid transparent; color: #eaf6f6; border-radius: 16px; padding: 10px 2px; font-size: .72rem; font-weight: 700; background: linear-gradient(155deg, rgba(255,255,255,.28), rgba(0,0,0,.08)), linear-gradient(150deg, #2f9298, #1d6b6f)"><span style="font-size: 1.2rem; line-height: 1">📚</span>מהמאגר</div>
+    </div>
+
+    <div style="background: #fffdf7; border: 1px solid rgba(20,18,14,.14); border-radius: 16px; padding: 13px 14px; display: flex; align-items: center; gap: 12px">
+      <div style="flex: none; width: 44px; height: 44px; border-radius: 12px; background: #eae3d4; display: grid; place-items: center; font-size: 1.2rem">🍴</div>
+      <div style="flex: 1; min-width: 0">
+        <div style="font-weight: 700; font-size: .96rem">בייגלה שטוח ×5</div>
+        <div style="color: #6b6253; font-size: .8rem; margin-top: 2px">16:05 · 🥩 4ג' · 🍞 30ג' · 🥑 2ג'</div>
+      </div>
+      <div style="text-align: end; font-weight: 700">160<small style="display: block; color: #9b9284; font-weight: 500; font-size: .72rem">קק"ל</small></div>
+    </div>
+
+  </div>
+
+  <div style="height: 62px; flex: none; display: grid; grid-template-columns: repeat(4, 1fr); background: rgba(255,253,247,.82); border-top: 1px solid rgba(20,18,14,.14)">
+    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: #9b9284"><span style="font-size: 1.24rem; line-height: 1; filter: grayscale(1) opacity(.6)">🏠</span><span style="font-size: .68rem; font-weight: 600">בית</span></div>
+    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: #2f2a22"><span style="font-size: 1.24rem; line-height: 1">🍽️</span><span style="font-size: .68rem; font-weight: 600">תזונה</span></div>
+    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: #9b9284"><span style="font-size: 1.24rem; line-height: 1; filter: grayscale(1) opacity(.6)">🏋️</span><span style="font-size: .68rem; font-weight: 600">אימון</span></div>
+    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: #9b9284"><span style="font-size: 1.24rem; line-height: 1; filter: grayscale(1) opacity(.6)">📈</span><span style="font-size: .68rem; font-weight: 600">התקדמות</span></div>
+  </div>
+
+</div>
+</x-dc>
+<script data-dc-script data-props='{"$preview":{"width":430,"height":1020}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>
