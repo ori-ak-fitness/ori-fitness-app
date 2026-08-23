@@ -212,12 +212,42 @@ async function initThemeSetting() {
 
   const select = $('#themeSelect');
   select.value = saved;
-  select.addEventListener('change', async () => {
-    applyTheme(select.value);
-    await db.setSetting(THEME_KEY, select.value);
+
+  /*
+   * כפתור השמש/ירח בראש המסך.
+   *
+   * ההגדרה קיימת גם בהגדרות, אבל בלילה — כשרוצים להחשיך מסך — זה
+   * שלוש פעולות. הכפתור הזה הופך את זה ללחיצה אחת מכל מסך, והוא
+   * והבורר בהגדרות מסונכרנים בשני הכיוונים.
+   */
+  const themeBtn = $('#themeBtn');
+
+  /** האם המסך כרגע כהה בפועל — כולל המקרה של "לפי המכשיר" */
+  const isDarkNow = () => document.documentElement.getAttribute('data-theme') === 'dark'
+    || (!document.documentElement.hasAttribute('data-theme')
+        && matchMedia('(prefers-color-scheme: dark)').matches);
+
+  function refreshThemeBtn() {
+    if (!themeBtn) return;
+    const dark = isDarkNow();
+    // הכפתור מראה לאן הוא ייקח אותך, לא איפה אתה נמצא
+    themeBtn.textContent = dark ? '☀️' : '🌙';
+    themeBtn.setAttribute('aria-label', dark ? 'מצב יום' : 'מצב לילה');
+  }
+
+  async function setTheme(value) {
+    applyTheme(value);
+    select.value = value;
+    refreshThemeBtn();
+    await db.setSetting(THEME_KEY, value);
     // הגרפים מציירים את הצבעים שלהם פעם אחת - צריך רינדור מחדש כדי שיתעדכנו
     if (currentScreen === 'progress') renderProgress();
-  });
+  }
+
+  themeBtn?.addEventListener('click', () => setTheme(isDarkNow() ? 'light' : 'dark'));
+  select.addEventListener('change', () => setTheme(select.value));
+
+  refreshThemeBtn();
 }
 
 /* ---------- הגדרות ---------- */
