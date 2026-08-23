@@ -2,7 +2,7 @@
   "artboards": [
     { "file": "Main.dc.html", "title": "בית", "x": 0, "y": 0, "w": 430, "h": 1160 },
     { "file": "Nutrition.dc.html", "title": "תזונה", "x": 510, "y": 0, "w": 430, "h": 1020 },
-    { "file": "Workout.dc.html", "title": "אימון", "x": 1020, "y": 0, "w": 430, "h": 940 },
+    { "file": "Workout.dc.html", "title": "אימון", "x": 1020, "y": 0, "w": 430, "h": 1420 },
     { "file": "Progress.dc.html", "title": "התקדמות", "x": 1530, "y": 0, "w": 430, "h": 900 }
   ],
   "annotations": [

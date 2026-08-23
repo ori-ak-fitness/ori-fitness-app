@@ -2,48 +2,78 @@
 <style>
   :root{
     --page-bg:#eceef0; --page-fg:#1a1d21; --page-dim:#5f6873;
-    --chrome:#ffffff; --edge:rgba(20,24,30,.12); --teal:#2f9298;
+    --chrome:#ffffff; --edge:rgba(20,24,30,.14); --teal:#2f9298; --ink:#e0245e;
   }
   @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
     --page-bg:#0e1013; --page-fg:#e8ebef; --page-dim:#98a2ad;
-    --chrome:#171a1f; --edge:rgba(225,232,240,.13);
+    --chrome:#171a1f; --edge:rgba(225,232,240,.15);
   }}
   :root[data-theme="dark"]{
     --page-bg:#0e1013; --page-fg:#e8ebef; --page-dim:#98a2ad;
-    --chrome:#171a1f; --edge:rgba(225,232,240,.13);
+    --chrome:#171a1f; --edge:rgba(225,232,240,.15);
   }
+  *{ box-sizing:border-box; }
   body{ background:var(--page-bg); color:var(--page-fg); direction:rtl; margin:0;
-    font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif; padding:26px 18px 60px; }
-  .wrap{ max-width:1960px; margin:0 auto; }
-  h1{ font-size:1.6rem; margin:0 0 6px; letter-spacing:-.01em; }
-  .lede{ color:var(--page-dim); margin:0 0 26px; line-height:1.65; max-width:64ch; }
-  .rail{ display:flex; gap:26px; align-items:flex-start; overflow-x:auto; padding-bottom:18px;
-    scroll-snap-type:x proximity; }
-  .col{ flex:none; scroll-snap-align:start; }
-  .cap{ display:flex; align-items:center; gap:8px; margin:0 4px 10px; }
-  .cap b{ font-size:1rem; }
-  .cap span{ color:var(--page-dim); font-size:.82rem; }
-  .phone{ width:430px; border:1px solid var(--edge); border-radius:28px; overflow:hidden;
-    box-shadow:0 22px 48px -26px rgba(0,0,0,.55); background:#f4efe4; }
-  /* בדיוק כמו באפליקציה: בלי זה הריפוד והמסגרות נוספים למידות
-     והאריחים הריבועיים של ימי השבוע יוצאים מלבנים */
-  .phone, .phone *{ box-sizing:border-box; }
-  .phone{ font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif; }
-  .note{ margin:34px auto 0; max-width:64ch; padding:15px 17px; border-radius:14px;
+    font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif; padding:14px 12px 28px;
+    -webkit-text-size-adjust:100%; }
+  .wrap{ max-width:760px; margin:0 auto; }
+  h1{ font-size:1.25rem; margin:0 0 4px; letter-spacing:-.01em; }
+  .lede{ color:var(--page-dim); margin:0 0 14px; line-height:1.6; font-size:.88rem; }
+
+  .tabs{ display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin-bottom:10px; }
+  .tab{ appearance:none; font:inherit; font-size:.85rem; font-weight:700; cursor:pointer;
+    padding:11px 4px; border-radius:11px; border:1px solid var(--edge);
+    background:var(--chrome); color:var(--page-dim); }
+  .tab[aria-selected="true"]{ background:var(--teal); border-color:transparent; color:#eaf6f6; }
+  .tab:focus-visible{ outline:2px solid var(--teal); outline-offset:2px; }
+
+  .tools{ display:flex; gap:6px; flex-wrap:wrap; align-items:center; margin-bottom:12px; }
+  .tool{ appearance:none; font:inherit; font-size:.82rem; font-weight:700; cursor:pointer;
+    padding:9px 13px; border-radius:999px; border:1px solid var(--edge);
+    background:var(--chrome); color:var(--page-fg); display:inline-flex; align-items:center; gap:6px; }
+  .tool[aria-pressed="true"]{ background:var(--ink); border-color:transparent; color:#fff; }
+  .tool:disabled{ opacity:.4; cursor:default; }
+  .tool:focus-visible{ outline:2px solid var(--teal); outline-offset:2px; }
+  .spacer{ flex:1; }
+
+  .stage{ position:relative; margin:0 auto; }
+  .frame{ position:absolute; top:0; left:50%; transform-origin:top center;
+    width:430px; border-radius:26px; overflow:hidden; background:#f4efe4;
+    border:1px solid var(--edge); box-shadow:0 18px 44px -24px rgba(0,0,0,.6); }
+  .frame, .frame *{ box-sizing:border-box; }
+  .frame{ font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif; }
+  .screen{ display:none; }
+  .screen.on{ display:block; }
+  #ink{ position:absolute; inset:0; width:100%; height:100%; touch-action:auto; }
+  #ink.drawing{ touch-action:none; cursor:crosshair; }
+
+  .hint{ margin:16px auto 0; padding:13px 15px; border-radius:13px; line-height:1.75; font-size:.86rem;
     background:color-mix(in srgb, var(--teal) 11%, transparent);
-    border:1px solid color-mix(in srgb, var(--teal) 32%, transparent); line-height:1.7; }
-  .note b{ color:var(--page-fg); }
-  ul{ margin:10px 0 0; padding-inline-start:20px; line-height:1.9; color:var(--page-dim); }
-  ul b{ color:var(--page-fg); }
-  @media (max-width:900px){ body{ padding:20px 12px 44px; } .phone{ width:340px; } .phone > div{ zoom:.79; } }
+    border:1px solid color-mix(in srgb, var(--teal) 32%, transparent); }
+  .hint b{ color:var(--page-fg); }
 </style>
 <div class="wrap">
   <h1>מסכי האפליקציה</h1>
-  <p class="lede">ארבעת המסכים של Ori Fitness, בגודל האמיתי של המסך בטלפון שלך (430 פיקסלים).
-    זה לא צילום מסך — זו האפליקציה עצמה, מצוירת מהקוד האמיתי, עם אותם צבעים, גדלים ומרווחים בדיוק.
-    תסתכל, ותגיד לי מה לשנות.</p>
-  <div class="rail">
-    <div class="col"><div class="cap"><b>בית</b><span>מסך הבית</span></div><div class="phone">
+  <p class="lede">מסך אחד בכל פעם, שלם על המסך. אפשר לצייר עליו ולסמן בדיוק מה לשנות.</p>
+
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" data-screen="s0" aria-selected="true">בית</button>
+    <button class="tab" role="tab" data-screen="s1" aria-selected="false">תזונה</button>
+    <button class="tab" role="tab" data-screen="s2" aria-selected="false">אימון</button>
+    <button class="tab" role="tab" data-screen="s3" aria-selected="false">התקדמות</button>
+  </div>
+
+  <div class="tools">
+    <button class="tool" id="penBtn" aria-pressed="false">✏️ צייר</button>
+    <button class="tool" id="undoBtn" disabled>↩ בטל</button>
+    <button class="tool" id="clearBtn" disabled>🗑 נקה</button>
+    <span class="spacer"></span>
+    <button class="tool" id="zoomBtn" aria-pressed="false">🔍 גודל מלא</button>
+  </div>
+
+  <div class="stage" id="stage">
+    <div class="frame" id="frame">
+      <div class="screen on" id="s0">
 
 <div dir="rtl" style="width: 430px; height: 1160px; display: flex; flex-direction: column; background: #f4efe4; color: #221e18; font-size: 16px; overflow: hidden">
 
@@ -188,8 +218,8 @@
   </div>
 
 </div>
-    </div></div>
-    <div class="col"><div class="cap"><b>תזונה</b><span>יומן האוכל</span></div><div class="phone">
+      </div>
+      <div class="screen" id="s1">
 
 <div dir="rtl" style="width: 430px; height: 1020px; display: flex; flex-direction: column; background: #f4efe4; color: #221e18; font-size: 16px; overflow: hidden">
 
@@ -321,10 +351,10 @@
   </div>
 
 </div>
-    </div></div>
-    <div class="col"><div class="cap"><b>אימון</b><span>האימון של היום</span></div><div class="phone">
+      </div>
+      <div class="screen" id="s2">
 
-<div dir="rtl" style="width: 430px; height: 940px; display: flex; flex-direction: column; background: #f4efe4; color: #221e18; font-size: 16px; overflow: hidden">
+<div dir="rtl" style="width: 430px; height: 1420px; display: flex; flex-direction: column; background: #f4efe4; color: #221e18; font-size: 16px; overflow: hidden">
 
   <div style="height: 54px; flex: none; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; background: rgba(255,253,247,.82); border-bottom: 1px solid rgba(20,18,14,.14)">
     <div style="display: flex; align-items: center; gap: 9px">
@@ -336,19 +366,15 @@
 
   <div style="flex: 1; min-height: 0; padding: 16px; display: flex; flex-direction: column">
 
-    <div style="display: flex; align-items: center; gap: 10px; margin: 0 0 12px">
-      <span style="font-size: 1.15rem; line-height: 1">💪</span>
-      <div style="font-weight: 700; font-size: 1.05rem; letter-spacing: -.01em">אימוני כוח</div>
-    </div>
-
     <!-- כרטיס השבוע + היום -->
     <div style="border: 1px solid rgba(20,18,14,.14); border-radius: 22px; overflow: hidden; background: linear-gradient(160deg, #eae3d4, #fffdf7)">
+
       <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; justify-items: center; padding: 12px 14px 10px; border-bottom: 1px solid rgba(20,18,14,.14)">
-        <div style="width: min(100%, 46px); aspect-ratio: 1; min-width: 0; border: 1px solid #dbd1be; border-radius: 11px; background: #fffdf7; padding: 5px 3px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px">
-          <div style="font-weight: 700; font-size: .95rem; line-height: 1.1">א</div>
-          <div style="font-size: .54rem; color: #6b6253; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%">מנוחה</div>
+        <div style="width: min(100%, 46px); aspect-ratio: 1; min-width: 0; border: 1px solid transparent; border-radius: 11px; padding: 5px 3px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; background: linear-gradient(155deg, rgba(255,255,255,.22), rgba(0,0,0,.06)), linear-gradient(150deg, #2f9298, #1d6b6f); box-shadow: 0 3px 10px -4px rgba(29,107,111,.55)">
+          <div style="font-weight: 700; font-size: .95rem; line-height: 1.1; color: #eaf6f6">א</div>
+          <div style="font-size: .54rem; color: #eaf6f6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%">חזה</div>
         </div>
-        <div style="width: min(100%, 46px); aspect-ratio: 1; min-width: 0; border: 2px solid #25D366; border-radius: 11px; background: rgba(37,211,102,.18); padding: 5px 3px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px">
+        <div style="width: min(100%, 46px); aspect-ratio: 1; min-width: 0; border: 1px solid #dbd1be; border-radius: 11px; background: #fffdf7; padding: 5px 3px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px">
           <div style="font-weight: 700; font-size: .95rem; line-height: 1.1">ב</div>
           <div style="font-size: .54rem; color: #2f2a22; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%">רגליים</div>
         </div>
@@ -356,9 +382,9 @@
           <div style="font-weight: 700; font-size: .95rem; line-height: 1.1">ג</div>
           <div style="font-size: .54rem; color: #6b6253; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%">מנוחה</div>
         </div>
-        <div style="width: min(100%, 46px); aspect-ratio: 1; min-width: 0; border: 1px solid transparent; border-radius: 11px; padding: 5px 3px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; background: linear-gradient(155deg, rgba(255,255,255,.22), rgba(0,0,0,.06)), linear-gradient(150deg, #2f9298, #1d6b6f); box-shadow: 0 3px 10px -4px rgba(29,107,111,.55)">
-          <div style="font-weight: 700; font-size: .95rem; line-height: 1.1; color: #eaf6f6">ד</div>
-          <div style="font-size: .54rem; color: #eaf6f6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%">חזה</div>
+        <div style="width: min(100%, 46px); aspect-ratio: 1; min-width: 0; border: 2px solid #25D366; border-radius: 11px; background: rgba(37,211,102,.18); padding: 5px 3px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px">
+          <div style="font-weight: 700; font-size: .95rem; line-height: 1.1">ד</div>
+          <div style="font-size: .54rem; color: #2f2a22; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%">גב</div>
         </div>
         <div style="width: min(100%, 46px); aspect-ratio: 1; min-width: 0; border: 1px solid #dbd1be; border-radius: 11px; background: #fffdf7; padding: 5px 3px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px">
           <div style="font-weight: 700; font-size: .95rem; line-height: 1.1">ה</div>
@@ -366,7 +392,7 @@
         </div>
         <div style="width: min(100%, 46px); aspect-ratio: 1; min-width: 0; border: 1px solid #dbd1be; border-radius: 11px; background: #fffdf7; padding: 5px 3px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px">
           <div style="font-weight: 700; font-size: .95rem; line-height: 1.1">ו</div>
-          <div style="font-size: .54rem; color: #2f2a22; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%">גב</div>
+          <div style="font-size: .54rem; color: #2f2a22; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%">כתפיים</div>
         </div>
         <div style="width: min(100%, 46px); aspect-ratio: 1; min-width: 0; border: 1px solid #dbd1be; border-radius: 11px; background: #fffdf7; padding: 5px 3px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px">
           <div style="font-weight: 700; font-size: .95rem; line-height: 1.1">ש</div>
@@ -374,38 +400,102 @@
         </div>
       </div>
 
+      <!-- כרטיס היום: היום, שם האימון, ורשימת התרגילים -->
       <div style="padding: 20px 18px">
-        <div style="color: #2f2a22; font-size: .78rem; font-weight: 700; letter-spacing: .05em">היום · יום רביעי</div>
+        <div style="color: #2f2a22; font-size: .78rem; font-weight: 700; letter-spacing: .05em">היום · יום ראשון</div>
         <div style="font-size: 1.45rem; font-weight: 700; letter-spacing: -.01em; margin: 4px 0 6px">חזה</div>
-        <div style="color: #6b6253; font-size: .88rem; margin-bottom: 16px">6 תרגילים · 18 סטים</div>
-        <div style="width: 100%; padding: 17px; font-size: 1.08rem; font-weight: 700; border-radius: 22px; text-align: center; color: #eaf6f6; letter-spacing: .01em; background: linear-gradient(155deg, rgba(255,255,255,.3), rgba(0,0,0,.08)), linear-gradient(150deg, #2f9298, #1d6b6f); box-shadow: 0 8px 18px -6px rgba(29,107,111,.45), 0 2px 4px rgba(29,107,111,.3)">התחל אימון</div>
+
+        <ul style="list-style: none; margin: 0 0 16px; padding: 0; display: flex; flex-direction: column; gap: 1px; background: rgba(20,18,14,.14); border-radius: 16px; overflow: hidden">
+          <li style="display: flex; align-items: center; justify-content: space-between; gap: 10px; background: #fffdf7; padding: 10px 13px; font-size: .88rem">
+            <span style="font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">לחיצת חזה במוט</span>
+            <span style="color: #9b9284; font-size: .78rem; flex: none">4×8</span>
+          </li>
+          <li style="display: flex; align-items: center; justify-content: space-between; gap: 10px; background: #fffdf7; padding: 10px 13px; font-size: .88rem">
+            <span style="font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">לחיצת חזה בשיפוע</span>
+            <span style="color: #9b9284; font-size: .78rem; flex: none">3×10</span>
+          </li>
+          <li style="display: flex; align-items: center; justify-content: space-between; gap: 10px; background: #fffdf7; padding: 10px 13px; font-size: .88rem">
+            <span style="font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">פרפר בפולי</span>
+            <span style="color: #9b9284; font-size: .78rem; flex: none">3×12</span>
+          </li>
+          <li style="display: flex; align-items: center; justify-content: space-between; gap: 10px; background: #fffdf7; padding: 10px 13px; font-size: .88rem">
+            <span style="font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">מקבילים</span>
+            <span style="color: #9b9284; font-size: .78rem; flex: none">3×10</span>
+          </li>
+          <li style="display: flex; align-items: center; justify-content: space-between; gap: 10px; background: #fffdf7; padding: 10px 13px; font-size: .88rem">
+            <span style="font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">הרחקת כתף בפולי</span>
+            <span style="color: #9b9284; font-size: .78rem; flex: none">3×15</span>
+          </li>
+        </ul>
+
+        <div style="width: 100%; padding: 17px; font-size: 1.08rem; font-weight: 700; border-radius: 22px; text-align: center; color: #eaf6f6; letter-spacing: .01em; background: linear-gradient(155deg, rgba(255,255,255,.3), rgba(0,0,0,.08)), linear-gradient(150deg, #2f9298, #1d6b6f); box-shadow: 0 8px 18px -6px rgba(29,107,111,.45), 0 2px 4px rgba(29,107,111,.3)">התחל חזה</div>
+        <div style="margin-top: 9px; width: 100%; padding: 13px 18px; font-size: 1rem; font-weight: 700; border-radius: 16px; text-align: center; background: transparent; border: 1px solid rgba(20,18,14,.14); color: #6b6253">אימון חופשי במקום</div>
       </div>
     </div>
 
-    <!-- אירובי -->
+    <!-- אימונים -->
     <div style="display: flex; align-items: center; gap: 10px; margin: 34px 0 12px">
-      <span style="font-size: 1.15rem; line-height: 1">🏃</span>
-      <div style="font-weight: 700; font-size: 1.05rem; letter-spacing: -.01em">אימוני אירובי</div>
+      <div style="font-weight: 700; font-size: 1.05rem; letter-spacing: -.01em">🏋️ אימונים</div>
     </div>
-    <div style="display: flex; flex-direction: column; gap: 8px">
-      <div style="background: #fffdf7; border: 2px solid #25D366; border-radius: 16px; padding: 12px 14px; display: flex; align-items: center; gap: 12px">
-        <div style="font-size: 1.5rem; flex: none; width: 34px; text-align: center">🚶</div>
-        <div style="flex: 1; min-width: 0">
-          <div style="font-weight: 700; font-size: .96rem">הליכה</div>
-          <div style="color: #6b6253; font-size: .8rem; margin-top: 2px">45 דקות · 2 מתוך 3 השבוע</div>
-        </div>
-        <div style="flex: none; width: 30px; height: 30px; border-radius: 50%; background: #25D366; display: grid; place-items: center">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="3.2"><polyline points="5,12 10,17 19,7"></polyline></svg>
+
+    <div style="display: flex; flex-direction: column; gap: 22px">
+
+      <div>
+        <div style="font-size: .86rem; font-weight: 700; color: #6b6253; margin: 0 0 9px; padding: 0 2px">💪 אימוני כוח</div>
+        <div style="display: flex; flex-direction: column; gap: 9px">
+          <div style="background: #fffdf7; border: 1px solid rgba(20,18,14,.14); border-radius: 16px; padding: 13px 14px; display: flex; align-items: center; gap: 12px">
+            <div style="flex: 1; min-width: 0">
+              <div style="font-weight: 700; font-size: .96rem">חזה</div>
+              <div style="color: #6b6253; font-size: .8rem; margin-top: 2px">5 תרגילים · ימים א</div>
+            </div>
+            <div style="flex: none; padding: 8px 13px; font-size: .85rem; font-weight: 700; border-radius: 10px; background: #eae3d4; border: 1px solid rgba(20,18,14,.14)">התחל</div>
+          </div>
+          <div style="background: #fffdf7; border: 1px solid rgba(20,18,14,.14); border-radius: 16px; padding: 13px 14px; display: flex; align-items: center; gap: 12px">
+            <div style="flex: 1; min-width: 0">
+              <div style="font-weight: 700; font-size: .96rem">רגליים</div>
+              <div style="color: #6b6253; font-size: .8rem; margin-top: 2px">6 תרגילים · ימים ב</div>
+            </div>
+            <div style="flex: none; padding: 8px 13px; font-size: .85rem; font-weight: 700; border-radius: 10px; background: #eae3d4; border: 1px solid rgba(20,18,14,.14)">התחל</div>
+          </div>
+          <div style="background: #fffdf7; border: 1px solid rgba(20,18,14,.14); border-radius: 16px; padding: 13px 14px; display: flex; align-items: center; gap: 12px">
+            <div style="flex: 1; min-width: 0">
+              <div style="font-weight: 700; font-size: .96rem">גב</div>
+              <div style="color: #6b6253; font-size: .8rem; margin-top: 2px">5 תרגילים · ימים ד</div>
+            </div>
+            <div style="flex: none; padding: 8px 13px; font-size: .85rem; font-weight: 700; border-radius: 10px; background: #eae3d4; border: 1px solid rgba(20,18,14,.14)">התחל</div>
+          </div>
         </div>
       </div>
-      <div style="background: #fffdf7; border: 1px solid rgba(20,18,14,.14); border-radius: 16px; padding: 12px 14px; display: flex; align-items: center; gap: 12px">
-        <div style="font-size: 1.5rem; flex: none; width: 34px; text-align: center">🚴</div>
-        <div style="flex: 1; min-width: 0">
-          <div style="font-weight: 700; font-size: .96rem">אופניים</div>
-          <div style="color: #6b6253; font-size: .8rem; margin-top: 2px">30 דקות · 0 מתוך 2 השבוע</div>
+
+      <div>
+        <div style="font-size: .86rem; font-weight: 700; color: #6b6253; margin: 0 0 9px; padding: 0 2px">🏃 אימוני אירובי</div>
+        <div style="display: flex; flex-direction: column; gap: 9px">
+          <div style="background: #fffdf7; border: 2px solid #25D366; border-radius: 16px; padding: 12px 14px; display: flex; align-items: center; gap: 12px">
+            <div style="font-size: 1.5rem; flex: none; width: 34px; text-align: center">🚶</div>
+            <div style="flex: 1; min-width: 0">
+              <div style="font-weight: 700; font-size: .96rem">הליכה</div>
+              <div style="color: #6b6253; font-size: .8rem; margin-top: 2px">2/3 השבוע · לחיצה על עיגול = הוספה</div>
+            </div>
+            <div style="display: flex; gap: 6px; flex: none">
+              <div style="width: 22px; height: 22px; border-radius: 50%; background: #25D366; border: 1px solid #25D366"></div>
+              <div style="width: 22px; height: 22px; border-radius: 50%; background: #25D366; border: 1px solid #25D366"></div>
+              <div style="width: 22px; height: 22px; border-radius: 50%; background: #eae3d4; border: 1px solid rgba(20,18,14,.14)"></div>
+            </div>
+          </div>
+          <div style="background: #fffdf7; border: 1px solid rgba(20,18,14,.14); border-radius: 16px; padding: 12px 14px; display: flex; align-items: center; gap: 12px">
+            <div style="font-size: 1.5rem; flex: none; width: 34px; text-align: center">🚴</div>
+            <div style="flex: 1; min-width: 0">
+              <div style="font-weight: 700; font-size: .96rem">אופניים</div>
+              <div style="color: #6b6253; font-size: .8rem; margin-top: 2px">0/2 השבוע · לחיצה על עיגול = הוספה</div>
+            </div>
+            <div style="display: flex; gap: 6px; flex: none">
+              <div style="width: 22px; height: 22px; border-radius: 50%; background: #eae3d4; border: 1px solid rgba(20,18,14,.14)"></div>
+              <div style="width: 22px; height: 22px; border-radius: 50%; background: #eae3d4; border: 1px solid rgba(20,18,14,.14)"></div>
+            </div>
+          </div>
         </div>
-        <div style="flex: none; width: 30px; height: 30px; border-radius: 50%; border: 1px solid rgba(20,18,14,.14); background: #eae3d4; display: grid; place-items: center; color: #6b6253; font-size: 1.1rem">+</div>
       </div>
+
     </div>
 
     <!-- אימונים אחרונים -->
@@ -413,20 +503,20 @@
       <span style="font-size: 1.15rem; line-height: 1">🕒</span>
       <div style="font-weight: 700; font-size: 1.05rem; letter-spacing: -.01em">אימונים אחרונים</div>
     </div>
-    <div style="display: flex; flex-direction: column; gap: 8px">
+    <div style="display: flex; flex-direction: column; gap: 9px">
       <div style="background: #fffdf7; border: 1px solid rgba(20,18,14,.14); border-radius: 16px; padding: 13px 14px; display: flex; align-items: center; gap: 12px">
         <div style="flex: 1; min-width: 0">
-          <div style="font-weight: 700; font-size: .96rem">רגליים</div>
-          <div style="color: #6b6253; font-size: .8rem; margin-top: 2px">אתמול · 52 דקות · 18 סטים</div>
+          <div style="font-weight: 700; font-size: .96rem">גב · יום רביעי</div>
+          <div style="color: #6b6253; font-size: .8rem; margin-top: 2px">16 סטים · 47 דקות</div>
         </div>
-        <div style="text-align: end; font-weight: 700">4,850<small style="display: block; color: #9b9284; font-weight: 500; font-size: .72rem">ק"ג נפח</small></div>
+        <div style="text-align: end; font-weight: 700">4,120<small style="display: block; color: #9b9284; font-weight: 500; font-size: .72rem">ק"ג</small></div>
       </div>
       <div style="background: #fffdf7; border: 1px solid rgba(20,18,14,.14); border-radius: 16px; padding: 13px 14px; display: flex; align-items: center; gap: 12px">
         <div style="flex: 1; min-width: 0">
-          <div style="font-weight: 700; font-size: .96rem">גב</div>
-          <div style="color: #6b6253; font-size: .8rem; margin-top: 2px">לפני 3 ימים · 47 דקות · 16 סטים</div>
+          <div style="font-weight: 700; font-size: .96rem">רגליים · יום שני</div>
+          <div style="color: #6b6253; font-size: .8rem; margin-top: 2px">18 סטים · 52 דקות</div>
         </div>
-        <div style="text-align: end; font-weight: 700">4,120<small style="display: block; color: #9b9284; font-weight: 500; font-size: .72rem">ק"ג נפח</small></div>
+        <div style="text-align: end; font-weight: 700">4,850<small style="display: block; color: #9b9284; font-weight: 500; font-size: .72rem">ק"ג</small></div>
       </div>
     </div>
 
@@ -440,8 +530,8 @@
   </div>
 
 </div>
-    </div></div>
-    <div class="col"><div class="cap"><b>התקדמות</b><span>גרפים ושקילות</span></div><div class="phone">
+      </div>
+      <div class="screen" id="s3">
 
 <div dir="rtl" style="width: 430px; height: 900px; display: flex; flex-direction: column; background: #f4efe4; color: #221e18; font-size: 16px; overflow: hidden">
 
@@ -522,16 +612,136 @@
   </div>
 
 </div>
-    </div></div>
+      </div>
+    </div>
+    <canvas id="ink"></canvas>
   </div>
-  <div class="note">
-    <b>איך זה עוזר לנו:</b> במקום שתתאר לי במילים ואני אנחש — תצביע. תגיד לי
-    "המספר הזה גדול מדי", "הכרטיס הזה מיותר", "תזיז את זה למעלה" — ואני עושה את זה באפליקציה עצמה.
-    <ul>
-      <li><b>גודל</b> — מה גדול מדי, מה קטן מדי</li>
-      <li><b>סדר</b> — מה צריך להיות למעלה ומה למטה</li>
-      <li><b>מה מיותר</b> — כל דבר שאתה לא באמת מסתכל עליו</li>
-      <li><b>מה חסר</b> — משהו שאתה מחפש ולא מוצא</li>
-    </ul>
-  </div>
+
+  <p class="hint">
+    <b>איך מסמנים לי:</b> לחץ על <b>✏️ צייר</b> וסמן עם האצבע ישר על המסך — עיגול, חץ, קו, מה שנוח.
+    אחר כך צלם מסך ושלח לי את התמונה. ככה אני רואה בדיוק על מה אתה מדבר, בלי לנחש.
+    <br>
+    <b>🔍 גודל מלא</b> מציג את המסך בגודל האמיתי שלו בטלפון — שם קוראים את הטקסט הקטן, וגוללים למטה.
+  </p>
 </div>
+<script>
+(function () {
+  var stage = document.getElementById('stage');
+  var frame = document.getElementById('frame');
+  var ink = document.getElementById('ink');
+  var penBtn = document.getElementById('penBtn');
+  var undoBtn = document.getElementById('undoBtn');
+  var clearBtn = document.getElementById('clearBtn');
+  var zoomBtn = document.getElementById('zoomBtn');
+  var tabs = Array.prototype.slice.call(document.querySelectorAll('.tab'));
+
+  var strokes = [];          /* כל שרטוט = מערך נקודות, כדי ש"בטל" יסיר אחד ולא הכל */
+  var current = null;
+  var drawing = false;
+  var fullSize = false;
+
+  function activeScreen() { return document.querySelector('.screen.on'); }
+
+  /* המסך מוצג שלם: מקטינים אותו עד שהוא נכנס גם לגובה וגם לרוחב.
+     במצב "גודל מלא" לא מקטינים בכלל — רק את הרוחב אם אין ברירה. */
+  function layout() {
+    var scr = activeScreen();
+    if (!scr) return;
+    var inner = scr.firstElementChild;
+    var h = inner ? inner.offsetHeight : 900;
+    frame.style.height = h + 'px';
+
+    var availW = stage.clientWidth || (window.innerWidth - 24);
+    var byW = availW / 430;
+    var byH = (window.innerHeight - 210) / h;
+    var k = fullSize ? Math.min(1, byW) : Math.min(1, byW, byH);
+
+    frame.style.transform = 'translateX(-50%) scale(' + k + ')';
+    stage.style.height = Math.ceil(h * k) + 'px';
+    resizeInk();
+  }
+
+  function resizeInk() {
+    var r = stage.getBoundingClientRect();
+    var dpr = window.devicePixelRatio || 1;
+    ink.width = Math.max(1, Math.round(r.width * dpr));
+    ink.height = Math.max(1, Math.round(r.height * dpr));
+    redraw();
+  }
+
+  function redraw() {
+    var ctx = ink.getContext('2d');
+    var dpr = window.devicePixelRatio || 1;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, ink.width / dpr, ink.height / dpr);
+    ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--ink').trim() || '#e0245e';
+    ctx.lineWidth = 4;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    for (var i = 0; i < strokes.length; i++) {
+      var s = strokes[i];
+      if (s.length < 2) continue;
+      ctx.beginPath();
+      ctx.moveTo(s[0].x, s[0].y);
+      for (var j = 1; j < s.length; j++) ctx.lineTo(s[j].x, s[j].y);
+      ctx.stroke();
+    }
+    undoBtn.disabled = strokes.length === 0;
+    clearBtn.disabled = strokes.length === 0;
+  }
+
+  function pt(e) {
+    var r = ink.getBoundingClientRect();
+    return { x: e.clientX - r.left, y: e.clientY - r.top };
+  }
+
+  ink.addEventListener('pointerdown', function (e) {
+    if (!drawing) return;
+    e.preventDefault();
+    ink.setPointerCapture(e.pointerId);
+    current = [pt(e)];
+    strokes.push(current);
+  });
+  ink.addEventListener('pointermove', function (e) {
+    if (!drawing || !current) return;
+    e.preventDefault();
+    current.push(pt(e));
+    redraw();
+  });
+  function endStroke() { current = null; redraw(); }
+  ink.addEventListener('pointerup', endStroke);
+  ink.addEventListener('pointercancel', endStroke);
+
+  penBtn.addEventListener('click', function () {
+    drawing = !drawing;
+    penBtn.setAttribute('aria-pressed', String(drawing));
+    penBtn.textContent = drawing ? '✏️ מצייר' : '✏️ צייר';
+    ink.classList.toggle('drawing', drawing);
+  });
+  undoBtn.addEventListener('click', function () { strokes.pop(); redraw(); });
+  clearBtn.addEventListener('click', function () { strokes = []; redraw(); });
+
+  zoomBtn.addEventListener('click', function () {
+    fullSize = !fullSize;
+    zoomBtn.setAttribute('aria-pressed', String(fullSize));
+    zoomBtn.textContent = fullSize ? '🔍 התאם למסך' : '🔍 גודל מלא';
+    layout();
+  });
+
+  tabs.forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      tabs.forEach(function (t) { t.setAttribute('aria-selected', String(t === tab)); });
+      Array.prototype.forEach.call(document.querySelectorAll('.screen'), function (s) {
+        s.classList.toggle('on', s.id === tab.getAttribute('data-screen'));
+      });
+      strokes = [];            /* סימון שייך למסך שסומן עליו */
+      layout();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  });
+
+  window.addEventListener('resize', layout);
+  layout();
+  setTimeout(layout, 120);     /* אחרי שהפריסה והאמוג'ים התייצבו */
+})();
+</script>
