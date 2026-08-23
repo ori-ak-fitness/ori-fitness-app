@@ -57,7 +57,7 @@
   <p class="lede">מסך אחד בכל פעם, שלם על המסך. אפשר לצייר עליו ולסמן בדיוק מה לשנות.</p>
 
   <div class="tabs" role="tablist">
-    <button class="tab pick" role="tab" data-screen="s4" aria-selected="true">🔴 ימים</button>
+    <button class="tab pick" role="tab" data-screen="s4" aria-selected="true">🔴 בית חדש</button>
     <button class="tab" role="tab" data-screen="s0" aria-selected="false">בית</button>
     <button class="tab" role="tab" data-screen="s1" aria-selected="false">תזונה</button>
     <button class="tab" role="tab" data-screen="s2" aria-selected="false">אימון</button>
@@ -616,128 +616,142 @@
       </div>
       <div class="screen on" id="s4">
 
-<div dir="rtl" style="width: 430px; height: 1180px; background: #f4efe4; color: #221e18; font-size: 16px; padding: 18px 16px; overflow: hidden">
+<div dir="rtl" style="width: 430px; height: 1190px; display: flex; flex-direction: column; background: #f4efe4; color: #221e18; font-size: 16px; overflow: hidden">
 
-  <div style="font-size: 1.2rem; font-weight: 700; letter-spacing: -.01em; margin-bottom: 4px">ימי האימונים — שלוש אפשרויות</div>
-  <div style="font-size: .84rem; color: #6b6253; line-height: 1.55; margin-bottom: 22px">
-    בכולן ירוק = בוצע, לבן = עוד לא. הכחול ירד. תגיד לי מספר.
+  <!-- סרגל עליון -->
+  <div style="height: 54px; flex: none; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; background: rgba(255,253,247,.82); border-bottom: 1px solid rgba(20,18,14,.14)">
+    <div style="display: flex; align-items: center; gap: 9px">
+      <div style="width: 28px; height: 28px; border-radius: 8px; background: linear-gradient(150deg, #2f9298, #1d6b6f); display: grid; place-items: center; color: #eaf6f6; font-size: .62rem; font-weight: 800; letter-spacing: -.02em">AK</div>
+      <div style="font-weight: 800; font-size: 1.05rem; letter-spacing: -.02em">Ori AK Fitness</div>
+    </div>
+    <div style="width: 38px; height: 38px; display: grid; place-items: center; font-size: 1.25rem">⚙️</div>
   </div>
 
-  <!-- ============ 1 ============ -->
-  <div style="display: flex; align-items: baseline; gap: 8px; margin-bottom: 10px">
-    <div style="width: 24px; height: 24px; border-radius: 8px; background: #2f2a22; color: #fbf7ef; display: grid; place-items: center; font-size: .78rem; font-weight: 800; flex: none">1</div>
-    <div style="font-weight: 700; font-size: .98rem">שתי שורות — משבצות גדולות</div>
-  </div>
-  <div style="font-size: .78rem; color: #6b6253; margin: 0 0 10px 0">כל שבעת הימים, אבל כל משבצת גדולה פי שלושה משטח.</div>
+  <!-- גוף המסך -->
+  <div style="flex: 1; min-height: 0; padding: 16px; display: flex; flex-direction: column">
 
-  <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 26px">
-    <div style="aspect-ratio: 1; min-width: 0; border: 2px solid #25D366; border-radius: 18px; background: rgba(37,211,102,.18); padding: 8px 5px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px">
-      <div style="font-weight: 700; font-size: 1.6rem; line-height: 1">א</div>
-      <div style="font-size: .74rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%">חזה</div>
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1a8f45" stroke-width="3.4"><polyline points="5,12 10,17 19,7"></polyline></svg>
-    </div>
-    <div style="aspect-ratio: 1; min-width: 0; border: 2px solid #25D366; border-radius: 18px; background: rgba(37,211,102,.18); padding: 8px 5px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px">
-      <div style="font-weight: 700; font-size: 1.6rem; line-height: 1">ב</div>
-      <div style="font-size: .74rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%">רגליים</div>
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1a8f45" stroke-width="3.4"><polyline points="5,12 10,17 19,7"></polyline></svg>
-    </div>
-    <div style="aspect-ratio: 1; min-width: 0; border: 1px solid #dbd1be; border-radius: 18px; background: #fffdf7; padding: 8px 5px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px">
-      <div style="font-weight: 700; font-size: 1.6rem; line-height: 1; color: #9b9284">ג</div>
-      <div style="font-size: .74rem; color: #9b9284; white-space: nowrap">מנוחה</div>
-    </div>
-    <div style="aspect-ratio: 1; min-width: 0; border: 1px solid #dbd1be; border-radius: 18px; background: #fffdf7; padding: 8px 5px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; box-shadow: inset 0 0 0 3px rgba(47,146,152,.55)">
-      <div style="font-weight: 700; font-size: 1.6rem; line-height: 1">ד</div>
-      <div style="font-size: .74rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%">גב</div>
-      <div style="font-size: .64rem; font-weight: 700; color: #1d6b6f">היום</div>
+    <div style="margin: 2px 4px 20px">
+      <div style="font-size: 1.65rem; font-weight: 700; letter-spacing: -.01em; color: #000">לילה טוב, אורי</div>
+      <div style="margin-top: 5px; font-size: .85rem; font-weight: 600; color: #000; opacity: .75">יום שבת, 23 באוגוסט</div>
     </div>
 
-    <div style="aspect-ratio: 1; min-width: 0; border: 1px solid #dbd1be; border-radius: 18px; background: #fffdf7; padding: 8px 5px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px">
-      <div style="font-weight: 700; font-size: 1.6rem; line-height: 1; color: #9b9284">ה</div>
-      <div style="font-size: .74rem; color: #9b9284; white-space: nowrap">מנוחה</div>
+    <!-- כרטיס הציטוט -->
+    <div style="position: relative; height: 234px; border-radius: 22px; overflow: hidden; border: 1px solid #dbd1be; display: flex; align-items: center; background: radial-gradient(120% 90% at 85% 0%, rgba(196,158,92,.38), transparent 62%), linear-gradient(160deg, #2a251c, #14120e)">
+      <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(24,20,14,.68) 6%, rgba(24,20,14,.92) 36%, rgba(24,20,14,.92) 64%, rgba(24,20,14,.24) 100%)"></div>
+      <div style="position: relative; z-index: 1; padding: 18px 18px 44px; width: 100%; text-align: center">
+        <div style="font-size: 1.06rem; font-weight: 600; color: #fdfaf3; line-height: 1.5">„נכשלתי פעם אחר פעם אחר פעם בחיים שלי. וזו בדיוק הסיבה שאני מצליח.”</div>
+      </div>
+      <div style="position: absolute; inset-inline: 0; bottom: 12px; z-index: 1; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 0 18px">
+        <div style="width: 24px; height: 24px; border-radius: 50%; background: #2f2a22; color: #fbf7ef; display: grid; place-items: center; font-size: .68rem; font-weight: 800; letter-spacing: -.02em">מג</div>
+        <div style="color: rgba(255,255,255,.84); font-size: .82rem; font-weight: 600">מייקל ג'ורדן</div>
+      </div>
     </div>
-    <div style="aspect-ratio: 1; min-width: 0; border: 1px solid #dbd1be; border-radius: 18px; background: #fffdf7; padding: 8px 5px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px">
-      <div style="font-weight: 700; font-size: 1.6rem; line-height: 1">ו</div>
-      <div style="font-size: .74rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%">כתפיים</div>
-    </div>
-    <div style="aspect-ratio: 1; min-width: 0; border: 1px solid #dbd1be; border-radius: 18px; background: #fffdf7; padding: 8px 5px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px">
-      <div style="font-weight: 700; font-size: 1.6rem; line-height: 1; color: #9b9284">ש</div>
-      <div style="font-size: .74rem; color: #9b9284; white-space: nowrap">מנוחה</div>
-    </div>
-  </div>
 
-  <!-- ============ 2 ============ -->
-  <div style="display: flex; align-items: baseline; gap: 8px; margin-bottom: 10px">
-    <div style="width: 24px; height: 24px; border-radius: 8px; background: #2f2a22; color: #fbf7ef; display: grid; place-items: center; font-size: .78rem; font-weight: 800; flex: none">2</div>
-    <div style="font-weight: 700; font-size: .98rem">רק ימי האימון — הכי גדול</div>
-  </div>
-  <div style="font-size: .78rem; color: #6b6253; margin: 0 0 10px 0">ימי מנוחה לא מוצגים בכלל. נשאר רק מה שאתה עושה.</div>
+    <!-- מטרות -->
+    <div style="display: flex; align-items: center; gap: 10px; margin: 34px 0 12px">
+      <span style="font-size: 1.15rem; line-height: 1">🎯</span>
+      <div style="font-weight: 700; font-size: 1.05rem; letter-spacing: -.01em">מטרות</div>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 8px">
+      <div style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 16px; background: #fffdf7; border: 1px solid rgba(20,18,14,.14); box-shadow: 0 1px 2px rgba(90,75,45,.10), 0 8px 20px -12px rgba(90,75,45,.10)">
+        <div style="flex: none; width: 30px; height: 30px; border-radius: 10px; background: linear-gradient(155deg, rgba(255,255,255,.35), rgba(0,0,0,.06)), linear-gradient(150deg, #2f9298, #1d6b6f); color: #eaf6f6; display: grid; place-items: center; font-size: .82rem; font-weight: 800">1</div>
+        <div style="font-size: .94rem; font-weight: 600">לרדת 5 קילו</div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 16px; background: #fffdf7; border: 1px solid rgba(20,18,14,.14); box-shadow: 0 1px 2px rgba(90,75,45,.10), 0 8px 20px -12px rgba(90,75,45,.10)">
+        <div style="flex: none; width: 30px; height: 30px; border-radius: 10px; background: linear-gradient(155deg, rgba(255,255,255,.35), rgba(0,0,0,.06)), linear-gradient(150deg, #2f9298, #1d6b6f); color: #eaf6f6; display: grid; place-items: center; font-size: .82rem; font-weight: 800">2</div>
+        <div style="font-size: .94rem; font-weight: 600">לחזור לשכיבות שמיכה</div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 16px; background: #fffdf7; border: 1px solid rgba(20,18,14,.14); box-shadow: 0 1px 2px rgba(90,75,45,.10), 0 8px 20px -12px rgba(90,75,45,.10)">
+        <div style="flex: none; width: 30px; height: 30px; border-radius: 10px; background: linear-gradient(155deg, rgba(255,255,255,.35), rgba(0,0,0,.06)), linear-gradient(150deg, #2f9298, #1d6b6f); color: #eaf6f6; display: grid; place-items: center; font-size: .82rem; font-weight: 800">3</div>
+        <div style="font-size: .94rem; font-weight: 600">לישון 7 שעות</div>
+      </div>
+    </div>
 
-  <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 26px">
-    <div style="aspect-ratio: 1; min-width: 0; border: 2px solid #25D366; border-radius: 18px; background: rgba(37,211,102,.18); padding: 8px 5px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px">
-      <div style="font-weight: 700; font-size: 1.6rem; line-height: 1">א</div>
-      <div style="font-size: .74rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%">חזה</div>
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1a8f45" stroke-width="3.4"><polyline points="5,12 10,17 19,7"></polyline></svg>
+    <!-- תזונה היום -->
+    <div style="display: flex; align-items: center; gap: 10px; margin: 34px 0 12px">
+      <span style="font-size: 1.15rem; line-height: 1">🍎</span>
+      <div style="font-weight: 700; font-size: 1.05rem; letter-spacing: -.01em">תזונה היום</div>
     </div>
-    <div style="aspect-ratio: 1; min-width: 0; border: 2px solid #25D366; border-radius: 18px; background: rgba(37,211,102,.18); padding: 8px 5px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px">
-      <div style="font-weight: 700; font-size: 1.6rem; line-height: 1">ב</div>
-      <div style="font-size: .74rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%">רגליים</div>
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1a8f45" stroke-width="3.4"><polyline points="5,12 10,17 19,7"></polyline></svg>
+    <div style="background: #fffdf7; border: 1px solid rgba(20,18,14,.14); border-radius: 16px; padding: 13px 14px; box-shadow: 0 1px 2px rgba(90,75,45,.10), 0 8px 20px -12px rgba(90,75,45,.10)">
+      <div style="margin: 0 0 9px; font-size: .95rem">נאכלו <b style="font-size: 1.15rem; font-weight: 800">1,220</b> מתוך <span>2,200</span> קק"ל</div>
+      <div style="display: flex; flex-direction: column; gap: 2px">
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 5px 0; border-bottom: 1px solid rgba(20,18,14,.14)">
+          <div style="display: flex; align-items: center; gap: 6px; font-size: .86rem; font-weight: 600"><span style="font-size: 1.1rem; line-height: 1">🥩</span> חלבון</div>
+          <div style="font-size: .88rem; color: #6b6253"><b style="color: #221e18; font-weight: 800; font-size: .96rem">94</b>/<span>150</span> ג'</div>
+        </div>
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 5px 0; border-bottom: 1px solid rgba(20,18,14,.14)">
+          <div style="display: flex; align-items: center; gap: 6px; font-size: .86rem; font-weight: 600"><span style="font-size: 1.1rem; line-height: 1">🍞</span> פחמימות</div>
+          <div style="font-size: .88rem; color: #6b6253"><b style="color: #221e18; font-weight: 800; font-size: .96rem">100</b>/<span>220</span> ג'</div>
+        </div>
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 5px 0">
+          <div style="display: flex; align-items: center; gap: 6px; font-size: .86rem; font-weight: 600"><span style="font-size: 1.1rem; line-height: 1">🥑</span> שומן</div>
+          <div style="font-size: .88rem; color: #6b6253"><b style="color: #221e18; font-weight: 800; font-size: .96rem">40</b>/<span>70</span> ג'</div>
+        </div>
+      </div>
     </div>
-    <div style="aspect-ratio: 1; min-width: 0; border: 1px solid #dbd1be; border-radius: 18px; background: #fffdf7; padding: 8px 5px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; box-shadow: inset 0 0 0 3px rgba(47,146,152,.55)">
-      <div style="font-weight: 700; font-size: 1.6rem; line-height: 1">ד</div>
-      <div style="font-size: .74rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%">גב</div>
-      <div style="font-size: .64rem; font-weight: 700; color: #1d6b6f">היום</div>
-    </div>
-    <div style="aspect-ratio: 1; min-width: 0; border: 1px solid #dbd1be; border-radius: 18px; background: #fffdf7; padding: 8px 5px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px">
-      <div style="font-weight: 700; font-size: 1.6rem; line-height: 1">ו</div>
-      <div style="font-size: .74rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%">כתפיים</div>
-    </div>
-  </div>
 
-  <!-- ============ 3 ============ -->
-  <div style="display: flex; align-items: baseline; gap: 8px; margin-bottom: 10px">
-    <div style="width: 24px; height: 24px; border-radius: 8px; background: #2f2a22; color: #fbf7ef; display: grid; place-items: center; font-size: .78rem; font-weight: 800; flex: none">3</div>
-    <div style="font-weight: 700; font-size: .98rem">שורה אחת, גבוהה יותר</div>
-  </div>
-  <div style="font-size: .78rem; color: #6b6253; margin: 0 0 10px 0">כל השבוע בשורה אחת כמו היום, אבל כל יום גבוה כמעט פי שניים.</div>
+    <!-- אימונים השבוע -->
+    <div style="display: flex; align-items: center; gap: 10px; margin: 34px 0 12px">
+      <span style="font-size: 1.15rem; line-height: 1">🏋️</span>
+      <div style="font-weight: 700; font-size: 1.05rem; letter-spacing: -.01em">אימונים השבוע</div>
+      <div style="margin-inline-start: auto; font-size: .92rem"><b style="font-size: 1.15rem; font-weight: 800">2</b> מתוך <span>4</span></div>
+    </div>
+    <div style="background: #fffdf7; border: 1px solid rgba(20,18,14,.14); border-radius: 16px; padding: 13px 14px; box-shadow: 0 1px 2px rgba(90,75,45,.10), 0 8px 20px -12px rgba(90,75,45,.10)">
+      <div style="height: 7px; background: #eae3d4; border-radius: 999px; overflow: hidden">
+        <div style="height: 100%; width: 50%; border-radius: 999px; background: linear-gradient(90deg, #1d6b6f, #2f9298)"></div>
+      </div>
+    </div>
 
-  <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px">
-    <div style="min-width: 0; height: 96px; border: 2px solid #25D366; border-radius: 15px; background: rgba(37,211,102,.18); padding: 8px 2px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px">
-      <div style="font-weight: 700; font-size: 1.32rem; line-height: 1">א</div>
-      <div style="font-size: .6rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%">חזה</div>
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1a8f45" stroke-width="3.6"><polyline points="5,12 10,17 19,7"></polyline></svg>
+    <!-- ימי האימון בלבד — משבצות גדולות, ירוק = בוצע -->
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 12px 0 0">
+
+      <div style="aspect-ratio: 1; min-width: 0; border: 2px solid #25D366; border-radius: 18px; background: rgba(37,211,102,.18); padding: 8px 5px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px">
+        <div style="font-weight: 700; font-size: 1.6rem; line-height: 1">א</div>
+        <div style="font-size: .74rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%">חזה</div>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1a8f45" stroke-width="3.4"><polyline points="5,12 10,17 19,7"></polyline></svg>
+      </div>
+
+      <div style="aspect-ratio: 1; min-width: 0; border: 2px solid #25D366; border-radius: 18px; background: rgba(37,211,102,.18); padding: 8px 5px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px">
+        <div style="font-weight: 700; font-size: 1.6rem; line-height: 1">ב</div>
+        <div style="font-size: .74rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%">רגליים</div>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1a8f45" stroke-width="3.4"><polyline points="5,12 10,17 19,7"></polyline></svg>
+      </div>
+
+      <div style="aspect-ratio: 1; min-width: 0; border: 1px solid #dbd1be; border-radius: 18px; background: #fffdf7; padding: 8px 5px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; box-shadow: inset 0 0 0 3px rgba(47,146,152,.55)">
+        <div style="font-weight: 700; font-size: 1.6rem; line-height: 1">ד</div>
+        <div style="font-size: .74rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%">גב</div>
+        <div style="font-size: .64rem; font-weight: 700; color: #1d6b6f">היום</div>
+      </div>
+
+      <div style="aspect-ratio: 1; min-width: 0; border: 1px solid #dbd1be; border-radius: 18px; background: #fffdf7; padding: 8px 5px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px">
+        <div style="font-weight: 700; font-size: 1.6rem; line-height: 1">ו</div>
+        <div style="font-size: .74rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%">כתפיים</div>
+      </div>
+
     </div>
-    <div style="min-width: 0; height: 96px; border: 2px solid #25D366; border-radius: 15px; background: rgba(37,211,102,.18); padding: 8px 2px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px">
-      <div style="font-weight: 700; font-size: 1.32rem; line-height: 1">ב</div>
-      <div style="font-size: .6rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%">רגליים</div>
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1a8f45" stroke-width="3.6"><polyline points="5,12 10,17 19,7"></polyline></svg>
-    </div>
-    <div style="min-width: 0; height: 96px; border: 1px solid #dbd1be; border-radius: 15px; background: #fffdf7; padding: 8px 2px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px">
-      <div style="font-weight: 700; font-size: 1.32rem; line-height: 1; color: #9b9284">ג</div>
-      <div style="font-size: .6rem; color: #9b9284; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%">מנוחה</div>
-    </div>
-    <div style="min-width: 0; height: 96px; border: 1px solid #dbd1be; border-radius: 15px; background: #fffdf7; padding: 8px 2px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; box-shadow: inset 0 0 0 3px rgba(47,146,152,.55)">
-      <div style="font-weight: 700; font-size: 1.32rem; line-height: 1">ד</div>
-      <div style="font-size: .6rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%">גב</div>
-      <div style="font-size: .56rem; font-weight: 700; color: #1d6b6f">היום</div>
-    </div>
-    <div style="min-width: 0; height: 96px; border: 1px solid #dbd1be; border-radius: 15px; background: #fffdf7; padding: 8px 2px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px">
-      <div style="font-weight: 700; font-size: 1.32rem; line-height: 1; color: #9b9284">ה</div>
-      <div style="font-size: .6rem; color: #9b9284; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%">מנוחה</div>
-    </div>
-    <div style="min-width: 0; height: 96px; border: 1px solid #dbd1be; border-radius: 15px; background: #fffdf7; padding: 8px 2px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px">
-      <div style="font-weight: 700; font-size: 1.32rem; line-height: 1">ו</div>
-      <div style="font-size: .6rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%">כתפיים</div>
-    </div>
-    <div style="min-width: 0; height: 96px; border: 1px solid #dbd1be; border-radius: 15px; background: #fffdf7; padding: 8px 2px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px">
-      <div style="font-weight: 700; font-size: 1.32rem; line-height: 1; color: #9b9284">ש</div>
-      <div style="font-size: .6rem; color: #9b9284; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%">מנוחה</div>
-    </div>
+
+    <div style="margin-top: 20px; width: 100%; padding: 17px; font-size: 1.08rem; font-weight: 700; border-radius: 22px; text-align: center; color: #eaf6f6; letter-spacing: .01em; background: linear-gradient(155deg, rgba(255,255,255,.3), rgba(0,0,0,.08)), linear-gradient(150deg, #2f9298, #1d6b6f); box-shadow: 0 8px 18px -6px rgba(29,107,111,.45), 0 2px 4px rgba(29,107,111,.3)">התחל אימון</div>
+
   </div>
 
-  <div style="margin-top: 26px; padding: 13px 15px; border-radius: 14px; background: rgba(47,146,152,.11); border: 1px solid rgba(47,146,152,.32); font-size: .82rem; line-height: 1.7">
-    בשלושתן: <b>ירוק מלא + וי</b> = האימון בוצע. <b>לבן</b> = יום אימון שעוד לא בוצע.
-    <b>אפור</b> = יום מנוחה. <b>מסגרת טורקיז דקה</b> = היום — סימון קטן בלבד, לא צבע מלא.
+  <!-- סרגל תחתון -->
+  <div style="height: 62px; flex: none; display: grid; grid-template-columns: repeat(4, 1fr); background: rgba(255,253,247,.82); border-top: 1px solid rgba(20,18,14,.14)">
+    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: #2f2a22">
+      <span style="font-size: 1.24rem; line-height: 1">🏠</span>
+      <span style="font-size: .68rem; font-weight: 600">בית</span>
+    </div>
+    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: #9b9284">
+      <span style="font-size: 1.24rem; line-height: 1; filter: grayscale(1) opacity(.6)">🍽️</span>
+      <span style="font-size: .68rem; font-weight: 600">תזונה</span>
+    </div>
+    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: #9b9284">
+      <span style="font-size: 1.24rem; line-height: 1; filter: grayscale(1) opacity(.6)">🏋️</span>
+      <span style="font-size: .68rem; font-weight: 600">אימון</span>
+    </div>
+    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: #9b9284">
+      <span style="font-size: 1.24rem; line-height: 1; filter: grayscale(1) opacity(.6)">📈</span>
+      <span style="font-size: .68rem; font-weight: 600">התקדמות</span>
+    </div>
   </div>
 
 </div>
