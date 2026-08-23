@@ -212,42 +212,12 @@ async function initThemeSetting() {
 
   const select = $('#themeSelect');
   select.value = saved;
-
-  /*
-   * כפתור השמש/ירח בראש המסך.
-   *
-   * ההגדרה קיימת גם בהגדרות, אבל בלילה — כשרוצים להחשיך מסך — זה
-   * שלוש פעולות. הכפתור הזה הופך את זה ללחיצה אחת מכל מסך, והוא
-   * והבורר בהגדרות מסונכרנים בשני הכיוונים.
-   */
-  const themeBtn = $('#themeBtn');
-
-  /** האם המסך כרגע כהה בפועל — כולל המקרה של "לפי המכשיר" */
-  const isDarkNow = () => document.documentElement.getAttribute('data-theme') === 'dark'
-    || (!document.documentElement.hasAttribute('data-theme')
-        && matchMedia('(prefers-color-scheme: dark)').matches);
-
-  function refreshThemeBtn() {
-    if (!themeBtn) return;
-    const dark = isDarkNow();
-    // הכפתור מראה לאן הוא ייקח אותך, לא איפה אתה נמצא
-    themeBtn.textContent = dark ? '☀️' : '🌙';
-    themeBtn.setAttribute('aria-label', dark ? 'מצב יום' : 'מצב לילה');
-  }
-
-  async function setTheme(value) {
-    applyTheme(value);
-    select.value = value;
-    refreshThemeBtn();
-    await db.setSetting(THEME_KEY, value);
+  select.addEventListener('change', async () => {
+    applyTheme(select.value);
+    await db.setSetting(THEME_KEY, select.value);
     // הגרפים מציירים את הצבעים שלהם פעם אחת - צריך רינדור מחדש כדי שיתעדכנו
     if (currentScreen === 'progress') renderProgress();
-  }
-
-  themeBtn?.addEventListener('click', () => setTheme(isDarkNow() ? 'light' : 'dark'));
-  select.addEventListener('change', () => setTheme(select.value));
-
-  refreshThemeBtn();
+  });
 }
 
 /* ---------- הגדרות ---------- */
@@ -290,7 +260,7 @@ async function registerSW() {
     const reg = await navigator.serviceWorker.register('sw.js');
 
     // גרסה שכבר סיימה להיטען וממתינה מרגע הפתיחה
-    if (reg.waiting && navigator.serviceWorker.controller) showUpdateBar(reg.waiting);
+    if (reg.waiting && navigator.serviceWorker.controller) takeUpdate(reg.waiting);
 
     reg.addEventListener('updatefound', () => {
       const incoming = reg.installing;
@@ -301,7 +271,7 @@ async function registerSW() {
          * שם אין גרסה קודמת להחליף, ו"יש עדכון" היה סתם מבלבל.
          */
         if (incoming.state === 'installed' && navigator.serviceWorker.controller) {
-          showUpdateBar(incoming);
+          takeUpdate(incoming);
         }
       });
     });
@@ -324,13 +294,22 @@ async function registerSW() {
 }
 
 /*
- * הודעת "יש גרסה חדשה".
+ * גרסה חדשה מותקנת מעצמה.
  *
- * זמנית ומכוונת לתקופת הפיתוח: כשאני דוחף תיקון, האפליקציה המותקנת
- * ממשיכה להריץ את הגרסה השמורה עד סגירה ופתיחה מלאה — וזה נראה בדיוק
- * כמו תיקון שלא עבד. **כשהאפליקציה תהיה גמורה ותפסיק להשתנות כל יום,
- * להסיר את המקטע הזה ואת #updateBar.**
+ * קודם היה כאן רק פס "יש גרסה חדשה" עם כפתור, והוא דרש לחיצה. בפועל
+ * זה אומר שכל תיקון שנדחף לא הגיע עד שנזכרים ללחוץ — וזה נראה בדיוק
+ * כמו תיקון שלא עבד. זו הייתה תלונה חוזרת, ובצדק.
+ *
+ * לכן העדכון נכנס לבד, מלבד מקרה אחד: **אימון פעיל.** החלפת הקוד
+ * מרעננת את הדף, ולעשות את זה באמצע סט זה לאבד את מה שרשמת. במצב
+ * הזה הפס נשאר, והבחירה מתי לרענן היא שלך.
  */
+function takeUpdate(worker) {
+  if (hasActiveWorkout()) { showUpdateBar(worker); return; }
+  worker.postMessage({ type: 'SKIP_WAITING' });   // controllerchange ירענן
+}
+
+/* הפס — נשאר רק למקרה של אימון פעיל, שבו אסור לרענן מתחת לידיים */
 function showUpdateBar(worker) {
   const bar = $('#updateBar');
   const btn = $('#updateBtn');
