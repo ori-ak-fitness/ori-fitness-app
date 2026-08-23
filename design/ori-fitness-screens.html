@@ -616,7 +616,7 @@
       </div>
       <div class="screen on" id="s4">
 
-<div dir="rtl" style="width: 430px; height: 1265px; display: flex; flex-direction: column; background: #f4efe4; color: #221e18; font-size: 16px; overflow: hidden">
+<div dir="rtl" style="width: 430px; height: 1205px; display: flex; flex-direction: column; background: #f4efe4; color: #221e18; font-size: 16px; overflow: hidden">
 
   <!-- סרגל עליון -->
   <div style="height: 54px; flex: none; display: flex; align-items: center; justify-content: space-between; padding: 0 16px; background: rgba(255,253,247,.82); border-bottom: 1px solid rgba(20,18,14,.14)">
@@ -702,45 +702,49 @@
       </div>
     </div>
 
-    <!-- כל שבעת הימים, שתי שורות, גודל ביניים -->
-    <div style="display: grid; grid-template-columns: repeat(4, 74px); justify-content: start; gap: 8px; margin: 12px 0 0">
+    <!-- שבעת הימים בשורה אחת — גבוהים יותר, מיושרים, ירוק = בוצע -->
+    <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin: 12px 0 0">
 
-      <div style="width: 74px; height: 74px; border: 2px solid #25D366; border-radius: 16px; background: rgba(37,211,102,.18); padding: 6px 3px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px">
-        <div style="font-weight: 700; font-size: 1.32rem; line-height: 1">א</div>
-        <div style="font-size: .66rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%">חזה</div>
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1a8f45" stroke-width="3.6"><polyline points="5,12 10,17 19,7"></polyline></svg>
+      <div style="min-width: 0; height: 92px; border: 1px solid #25D366; border-radius: 14px; background: rgba(37,211,102,.16); display: grid; grid-template-rows: 26px 1fr 18px; align-items: center; justify-items: center; padding: 7px 2px">
+        <div style="font-weight: 700; font-size: 1.28rem; line-height: 1">א</div>
+        <div style="font-size: .6rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%">חזה</div>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1a8f45" stroke-width="3.6"><polyline points="5,12 10,17 19,7"></polyline></svg>
       </div>
 
-      <div style="width: 74px; height: 74px; border: 2px solid #25D366; border-radius: 16px; background: rgba(37,211,102,.18); padding: 6px 3px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px">
-        <div style="font-weight: 700; font-size: 1.32rem; line-height: 1">ב</div>
-        <div style="font-size: .66rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%">רגליים</div>
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1a8f45" stroke-width="3.6"><polyline points="5,12 10,17 19,7"></polyline></svg>
+      <div style="min-width: 0; height: 92px; border: 1px solid #25D366; border-radius: 14px; background: rgba(37,211,102,.16); display: grid; grid-template-rows: 26px 1fr 18px; align-items: center; justify-items: center; padding: 7px 2px">
+        <div style="font-weight: 700; font-size: 1.28rem; line-height: 1">ב</div>
+        <div style="font-size: .6rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%">רגליים</div>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1a8f45" stroke-width="3.6"><polyline points="5,12 10,17 19,7"></polyline></svg>
       </div>
 
-      <div style="width: 74px; height: 74px; border: 1px solid #dbd1be; border-radius: 16px; background: #fffdf7; padding: 6px 3px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px">
-        <div style="font-weight: 700; font-size: 1.32rem; line-height: 1; color: #9b9284">ג</div>
-        <div style="font-size: .66rem; color: #9b9284; white-space: nowrap">מנוחה</div>
+      <div style="min-width: 0; height: 92px; border: 1px solid #e4dccc; border-radius: 14px; background: #faf7ef; display: grid; grid-template-rows: 26px 1fr 18px; align-items: center; justify-items: center; padding: 7px 2px">
+        <div style="font-weight: 700; font-size: 1.28rem; line-height: 1; color: #b3ab9c">ג</div>
+        <div style="font-size: .6rem; color: #b3ab9c; white-space: nowrap">מנוחה</div>
+        <div></div>
       </div>
 
-      <div style="width: 74px; height: 74px; border: 1px solid #dbd1be; border-radius: 16px; background: #fffdf7; padding: 6px 3px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; box-shadow: inset 0 0 0 3px rgba(47,146,152,.55)">
-        <div style="font-weight: 700; font-size: 1.32rem; line-height: 1">ד</div>
-        <div style="font-size: .66rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%">גב</div>
-        <div style="font-size: .58rem; font-weight: 700; color: #1d6b6f">היום</div>
+      <div style="min-width: 0; height: 92px; border: 1px solid #dbd1be; border-radius: 14px; background: #fffdf7; box-shadow: inset 0 0 0 2px #2f9298; display: grid; grid-template-rows: 26px 1fr 18px; align-items: center; justify-items: center; padding: 7px 2px">
+        <div style="font-weight: 700; font-size: 1.28rem; line-height: 1; color: #1d6b6f">ד</div>
+        <div style="font-size: .6rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%">גב</div>
+        <div style="font-size: .56rem; font-weight: 700; color: #1d6b6f">היום</div>
       </div>
 
-      <div style="width: 74px; height: 74px; border: 1px solid #dbd1be; border-radius: 16px; background: #fffdf7; padding: 6px 3px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px">
-        <div style="font-weight: 700; font-size: 1.32rem; line-height: 1; color: #9b9284">ה</div>
-        <div style="font-size: .66rem; color: #9b9284; white-space: nowrap">מנוחה</div>
+      <div style="min-width: 0; height: 92px; border: 1px solid #e4dccc; border-radius: 14px; background: #faf7ef; display: grid; grid-template-rows: 26px 1fr 18px; align-items: center; justify-items: center; padding: 7px 2px">
+        <div style="font-weight: 700; font-size: 1.28rem; line-height: 1; color: #b3ab9c">ה</div>
+        <div style="font-size: .6rem; color: #b3ab9c; white-space: nowrap">מנוחה</div>
+        <div></div>
       </div>
 
-      <div style="width: 74px; height: 74px; border: 1px solid #dbd1be; border-radius: 16px; background: #fffdf7; padding: 6px 3px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px">
-        <div style="font-weight: 700; font-size: 1.32rem; line-height: 1">ו</div>
-        <div style="font-size: .66rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%">כתפיים</div>
+      <div style="min-width: 0; height: 92px; border: 1px solid #dbd1be; border-radius: 14px; background: #fffdf7; display: grid; grid-template-rows: 26px 1fr 18px; align-items: center; justify-items: center; padding: 7px 2px">
+        <div style="font-weight: 700; font-size: 1.28rem; line-height: 1">ו</div>
+        <div style="font-size: .6rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%">כתפיים</div>
+        <div style="width: 7px; height: 7px; border-radius: 50%; border: 1px solid #c9c0ae"></div>
       </div>
 
-      <div style="width: 74px; height: 74px; border: 1px solid #dbd1be; border-radius: 16px; background: #fffdf7; padding: 6px 3px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px">
-        <div style="font-weight: 700; font-size: 1.32rem; line-height: 1; color: #9b9284">ש</div>
-        <div style="font-size: .66rem; color: #9b9284; white-space: nowrap">מנוחה</div>
+      <div style="min-width: 0; height: 92px; border: 1px solid #e4dccc; border-radius: 14px; background: #faf7ef; display: grid; grid-template-rows: 26px 1fr 18px; align-items: center; justify-items: center; padding: 7px 2px">
+        <div style="font-weight: 700; font-size: 1.28rem; line-height: 1; color: #b3ab9c">ש</div>
+        <div style="font-size: .6rem; color: #b3ab9c; white-space: nowrap">מנוחה</div>
+        <div></div>
       </div>
 
     </div>
