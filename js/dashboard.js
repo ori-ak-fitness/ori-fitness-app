@@ -356,14 +356,16 @@ export async function renderStats() {
 
     $('#hsWorkoutsCount').textContent = String(week.length);
     $('#hsWorkoutsGoal').textContent = String(weeklyGoal);
-    $('#hsWorkoutsBar').style.width = `${weeklyGoal > 0 ? Math.min(week.length / weeklyGoal, 1) * 100 : 0}%`;
 
-    // אירובי עם יעד שבועי מוגדר — אותו תקציר שמופיע במסך האימון, גם כאן
+    // אירובי עם יעד שבועי מוגדר — אותו תקציר שמופיע במסך האימון, גם כאן.
+    // בלי אירובי מוגדר הכרטיס מוסתר לגמרי, אחרת נשארה כאן קופסה ריקה
+    // עם מסגרת ובלי שום תוכן בתוכה.
     const cardioSummary = await weeklyCardioSummary();
     $('#hsCardioList').replaceChildren(...cardioSummary.map((c) => el('div', { class: 'hs-cardio-row' },
       el('span', {}, `${c.icon} ${c.name}`),
       el('b', {}, `${c.count}/${c.goal}`),
     )));
+    $('#hsCardioCard').classList.toggle('hidden', cardioSummary.length === 0);
 
     // אותו לוח שבוע (עם וי על ימים שבוצעו) שיש במסך האימון, גם כאן בבית
     const [hsRoutines, hsSchedule] = await Promise.all([getRoutines(), getSchedule()]);

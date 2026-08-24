@@ -217,11 +217,13 @@
           <h2>אימונים השבוע</h2>
           <span class="hs-value"><b id="hsWorkoutsCount">0</b> מתוך <span id="hsWorkoutsGoal">0</span></span>
         </div>
-        <div class="hs-card">
-          <div class="bar"><div class="bar-fill" id="hsWorkoutsBar"></div></div>
+        <!-- הימים הם התוכן של המקטע, לא תוכן של כרטיס — ולכן הם באים
+             ראשונים ובלי מסגרת סביבם. פס ההתקדמות שהיה כאן הוסר: הוא
+             אמר בדיוק את מה שהאריחים והמונה שבכותרת כבר אומרים. -->
+        <div class="week-strip" id="hsWeekStrip"></div>
+        <div class="hs-card hidden" id="hsCardioCard">
           <div class="hs-cardio-list" id="hsCardioList"></div>
         </div>
-        <div class="week-strip" id="hsWeekStrip"></div>
       </div>
 
       <button class="btn btn-primary btn-xl" id="homeWorkoutBtn">התחל אימון</button>

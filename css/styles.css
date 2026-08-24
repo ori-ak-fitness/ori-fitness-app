@@ -490,7 +490,6 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .hs-macro-val { font-size: .88rem; color: var(--text-dim); }
 .hs-macros b { color: var(--text); font-weight: 800; font-size: .96rem; }
 .hs-macro-ico { font-size: 1.1rem; line-height: 1; }
-.hs-card .bar-fill { background: linear-gradient(90deg, var(--gold-deep), var(--gold)); }
 
 /* ---------- יעדים אישיים (מסך הבית) ---------- */
 /* כל מטרה כרטיסון נפרד עם מספר "מבריק" (אותה שכבת אור עדינה על ה-accent
@@ -544,8 +543,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .badge-name { font-size: .72rem; font-weight: 600; color: var(--text-dim); }
 .badge-tile.is-earned .badge-name { color: var(--text); }
 
-.hs-cardio-list { display: flex; flex-direction: column; gap: 5px; margin-top: 9px; }
-.hs-cardio-list:empty { margin-top: 0; }
+.hs-cardio-list { display: flex; flex-direction: column; gap: 5px; }
 .hs-cardio-row {
   display: flex; justify-content: space-between; font-size: .8rem;
   color: var(--text-dim); font-variant-numeric: tabular-nums;
@@ -727,7 +725,10 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
  * היותר שביעית ממנו. לכן ה"גדול יותר" מגיע משלושה מקומות קטנים —
  * הרצועה נמתחת עד קצוות המסך, הרווחים מצטמצמים, והאות בפנים גדלה.
  */
-#hsWeekStrip { gap: 3px; margin-inline: -16px; }
+/* הרצועה יושבת ישר מתחת לכותרת המקטע, ולכן צריך כאן מרווח משלה —
+   קודם היא באה אחרי כרטיס שכבר סיפק אותו */
+#hsWeekStrip { gap: 3px; margin-inline: -16px; margin-top: 2px; }
+#hsCardioCard { margin-top: 10px; }
 #hsWeekStrip .day-letter { font-size: 1.38rem; }
 #hsWeekStrip .day-plan { font-size: .64rem; }
 .day-chip {
