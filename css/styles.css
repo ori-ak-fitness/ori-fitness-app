@@ -1691,3 +1691,38 @@ body.gate-open main { display: none !important; }
 .hs-card, .challenge-card, .goal-row {
   box-shadow: 0 1px 2px var(--shadow-soft), 0 8px 20px -12px var(--shadow-soft);
 }
+
+/* ===================================================================
+   שטח נגיעה מינימלי — 44 פיקסלים.
+
+   כמה כפתורים כאן מצוירים קטן בכוונה: חיצי הגרפים, גלגל השיניים,
+   כפתור המצלמה על הציטוט. הם נראים נכון בגודל הזה, אבל אצבע אינה
+   סמן עכבר, ומתחת ל-44 מפספסים אותם — במיוחד חיצי הגרפים, שהם 30.
+
+   הפתרון מרחיב את שטח הנגיעה בלי לגעת במראה: שכבה שקופה סביב
+   הכפתור. הריבוע גדל, הציור נשאר בדיוק כפי שהיה.
+   =================================================================== */
+
+.icon-btn,
+.quote-photo-btn,
+.chart-nav-btn,
+.btn-sm,
+.plan-ex-actions .icon-btn {
+  position: relative;
+}
+.icon-btn::after,
+.quote-photo-btn::after,
+.chart-nav-btn::after,
+.btn-sm::after,
+.plan-ex-actions .icon-btn::after {
+  content: '';
+  position: absolute;
+  inset-block: calc(50% - 22px);
+  inset-inline: calc(50% - 22px);
+  min-width: 44px; min-height: 44px;
+  /* השכבה נועדה לאצבע בלבד ואסור שתחסום את מה שמתחתיה בעכבר */
+  pointer-events: auto;
+}
+/* כפתור רחב כבר רחב מספיק — רק הגובה צריך תיקון, אחרת השכבה
+   הייתה בולטת מעבר לצדדים ו"גונבת" לחיצות משכנים */
+.btn-sm::after { inset-inline: 0; }
