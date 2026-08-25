@@ -496,8 +496,8 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
    כמו נקודות הימים למעלה), במקום רשימה שטוחה עם קווי הפרדה */
 .goals-card { display: flex; flex-direction: column; gap: 8px; }
 .goals-card .muted {
-  padding: 14px; font-size: .85rem;
-  background: var(--bg-elev); border: 1px solid var(--line); border-radius: var(--r-md);
+  padding: 14px; font-size: .85rem; text-align: center;
+  background: var(--bg-elev); border: 1px dashed var(--line); border-radius: var(--r-md);
 }
 .goal-row {
   display: flex; align-items: center; gap: 12px;
@@ -921,7 +921,10 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
   background: var(--bg-elev); border: 1px solid var(--line);
   border-radius: var(--r-md); padding: 13px 14px;
 }
-.full-menu-card.is-empty { color: var(--text-faint); font-style: italic; }
+.full-menu-card.is-empty {
+  color: var(--text-dim); text-align: center;
+  border-style: dashed; white-space: normal;
+}
 
 /* תזכורת מוטיבציה/הבטחה בתוך האימון הפעיל — אותו ציטוט שמתחלף בבית */
 .workout-reminder {
