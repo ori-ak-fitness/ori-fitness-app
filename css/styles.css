@@ -522,6 +522,10 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
   background: var(--bg-elev); border: 1px solid var(--line);
   border-radius: var(--r-md); padding: 12px 14px;
 }
+.challenge-card.is-empty {
+  border-style: dashed; box-shadow: none;
+  color: var(--text-dim); font-size: .85rem; text-align: center;
+}
 .challenge-card .bar-fill { background: linear-gradient(90deg, var(--gold-deep), var(--gold)); }
 .challenge-msg { font-size: .8rem; color: var(--text-dim); margin-top: 9px; }
 .challenge-msg.is-praise { font-size: .88rem; font-weight: 700; color: var(--text); }

@@ -104,7 +104,16 @@ export async function renderChallengeWidget() {
   let challenge = await load();
   const section = $('#challengeSection');
   const host = $('#challengeCard');
-  if (!challenge) { section.classList.add('hidden'); return; }
+  section.classList.remove('hidden');
+  host.classList.remove('is-empty');
+
+  if (!challenge) {
+    $('#challengeTitle').textContent = 'אתגר';
+    $('#challengeDay').textContent = '';
+    host.classList.add('is-empty');
+    host.replaceChildren(el('p', {}, 'אין אתגר פעיל. אפשר להתחיל אחד דרך ההגדרות.'));
+    return;
+  }
 
   const { challenge: updated, justCompleted } = await ensureCompletionCounted(challenge);
   challenge = updated;
