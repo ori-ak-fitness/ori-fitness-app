@@ -506,8 +506,8 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 }
 .goal-num {
   flex: none; width: 30px; height: 30px; border-radius: 10px;
-  background: linear-gradient(155deg, rgba(255,255,255,.35), rgba(0,0,0,.06)), linear-gradient(150deg, var(--gold), var(--gold-deep));
-  color: var(--gold-ink); box-shadow: 0 2px 6px rgba(29, 107, 111, .35);
+  background: var(--bg-elev-2); border: 1.5px solid var(--gold-deep);
+  color: var(--gold-deep);
   display: grid; place-items: center; font-size: .82rem; font-weight: 800;
 }
 .goal-text { font-size: .94rem; font-weight: 600; }
@@ -765,29 +765,22 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .day-chip.has-plan { border-color: var(--line-neutral); }
 .day-chip.has-plan .day-letter { color: var(--text); }
 .day-chip.has-plan .day-plan { color: var(--accent); }
-/* היום מסומן באריח מלא ולא במסגרת נוספת — סימון אחד חזק קריא יותר
-   משבע מסגרות שנבדלות בגוון */
+/* היום מסומן במסגרת טורקיז, לא במילוי מלא — המילוי המלא נשמר לכפתור
+   הפעולה הראשי בלבד, כדי שטורקיז ימשיך לומר דבר אחד ולא חמישה */
 .day-chip.is-today {
-  background: linear-gradient(155deg, rgba(255, 255, 255, .22), rgba(0, 0, 0, .06)),
-              linear-gradient(150deg, var(--gold), var(--gold-deep));
-  border-color: transparent; color: var(--gold-ink);
-  box-shadow: 0 3px 10px -4px rgba(29, 107, 111, .55);
+  background: var(--bg-elev); color: var(--gold-deep);
+  border-color: var(--gold-deep); box-shadow: none;
 }
 .day-chip.is-today .day-letter,
-.day-chip.is-today .day-plan { color: var(--gold-ink); }
+.day-chip.is-today .day-plan { color: var(--gold-deep); }
 .day-chip.is-static { cursor: default; }
 /* התג כולו נצבע ירוק שקוף כשהאימון שלו כבר בוצע השבוע — וי גדול ושקוף
    ברקע, כדי שהצבע יראה "מהרקע" ובכל זאת יישאר אפשר לקרוא איזה יום ומה
    האימון (האות והשם נשארים מעל הוי, לא מוחלפים בו) */
 .day-chip.is-done { background: var(--ok-soft); border-color: var(--ok); box-shadow: none; }
-/* יום שהוא גם היום וגם כבר בוצע: האריח המלא נשאר, אחרת הטקסט הבהיר
-   שלו היה נופל על רקע ירוק בהיר ונעלם. הוי מצויר בגוון של האריח. */
-.day-chip.is-today.is-done {
-  background: linear-gradient(155deg, rgba(255, 255, 255, .22), rgba(0, 0, 0, .06)),
-              linear-gradient(150deg, var(--gold), var(--gold-deep));
-  border-color: transparent;
-}
-.day-chip.is-today.is-done .day-check polyline { stroke: var(--gold-ink); opacity: .85; }
+/* יום שהוא גם היום וגם כבר בוצע: מילוי הירוק הרגיל של "בוצע" נשאר,
+   ומעליו רק מסגרת טורקיז שמסמנת שזה גם היום */
+.day-chip.is-today.is-done { border-color: var(--gold-deep); }
 /* וי אמיתי מ-SVG (קו קצר וקו ארוך, כמו וי אמיתי) — לא תו טקסט מעוגל,
    פינות חדות לגמרי (stroke-linecap/linejoin לא round) */
 .day-check {
