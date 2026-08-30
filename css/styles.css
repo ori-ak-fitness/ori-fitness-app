@@ -319,16 +319,13 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 }
 .food-action {
   display: flex; flex-direction: column; align-items: center; gap: 4px;
-  background: var(--bg-elev); border: 1px solid var(--line); color: var(--text-dim);
+  background: linear-gradient(155deg, rgba(255,255,255,.28), rgba(0,0,0,.08)), linear-gradient(150deg, var(--gold), var(--gold-deep));
+  border: 1px solid transparent; color: var(--gold-ink);
   border-radius: var(--r-md); padding: 10px 2px; font-size: .72rem; font-weight: 700;
   cursor: pointer; transition: transform .08s ease, border-color .15s ease;
 }
 .food-action:active { transform: scale(.96); }
 .food-action span { font-size: 1.2rem; line-height: 1; }
-.food-action.is-primary {
-  background: linear-gradient(155deg, rgba(255,255,255,.28), rgba(0,0,0,.08)), linear-gradient(150deg, var(--gold), var(--gold-deep));
-  border-color: transparent; color: var(--gold-ink);
-}
 /* חמישה תאים ברוחב טלפון צר במיוחד נדחסים מתחת לנוחות קריאה —
    התווית יורדת שורה כדי שהריווח הפנימי לא יילחץ עוד יותר */
 @media (max-width: 350px) {
