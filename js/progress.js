@@ -7,6 +7,7 @@ import { $, el, num, fmtNum, shortDate, formatDateHe } from './ui.js';
 import { lineChart, barChart } from './charts.js';
 import { getAllWorkouts, calcVolume } from './workouts.js';
 import { isSetDone } from './records.js';
+import { getRoutines } from './routines.js';
 
 let selected = null;
 let selectedExerciseType = 'all';
@@ -107,7 +108,20 @@ export async function renderProgress() {
     ? chronological
     : chronological.filter((w) => workoutTypeLabel(w) === selectedExerciseType);
   const series = buildExerciseSeries(workoutsForExercise);
-  const names = Array.from(series.keys()).sort((a, b) => a.localeCompare(b, 'he'));
+
+  /*
+   * הבורר לא יציג רק תרגילים עם היסטוריה — אחרת תרגיל שנוסף לתוכנית
+   * אחרי האימון האחרון "נעלם" מכאן לגמרי, למרות שהוא מופיע כרגיל
+   * כשבאמת מתחילים אימון (זה נשלף מהתוכנית עצמה, לא מההיסטוריה).
+   * לכן מוסיפים גם את התרגילים הנוכחיים של התוכנית הנבחרת, גם אם
+   * עוד אין להם נתון — הגרף שלהם פשוט יראה ריק עד האימון הראשון.
+   */
+  const nameSet = new Set(series.keys());
+  if (selectedExerciseType !== 'all') {
+    const routine = (await getRoutines()).find((r) => r.name === selectedExerciseType);
+    if (routine) for (const ex of routine.exercises) nameSet.add(ex.name);
+  }
+  const names = Array.from(nameSet).sort((a, b) => a.localeCompare(b, 'he'));
 
   // ---- בורר תרגיל (בתוך האימון שנבחר) ----
   const select = $('#progressExercise');
@@ -116,7 +130,7 @@ export async function renderProgress() {
     select.disabled = true;
   } else {
     select.disabled = false;
-    if (!selected || !series.has(selected)) selected = names[0];
+    if (!selected || !nameSet.has(selected)) selected = names[0];
     select.replaceChildren(...names.map((n) => el('option', { value: n, selected: n === selected }, n)));
     select.value = selected;
   }
