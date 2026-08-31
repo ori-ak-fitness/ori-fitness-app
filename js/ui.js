@@ -193,11 +193,15 @@ export function formatDuration(totalSec) {
   return h > 0 ? `${h}:${p(m)}:${p(sec)}` : `${p(m)}:${p(sec)}`;
 }
 
-/** משך קריא לסיכום: "1 שעה 12 דק'" */
+/*
+ * משך קריא לסיכום: "1 שעה 12 דק'". מעגלים את סך הדקות פעם אחת ואז
+ * מפצלים לשעות/דקות — לא מעגלים כל אחד בנפרד, כי זה נתן "60 דק'"
+ * במקום לגלוש לשעה כשהשארית מתעגלת בדיוק ל-60 (למשל 59:40).
+ */
 export function formatDurationHe(totalSec) {
-  const s = Math.max(0, Math.floor(totalSec));
-  const h = Math.floor(s / 3600);
-  const m = Math.round((s % 3600) / 60);
+  const totalMin = Math.round(Math.max(0, totalSec) / 60);
+  const h = Math.floor(totalMin / 60);
+  const m = totalMin % 60;
   if (h && m) return `${h} שע' ${m} דק'`;
   if (h) return `${h} שעות`;
   return `${m || 1} דק'`;

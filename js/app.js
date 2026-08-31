@@ -492,6 +492,7 @@ async function main() {
       invalidatePlanCache();
       invalidateGoalsCache();
       invalidateCardioCache();
+      invalidateWeightCache();
       await renderPlan();
       await renderCardio();
       await renderNutrition();

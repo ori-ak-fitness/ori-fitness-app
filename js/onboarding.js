@@ -5,7 +5,7 @@
    =================================================================== */
 
 import * as db from './db.js';
-import { $, el, toast, num, fmtNum, keepScroll } from './ui.js';
+import { $, el, toast, num, fmtNum, keepScroll, dateKey } from './ui.js';
 import { getRoutines, getSchedule, DAY_NAMES, DAY_SHORT } from './routines.js';
 import { getCardioTemplates } from './cardio.js';
 import { getPlan } from './mealplan.js';
@@ -456,10 +456,7 @@ async function persist() {
     if (bs.sex) await setUserSex(bs.sex);
     if (bs.activity) await setActivityLevel(bs.activity);
     if (weightKg > 0) {
-      const today = new Date();
-      const p = (n) => String(n).padStart(2, '0');
-      const todayKey = `${today.getFullYear()}-${p(today.getMonth() + 1)}-${p(today.getDate())}`;
-      await db.put(db.STORES.bodyWeight, { date: todayKey, weight: weightKg, loggedAt: Date.now() });
+      await db.put(db.STORES.bodyWeight, { date: dateKey(), weight: weightKg, loggedAt: Date.now() });
     }
   }
 
@@ -467,7 +464,9 @@ async function persist() {
   if (g.calories > 0) {
     await db.put(db.STORES.goals, {
       id: db.uid(),
-      effectiveFrom: new Date().toISOString().slice(0, 10),
+      // dateKey(), לא toISOString() — זה תאריך UTC, ולפני חצות בישראל
+      // (UTC+2/3) הוא עדיין "אתמול", בניגוד לכל שאר האפליקציה
+      effectiveFrom: dateKey(),
       calories: g.calories, protein: g.protein, carbs: g.carbs, fat: g.fat,
     });
   }

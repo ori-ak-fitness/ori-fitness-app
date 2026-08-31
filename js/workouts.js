@@ -23,7 +23,8 @@ let saveTimer = null;     // debounce לשמירה
 let onWorkoutSaved = null; // callback לרענון מסכים אחרים
 let prBest = new Map();   // שם תרגיל -> השיא במשקל לפני הסט הבא (ראה checkPR)
 let repBest = new Map();  // שם תרגיל -> השיא בחזרות לפני הסט הבא
-let prCheckTimer = null;  // debounce לבדיקת שיא תוך כדי הקלדה
+let prCheckTimers = new Map(); // setId -> debounce לבדיקת שיא תוך כדי הקלדה, אחד לכל סט
+                                // (לא טיימר משותף אחד — עריכת סט אחר לא תבטל בדיקה ממתינה של סט קודם)
 let onGetReminder = null; // מספק את הציטוט/הבטחה הנוכחיים (dashboard.js, דרך callback כדי לא ליצור תלות מעגלית)
 let reminderText = '';    // נטען פעם אחת בכניסה לאימון, לא בכל רינדור
 
@@ -205,8 +206,9 @@ function checkPR(ex, set) {
  * שיא רק אחרי שהאצבע נחה, כדי שלא יקפצו כמה התראות על אותו סט.
  */
 function schedulePRCheck(exId, setId) {
-  clearTimeout(prCheckTimer);
-  prCheckTimer = setTimeout(() => {
+  clearTimeout(prCheckTimers.get(setId));
+  prCheckTimers.set(setId, setTimeout(() => {
+    prCheckTimers.delete(setId);
     const { ex, set } = findSet(exId, setId);
     if (!ex || !set || !isSetDone(set)) return;
     if (!checkPR(ex, set)) return;
@@ -216,7 +218,7 @@ function schedulePRCheck(exId, setId) {
     const meta = row?.closest('.exercise-card')?.querySelector('.exercise-meta');
     if (meta) meta.textContent = exerciseMetaText(ex);
     saveNow();
-  }, 800);
+  }, 800));
 }
 
 /** מספר הסטים ששברו שיא באימון (מתוך הדגלים שנרשמו בזמן אמת) */
@@ -434,7 +436,8 @@ function onSetInput(input) {
   if (nowDone) {
     schedulePRCheck(exId, setId);
   } else if (set.isPR) {
-    clearTimeout(prCheckTimer);
+    clearTimeout(prCheckTimers.get(setId));
+    prCheckTimers.delete(setId);
     delete set.isPR;
     input.closest('.set-row')?.classList.remove('is-pr');
   }
@@ -579,7 +582,8 @@ async function finishWorkout() {
 
   // ההתראה נסגרת לפני החגיגה, כדי ששתי שכבות-על לא יישבו זו על זו
   dismissPR();
-  clearTimeout(prCheckTimer);
+  for (const t of prCheckTimers.values()) clearTimeout(t);
+  prCheckTimers.clear();
 
   const hasData = active.exercises.some((ex) => ex.sets.some(isSetDone));
   if (!hasData) {
@@ -874,10 +878,14 @@ export async function initWorkouts({ onSaved, getReminder } = {}) {
   await renderHistory();
   await refreshSuggestions();
 
-  // כשחוזרים לאפליקציה — לוודא שהטיימר מסונכרן
+  // כשחוזרים לאפליקציה — לוודא שהטיימר מסונכרן. וכשעוזבים (או האפליקציה
+  // נסגרת) — לשמור מיד כל שינוי שעדיין ממתין ב-debounce של 350ms, כדי
+  // שהקלדה אחרונה לפני מעבר אפליקציה/נעילת מסך לא תלך לאיבוד.
   document.addEventListener('visibilitychange', () => {
-    if (!document.hidden && active) tickTimer();
+    if (document.hidden) { if (active) saveNow(); }
+    else if (active) tickTimer();
   });
+  addEventListener('pagehide', () => { if (active) saveNow(); });
 }
 
 export function hasActiveWorkout() { return !!active; }

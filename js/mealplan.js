@@ -70,12 +70,16 @@ async function saveLibrary(items) {
 const busy = new Set();
 
 /** מוסיף פריט מהמאגר ליום. אפשר להוסיף את אותו פריט כמה פעמים. */
-export async function addFoodToDay(item, date) {
+export async function addFoodToDay(item, date, { fromToggle = false } = {}) {
   await db.put(db.STORES.meals, {
     id: db.uid(),
     date,
     createdAt: Date.now(),
     planId: item.id,
+    // מבדיל בין הרשומה שנוצרה מסימון "אכלתי" בתפריט הקבוע לבין הוספה
+    // ידנית נוספת של אותו פריט — כדי שביטול הסימון ימחק רק את שלו,
+    // לא כל מנה נוספת שנרשמה עם אותו planId
+    fromToggle,
     name: item.name,
     kind: item.kind ?? 'meal',
     calories: num(item.calories, 0),
@@ -101,11 +105,12 @@ async function toggleDefault(item, date, row) {
 
   try {
     const dayMeals = await db.getAllByIndex(db.STORES.meals, 'date', IDBKeyRange.only(date));
-    const existing = dayMeals.filter((m) => m.planId === item.id);
+    // רק רשומות שנוצרו מהסימון עצמו — לא מנות נוספות שנרשמו בנפרד
+    const existing = dayMeals.filter((m) => m.planId === item.id && m.fromToggle);
     if (existing.length) {
       for (const m of existing) await db.del(db.STORES.meals, m.id);
     } else {
-      await addFoodToDay(item, date);
+      await addFoodToDay(item, date, { fromToggle: true });
       return;   // addFoodToDay כבר מודיע על שינוי
     }
     onPlanChanged?.();

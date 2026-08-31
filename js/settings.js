@@ -422,6 +422,9 @@ const RESET_SETTING_KEYS = [
   'onboardingDone', 'weekSchedule', 'cardioWeekSchedule', 'activeWorkout', 'quoteRotation',
   'personalGoals', 'activeChallenge', 'challengesCompletedCount', 'lastWeighInReminderDate',
   'remindersDismissed',
+  // תוכן פרופיל/תוכן שהמשתמש הזין בעצמו — לא רק הגדרת תצוגה, לכן כן נמחק
+  'userName', 'userHeightCm', 'userAge', 'userSex', 'userActivityLevel',
+  'fullMenuNote', 'myBarcodeProducts', 'weeklyWorkoutGoal',
 ];
 
 const CONFIRM_PHRASE = 'מחק הכל';
