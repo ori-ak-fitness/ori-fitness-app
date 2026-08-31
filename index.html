@@ -503,26 +503,35 @@
       <input type="date" id="nutDatePicker" class="hidden-date">
 
       <div class="kcal-card" id="kcalCard">
+        <div class="kcal-ring-wrap">
+          <svg class="kcal-ring" viewBox="0 0 120 120" aria-hidden="true">
+            <circle class="kcal-ring-track" cx="60" cy="60" r="50"/>
+            <circle class="kcal-ring-seg" data-macro="protein" cx="60" cy="60" r="50"/>
+            <circle class="kcal-ring-seg" data-macro="carbs" cx="60" cy="60" r="50"/>
+            <circle class="kcal-ring-seg" data-macro="fat" cx="60" cy="60" r="50"/>
+          </svg>
+          <div class="kcal-ring-center">
+            <span class="kcal-ring-label" id="kcalFootLabel">נותרו</span>
+            <b id="kcalFootNum">0</b>
+            <span class="kcal-ring-sub">מתוך <span id="kcalFootGoal">0</span> קק"ל</span>
+          </div>
+        </div>
         <div class="macros" id="macros">
           <div class="macro" data-macro="protein">
+            <span class="macro-dot"></span>
             <span class="macro-name">🥩 חלבון</span>
-            <span class="bar"><span class="bar-fill"></span></span>
             <span class="macro-val"><span class="m-unit">ג'</span><b class="m-cur">0</b><span class="m-sep">/</span><span class="m-goal">0</span></span>
           </div>
           <div class="macro" data-macro="carbs">
+            <span class="macro-dot"></span>
             <span class="macro-name">🍞 פחמימות</span>
-            <span class="bar"><span class="bar-fill"></span></span>
             <span class="macro-val"><span class="m-unit">ג'</span><b class="m-cur">0</b><span class="m-sep">/</span><span class="m-goal">0</span></span>
           </div>
           <div class="macro" data-macro="fat">
+            <span class="macro-dot"></span>
             <span class="macro-name">🥑 שומן</span>
-            <span class="bar"><span class="bar-fill"></span></span>
             <span class="macro-val"><span class="m-unit">ג'</span><b class="m-cur">0</b><span class="m-sep">/</span><span class="m-goal">0</span></span>
           </div>
-        </div>
-        <div class="kcal-footer">
-          <span class="kcal-foot-label" id="kcalFootLabel">נותרו</span>
-          <span class="kcal-foot-val"><b id="kcalFootNum">0</b> מתוך <span id="kcalFootGoal">0</span> קק"ל</span>
         </div>
       </div>
 

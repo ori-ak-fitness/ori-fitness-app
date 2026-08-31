@@ -247,14 +247,30 @@ async function searchProducts(term) {
               `&search_simple=1&action=process&json=1&page_size=24&fields=${fields}`;
 
   /*
-   * שרת החיפוש של המאגר פחות יציב מזה של הברקוד, ונופל מדי פעם ל-503.
-   * מבדילים בין "השירות למטה" ל"אין אינטרנט" כדי שלא תיראה כאן תקלה
-   * של האפליקציה כשהיא לא שלה.
+   * שרת החיפוש של המאגר נופל בתדירות גבוהה בהרבה ממה שהערה הזו טענה
+   * במקור — נמדד בפועל: אותה בקשה בדיוק נכשלת בערך בכל ניסיון שני,
+   * לפעמים ב-503/429 ולפעמים ב-CORS שלם (השרת שלהם לפעמים לא מחזיר
+   * כותרת Access-Control-Allow-Origin כשהוא עמוס, והדפדפן חוסם את
+   * זה כ"Failed to fetch" בלי קוד סטטוס בכלל). בלי ניסיון חוזר,
+   * חיפוש אמיתי נראה כמו "לא עובד" כי המטבע פשוט לא נופל לצד הנכון
+   * לעיתים קרובות מדי. שלושה ניסיונות עם המתנה קצרה מורידים את זה
+   * לסיכוי כישלון אמיתי נמוך בהרבה.
    */
-  const res = await fetch(url);
-  if (res.status === 503 || res.status === 429) {
-    throw Object.assign(new Error('service'), { code: 'service-down' });
+  let res;
+  let lastErr;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      res = await fetch(url);
+      if (res.status === 503 || res.status === 429) {
+        lastErr = Object.assign(new Error('service'), { code: 'service-down' });
+        res = null;
+      } else break;
+    } catch (e) {
+      lastErr = e;
+    }
+    if (attempt < 2) await new Promise((r) => setTimeout(r, 500 * (attempt + 1)));
   }
+  if (!res) throw lastErr || new Error('שגיאת רשת');
   if (!res.ok) throw new Error('שגיאת רשת');
   const data = await res.json();
 

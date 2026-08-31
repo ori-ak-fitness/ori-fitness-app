@@ -134,10 +134,31 @@ export async function renderNutrition() {
 
   $('#kcalCard').classList.toggle('over', over);
 
-  // שורת הקלוריות — היא המספר הראשי מאז שהטבעת ירדה
+  // מרכז הטבעת — אותו מספר "נותרו/חריגה" שהיה בשורת הסיכום
   $('#kcalFootLabel').textContent = over ? 'חריגה של' : 'נותרו';
   $('#kcalFootNum').textContent = fmtNum(Math.abs(Math.round(remaining)));
   $('#kcalFootGoal').textContent = fmtNum(goal.calories);
+
+  /*
+   * קשתות הטבעת — לפי חלקו של כל מאקרו בקלוריות שנאכלו, לא בגרמים:
+   * שומן שוקל 9 קק"ל לגרם מול 4 לחלבון/פחמימות, אז חלוקה לפי גרם
+   * הייתה מציגה אותו גדול הרבה יותר משהוא תורם בפועל לעיגול.
+   */
+  const ringCirc = 2 * Math.PI * 50;
+  const macroKcal = {
+    protein: totals.protein * 4,
+    carbs: totals.carbs * 4,
+    fat: totals.fat * 9,
+  };
+  const macroKcalTotal = macroKcal.protein + macroKcal.carbs + macroKcal.fat;
+  let cursor = 0;
+  for (const key of ['protein', 'carbs', 'fat']) {
+    const seg = $(`.kcal-ring-seg[data-macro="${key}"]`);
+    const len = macroKcalTotal > 0 ? (macroKcal[key] / macroKcalTotal) * ringCirc : 0;
+    seg.style.strokeDasharray = `${len} ${ringCirc - len}`;
+    seg.style.strokeDashoffset = String(-cursor);
+    cursor += len;
+  }
 
   // מאקרו — כמה נשאר, לא רק כמה נאכל
   for (const [key, cur] of Object.entries({ protein: totals.protein, carbs: totals.carbs, fat: totals.fat })) {
@@ -147,8 +168,6 @@ export async function renderNutrition() {
 
     row.querySelector('.m-cur').textContent = fmtNum(Math.round(cur));
     row.querySelector('.m-goal').textContent = fmtNum(target);
-    const p = target > 0 ? Math.min(cur / target, 1) * 100 : 0;
-    row.querySelector('.bar-fill').style.width = p + '%';
 
     /*
      * שורת "נותרו X ג׳" הוסרה — היא שילשה את גובה המקטע בשביל מספר

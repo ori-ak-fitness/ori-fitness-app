@@ -403,9 +403,9 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 /* ברירת מחדל כשאין עדיין תמונות: רקע גיאומטרי בצבעי האפליקציה */
 .quote-card:not(.has-photo) .quote-photo {
   background:
-    radial-gradient(120% 90% at 85% 0%, rgba(196, 158, 92, .38), transparent 62%),
-    repeating-linear-gradient(115deg, rgba(255,255,255,.05) 0 2px, transparent 2px 16px),
-    linear-gradient(160deg, #2a251c, #14120e);
+    radial-gradient(120% 90% at 85% 0%, rgba(47, 146, 152, .3), transparent 62%),
+    repeating-linear-gradient(115deg, rgba(255,255,255,.04) 0 2px, transparent 2px 16px),
+    linear-gradient(160deg, #2f2a22, #1a1712);
 }
 /* שכבת כהות כדי שהטקסט יישאר קריא על כל תמונה */
 .quote-card::after {
@@ -503,8 +503,8 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 }
 .goal-num {
   flex: none; width: 30px; height: 30px; border-radius: 10px;
-  background: var(--bg-elev-2); border: 1.5px solid var(--gold-deep);
-  color: var(--gold-deep);
+  background: linear-gradient(155deg, rgba(255,255,255,.35), rgba(0,0,0,.06)), linear-gradient(150deg, var(--gold), var(--gold-deep));
+  color: var(--gold-ink); box-shadow: 0 2px 6px rgba(29, 107, 111, .35);
   display: grid; place-items: center; font-size: .82rem; font-weight: 800;
 }
 .goal-text { font-size: .94rem; font-weight: 600; }
@@ -574,24 +574,24 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 /* ---------- תרגילים ---------- */
 .exercise-card {
   background: var(--bg-elev); border: 1px solid var(--line);
-  border-radius: var(--r-lg); padding: 14px; margin-top: 12px;
+  border-radius: var(--r-lg); padding: 12px; margin-top: 9px;
 }
 .exercise-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .exercise-name { font-weight: 700; font-size: 1rem; }
 .exercise-meta { color: var(--text-faint); font-size: .78rem; }
 
-.set-table { margin-top: 10px; display: flex; flex-direction: column; gap: 7px; }
+.set-table { margin-top: 8px; display: flex; flex-direction: column; gap: 5px; }
 .set-head, .set-row {
   display: grid; grid-template-columns: 30px 1fr 1fr 36px 30px; gap: 7px; align-items: center;
 }
 .set-head { color: var(--text-faint); font-size: .72rem; padding: 0 2px; }
 .set-idx {
   background: var(--bg-elev-2); border-radius: 8px; text-align: center;
-  font-size: .82rem; font-weight: 700; color: var(--text-dim); padding: 8px 0;
+  font-size: .82rem; font-weight: 700; color: var(--text-dim); padding: 6px 0;
 }
 .set-row input {
   width: 100%; background: var(--bg-elev-2); border: 1px solid var(--line-strong);
-  color: var(--text); border-radius: var(--r-sm); padding: 11px 8px;
+  color: var(--text); border-radius: var(--r-sm); padding: 9px 8px;
   text-align: center; font-size: 1rem; font-weight: 600;
   font-variant-numeric: tabular-nums; direction: ltr;
   transition: border-color .15s ease, background .15s ease;
@@ -620,9 +620,9 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .set-row.is-done input { border-color: var(--ok); }
 
 .add-set-btn {
-  margin-top: 10px; width: 100%; background: transparent;
+  margin-top: 8px; width: 100%; background: transparent;
   border: 1px dashed var(--line); color: var(--text-dim);
-  border-radius: var(--r-sm); padding: 10px; cursor: pointer; font-weight: 600;
+  border-radius: var(--r-sm); padding: 8px; cursor: pointer; font-weight: 600;
 }
 .add-set-btn:active { background: var(--bg-elev-2); }
 
@@ -651,12 +651,12 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
  * צרים יותר וממורכזים, וטקסט קטן יותר.
  */
 .week-plan-card .week-strip {
-  padding: 12px 14px 10px; border-bottom: 1px solid var(--line);
-  gap: 4px; justify-items: center;
+  padding: 12px 6px 10px; border-bottom: 1px solid var(--line);
+  gap: 3px; justify-items: center;
 }
-.week-plan-card .day-chip { width: min(100%, 46px); border-radius: 11px; }
-.week-plan-card .day-letter { font-size: .95rem; }
-.week-plan-card .day-plan { font-size: .54rem; }
+.week-plan-card .day-chip { width: min(100%, 54px); border-radius: 12px; }
+.week-plan-card .day-letter { font-size: 1.08rem; }
+.week-plan-card .day-plan { font-size: .6rem; }
 .week-plan-card .today-card {
   border: none; border-radius: 0; background: transparent;
 }
@@ -728,10 +728,10 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
  */
 /* הרצועה יושבת ישר מתחת לכותרת המקטע, ולכן צריך כאן מרווח משלה —
    קודם היא באה אחרי כרטיס שכבר סיפק אותו */
-#hsWeekStrip { gap: 3px; margin-inline: -16px; margin-top: 2px; }
+#hsWeekStrip { gap: 2px; margin-inline: -16px; margin-top: 2px; }
 #hsCardioCard { margin-top: 10px; }
-#hsWeekStrip .day-letter { font-size: 1.38rem; }
-#hsWeekStrip .day-plan { font-size: .64rem; }
+#hsWeekStrip .day-letter { font-size: 1.55rem; }
+#hsWeekStrip .day-plan { font-size: .68rem; }
 .day-chip {
   position: relative; aspect-ratio: 1;
   /*
@@ -1158,71 +1158,63 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .hidden-date { position: fixed; opacity: 0; pointer-events: none; width: 1px; height: 1px; }
 
 /* ---------- קלוריות ---------- */
-.kcal-card { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+.kcal-card { display: flex; flex-wrap: wrap; }
 
 /*
- * שורת הסיכום מתחת לטבעת ולמאקרו. המספר הגדול בתוך הטבעת אומר כמה
- * נשאר, אבל לא ממה — והשורה הזו סוגרת את זה במילים, ברוחב מלא, בלי
- * לדחוס עוד טקסט לתוך העיגול.
+ * טבעת המאקרו — שלושה קשתות (חלבון/פחמימות/שומן) בצבע הראוי לכל אחת,
+ * לפי חלקן היחסי בקלוריות שנאכלו היום (לא בגרמים — שומן שוקל פי 2.25
+ * מחלבון/פחמימות לאותה קלוריה, אז חלוקה לפי גרם הייתה מטעה). במרכז
+ * הטבעת נשאר המספר שהיה בשורת הסיכום — "נותרו/חריגה" מתוך היעד.
  */
-.kcal-footer {
-  flex-basis: 100%;
-  display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
-  margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line);
-  font-size: .92rem;
+.kcal-card { flex-direction: column; align-items: center; gap: 16px; }
+.kcal-ring-wrap { position: relative; width: 152px; height: 152px; flex: none; }
+.kcal-ring { width: 100%; height: 100%; transform: rotate(-90deg); }
+.kcal-ring-track, .kcal-ring-seg { fill: none; stroke-width: 12; }
+.kcal-ring-track { stroke: var(--bg-elev-2); }
+.kcal-ring-seg { stroke-linecap: butt; transition: stroke-dasharray .5s ease, stroke-dashoffset .5s ease; }
+.kcal-ring-seg[data-macro="protein"] { stroke: var(--protein); }
+.kcal-ring-seg[data-macro="carbs"] { stroke: var(--carbs); }
+.kcal-ring-seg[data-macro="fat"] { stroke: var(--fat); }
+.kcal-ring-center {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; gap: 1px;
 }
-/* מאז שהטבעת ירדה זה המספר הראשי של המסך, ולכן הוא גדול בהתאם */
-.kcal-foot-label { font-weight: 700; color: var(--text-dim); }
-.kcal-foot-val { color: var(--text-dim); font-variant-numeric: tabular-nums; }
-.kcal-foot-val b { color: var(--text); font-size: 1.5rem; font-weight: 800; margin-inline-end: 3px; }
-.kcal-card.over .kcal-foot-val b { color: var(--danger); }
-/*
- * מאקרו — שורה אחת לכל אחד: שם, פס, ומספר.
- *
- * קודם כל מאקרו תפס שלוש שורות (שם ומספר, פס, ו"נותרו X ג׳"), כלומר
- * תשע שורות לשלושה מספרים. הפריסה כאן היא grid ולא flex בכל שורה
- * בנפרד, כדי שהשמות, הפסים והמספרים יתיישרו לטורים — זה מה שהופך
- * את זה לקריא במבט אחד במקום שלושה בלוקים נפרדים.
- */
-.macros {
-  flex: 1; min-width: 0;
-  display: grid; grid-template-columns: auto 1fr auto; align-items: center;
-  column-gap: 10px; row-gap: 9px;
+.kcal-ring-label { font-size: .78rem; font-weight: 700; color: var(--text-dim); }
+.kcal-ring-center b {
+  font-size: 1.9rem; font-weight: 800; line-height: 1.15; color: var(--text);
+  font-variant-numeric: tabular-nums;
 }
-.macro { display: contents; }
-.macro-name {
-  font-size: .92rem; font-weight: 600; color: var(--text-dim);
-  white-space: nowrap;
+.kcal-card.over .kcal-ring-center b { color: var(--danger); }
+.kcal-ring-sub { font-size: .72rem; color: var(--text-dim); font-variant-numeric: tabular-nums; }
+
+/* מתחת לטבעת — שורה נפרדת לכל מאקרו: נקודת הצבע שלו, השם, והכמות */
+.macros { width: 100%; display: flex; flex-direction: column; }
+.macro {
+  display: flex; align-items: center; gap: 9px;
+  padding: 8px 0; border-bottom: 1px solid var(--line);
 }
-.bar { height: 7px; background: var(--bg-elev-2); border-radius: 999px; overflow: hidden; }
-.bar-fill { display: block; height: 100%; width: 0; border-radius: 999px; transition: width .45s ease; }
-.macro[data-macro="protein"] .bar-fill { background: var(--protein); }
-.macro[data-macro="carbs"]   .bar-fill { background: var(--carbs); }
-.macro[data-macro="fat"]     .bar-fill { background: var(--fat); }
-/*
- * המספר והיחידה יחד בקצה, והספרות ב-tabular-nums כדי ששלוש השורות
- * יתיישרו זו מתחת לזו גם כשהמספרים באורך שונה.
- */
+.macros > .macro:last-child { border-bottom: none; }
+.macro-dot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+.macro[data-macro="protein"] .macro-dot { background: var(--protein); }
+.macro[data-macro="carbs"]   .macro-dot { background: var(--carbs); }
+.macro[data-macro="fat"]     .macro-dot { background: var(--fat); }
+.macro-name { flex: 1; min-width: 0; font-size: .9rem; font-weight: 600; color: var(--text-dim); }
 /*
  * flex ולא טקסט זורם: "ג׳" הוא תו עברי, ואלגוריתם הדו-כיווניות של
  * הדפדפן מסדר מחדש טקסט מעורב של עברית וספרות לפי כללים משלו — גם
- * בתוך אזור שמוגדר LTR. התוצאה הייתה שהיחידה קפצה לימין המספר.
- * פריטי flex אינם עוברים סידור כזה, ולכן הסדר כאן הוא בדיוק סדר
- * ה-HTML: יחידה, ואז המספרים.
+ * בתוך אזור שמוגדר LTR. פריטי flex אינם עוברים סידור כזה, ולכן הסדר
+ * כאן הוא בדיוק סדר ה-HTML: יחידה, ואז המספרים.
  */
 .macro-val {
   font-size: .92rem; color: var(--text); font-weight: 700;
   font-variant-numeric: tabular-nums; white-space: nowrap;
-  justify-self: end;
   display: flex; align-items: baseline; direction: ltr;
 }
 .macro-val .m-sep, .macro-val .m-goal { color: var(--text-dim); font-weight: 600; }
-/* היחידה ראשונה בסדר ה-LTR, כלומר בקצה השמאלי — כך שלוש היחידות
-   יושבות בטור אחד ולא רודפות אחרי מספרים באורך משתנה */
 .macro-val .m-unit { color: var(--text-faint); font-weight: 600; font-size: .8em; margin-inline-end: 5px; }
 .macro.is-done .macro-val b { color: var(--ok); }
 .macro.is-over .macro-val b { color: var(--danger); }
-.macro.is-over .bar-fill { background: var(--danger) !important; }
 
 .head-badge {
   background: var(--bg-elev-2); border: 1px solid var(--line);
