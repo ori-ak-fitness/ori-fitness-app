@@ -639,30 +639,19 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
   box-shadow: 0 10px 30px var(--shadow-strong);
 }
 
-/* ---------- תוכנית השבוע + היום — כרטיס אחד מחובר: הימים למעלה,
-   ומתחת (ללא הפרדה) איזה יום היום ומה מתוכנן בו ---------- */
-.week-plan-card {
-  background: linear-gradient(160deg, var(--bg-elev-2), var(--bg-elev));
-  border: 1px solid var(--line); border-radius: var(--r-lg); overflow: hidden;
-}
-/*
- * לוח הימים במסך האימון הוא סקירה בלבד — מתחתיו יושב כרטיס היום
- * עצמו, שהוא העיקר. לכן הוא מוגש קטן יותר מזה שבמסך הבית: אריחים
- * צרים יותר וממורכזים, וטקסט קטן יותר.
- */
-.week-plan-card .week-strip {
-  padding: 12px 6px 10px; border-bottom: 1px solid var(--line);
-  gap: 3px; justify-items: center;
-}
-.week-plan-card .day-chip { width: min(100%, 54px); border-radius: 12px; }
-.week-plan-card .day-letter { font-size: 1.08rem; }
-.week-plan-card .day-plan { font-size: .6rem; }
-.week-plan-card .today-card {
-  border: none; border-radius: 0; background: transparent;
-}
+/* ---------- לוח ימי השבוע במסך האימון ----------
+   פעם היה מחובר לכרטיס "היום" מתחתיו בלי הפרדה, וזה בדיוק מה שהגביל
+   את גודל האריחים — הריפוד של הכרטיס גזל מהם רוחב. עכשיו הרצועה
+   עצמה חופשית וזורמת עד קצוות המסך, בדיוק כמו בבית, והאריחים גדולים
+   בהתאם. כרטיס "היום" נשאר כרטיס נפרד ומודגש מתחתיה. */
+#screen-workout .week-strip { gap: 2px; margin-inline: -16px; margin-top: 2px; margin-bottom: 16px; }
+#screen-workout .day-letter { font-size: 1.4rem; }
+#screen-workout .day-plan { font-size: .62rem; }
 
 .today-card {
   padding: 20px 18px;
+  background: linear-gradient(160deg, var(--bg-elev-2), var(--bg-elev));
+  border: 1px solid var(--line); border-radius: var(--r-lg);
 }
 .today-day { color: var(--accent); font-size: .78rem; font-weight: 700; letter-spacing: .05em; }
 .today-name { font-size: 1.45rem; margin: 4px 0 6px; }
