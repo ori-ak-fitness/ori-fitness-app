@@ -38,8 +38,9 @@ function newWorkout(routine = null, lastByExercise = new Map()) {
     endedAt: null,
     routineId: routine?.id ?? null,
     routineName: routine?.name ?? null,
-    // תוכנית טוענת את התרגילים מראש, והמשקלים מגיעים ממה שהרמת בפעם
-    // הקודמת — נכנסים לאימון ורק מתקנים אם עלית.
+    // תוכנית טוענת את התרגילים מראש. המשקל של הפעם הקודמת/התוכנית לא
+    // נכתב כערך אמיתי — הוא מוצג כרמז שקוף בשדה (ראה weightHintFor),
+    // וממתין שתקליד עליו או תסמן ✓ בלי להקליד אם עלה בול כמו שתוכנן.
     exercises: (routine?.exercises ?? []).map((ex) => {
       const last = lastByExercise.get(ex.name);
       const count = Math.max(1, ex.sets || 1);
@@ -47,23 +48,16 @@ function newWorkout(routine = null, lastByExercise = new Map()) {
         id: db.uid(),
         name: ex.name,
         targetReps: ex.reps || '',
-        lastTime: last ? { date: last.date, summary: summarizeSets(last.sets) } : null,
-        sets: Array.from({ length: count }, (_, i) => {
-          const s = newSet();
-          // קודם מה שהרמת בפועל בפעם הקודמת (אותו סט, ואם אין — האחרון),
-          // ורק אם אין היסטוריה בכלל — המשקל ההתחלתי מהתוכנית
-          const ref = last?.sets[i] ?? last?.sets[last.sets.length - 1];
-          if (ref?.weight) s.weight = ref.weight;
-          else if (ex.weight) s.weight = String(ex.weight);
-          return s;
-        }),
+        plannedWeight: ex.weight || null,
+        lastTime: last ? { date: last.date, summary: summarizeSets(last.sets), sets: last.sets } : null,
+        sets: Array.from({ length: count }, () => newSet()),
       };
     }),
   };
 }
 
 function newExercise(name) {
-  return { id: db.uid(), name: name.trim(), targetReps: '', lastTime: null, sets: [newSet()] };
+  return { id: db.uid(), name: name.trim(), targetReps: '', plannedWeight: null, lastTime: null, sets: [newSet()] };
 }
 
 function newSet() {
@@ -306,10 +300,29 @@ function renderExerciseCard(ex) {
   return card;
 }
 
+/*
+ * רמז המשקל לסט — לא ערך אמיתי, רק מה שמוצג כטקסט placeholder שקוף
+ * בשדה ריק, ומה ש"סמן ✓" בלי הקלדה קופץ אליו (בדיוק כמו יעד החזרות).
+ * סדר עדיפות: סט קודם באותו אימון עם משקל (המשך טבעי של הסדרה) →
+ * אותו אינדקס בפעם הקודמת → הסט האחרון שלה אם היו פחות סטים →
+ * המשקל המתוכנן בתוכנית. שימוש משותף ל-renderSetRow ול-toggleSetDone
+ * כדי ששניהם תמיד יסכימו על אותו רמז.
+ */
+function weightHintFor(ex, index) {
+  for (let i = index - 1; i >= 0; i--) {
+    const w = ex.sets[i]?.weight;
+    if (String(w ?? '').trim() !== '') return w;
+  }
+  const lastSets = ex.lastTime?.sets;
+  if (lastSets?.length) return lastSets[index]?.weight ?? lastSets[lastSets.length - 1]?.weight ?? null;
+  return ex.plannedWeight || null;
+}
+
 function renderSetRow(ex, set, index) {
   // המשקל מגיע מהפעם הקודמת/מהתוכנית, החזרות מהיעד — כך אפשר
   // לסמן ✓ בלי להקליד כלום כשהסט בוצע בדיוק כמתוכנן.
   const targetReps = firstNumber(ex.targetReps);
+  const weightHint = weightHintFor(ex, index);
 
   const mkInput = (field, placeholder, mode) => el('input', {
     type: 'text',
@@ -329,7 +342,7 @@ function renderSetRow(ex, set, index) {
     dataset: { set: set.id },
   },
     el('div', { class: 'set-idx' }, String(index + 1)),
-    mkInput('weight', set.weight ? '' : '0', 'decimal'),
+    mkInput('weight', set.weight ? '' : (weightHint ? String(weightHint) : '0'), 'decimal'),
     mkInput('reps', targetReps ? String(targetReps) : '0', 'numeric'),
     el('button', {
       class: `set-check${set.done ? ' is-done' : ''}`,
@@ -365,10 +378,8 @@ function toggleSetDone(exId, setId, targetReps) {
     delete set.isPR;
   } else {
     if (String(set.weight ?? '').trim() === '') {
-      // משקל מסט קודם באותו תרגיל, אם יש
-      const prev = ex.sets.slice(0, ex.sets.indexOf(set)).reverse()
-        .find((s) => String(s.weight ?? '').trim() !== '');
-      if (prev) set.weight = prev.weight;
+      const hint = weightHintFor(ex, ex.sets.indexOf(set));
+      if (hint) set.weight = hint;
     }
     if (num(set.reps, 0) <= 0 && targetReps) set.reps = String(targetReps);
     set.done = true;
@@ -441,12 +452,10 @@ async function addExercise(name) {
   if (!clean) { toast('כתוב שם תרגיל', 'err'); return; }
   const ex = newExercise(clean);
 
-  // גם תרגיל שנוסף באמצע האימון מקבל את המשקל מהפעם הקודמת
+  // גם תרגיל שנוסף באמצע האימון מקבל רמז משקל מהפעם הקודמת (כטקסט
+  // placeholder בלבד — ראה weightHintFor)
   const last = (await lastPerformanceByExercise()).get(clean);
-  if (last) {
-    ex.lastTime = { date: last.date, summary: summarizeSets(last.sets) };
-    if (last.sets[0]?.weight) ex.sets[0].weight = last.sets[0].weight;
-  }
+  if (last) ex.lastTime = { date: last.date, summary: summarizeSets(last.sets), sets: last.sets };
 
   active.exercises.push(ex);
   saveNow();
@@ -512,11 +521,9 @@ async function removeExercise(exId) {
 function addSet(exId) {
   const ex = active?.exercises.find((e) => e.id === exId);
   if (!ex) return;
-  // סט חדש יורש את המשקל האחרון — חוסך הקלדה
-  const prev = ex.sets[ex.sets.length - 1];
-  const s = newSet();
-  if (prev && prev.weight) s.weight = prev.weight;
-  ex.sets.push(s);
+  // סט חדש לא יורש משקל כערך אמיתי — weightHintFor כבר מציג את משקל
+  // הסט הקודם כרמז שקוף בשדה הריק
+  ex.sets.push(newSet());
   saveNow();
   renderActive();
   const row = $(`#exerciseList .set-row[data-set="${s.id}"]`);
