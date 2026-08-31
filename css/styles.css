@@ -661,7 +661,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
    את גודל האריחים — הריפוד של הכרטיס גזל מהם רוחב. עכשיו הרצועה
    עצמה חופשית וזורמת עד קצוות המסך, בדיוק כמו בבית, והאריחים גדולים
    בהתאם. כרטיס "היום" נשאר כרטיס נפרד ומודגש מתחתיה. */
-#screen-workout .week-strip { gap: 2px; margin-inline: -13px; margin-top: 2px; margin-bottom: 16px; }
+#screen-workout .week-strip { gap: 2px; margin-inline: -6px; margin-top: 2px; margin-bottom: 16px; }
 #screen-workout .day-letter { font-size: 1.4rem; }
 #screen-workout .day-plan { font-size: .62rem; }
 
@@ -734,7 +734,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
  */
 /* הרצועה יושבת ישר מתחת לכותרת המקטע, ולכן צריך כאן מרווח משלה —
    קודם היא באה אחרי כרטיס שכבר סיפק אותו */
-#hsWeekStrip { gap: 2px; margin-inline: -13px; margin-top: 2px; }
+#hsWeekStrip { gap: 2px; margin-inline: -6px; margin-top: 2px; }
 #hsCardioCard { margin-top: 10px; }
 #hsWeekStrip .day-letter { font-size: 1.55rem; }
 #hsWeekStrip .day-plan { font-size: .68rem; }

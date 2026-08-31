@@ -523,7 +523,8 @@ function addSet(exId) {
   if (!ex) return;
   // סט חדש לא יורש משקל כערך אמיתי — weightHintFor כבר מציג את משקל
   // הסט הקודם כרמז שקוף בשדה הריק
-  ex.sets.push(newSet());
+  const s = newSet();
+  ex.sets.push(s);
   saveNow();
   renderActive();
   const row = $(`#exerciseList .set-row[data-set="${s.id}"]`);
