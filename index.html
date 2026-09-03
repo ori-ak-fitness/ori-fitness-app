@@ -249,166 +249,180 @@
         </p>
       </div>
 
-      <!-- החשבון המחובר. מוסתר כשאין התחברות (Firebase לא מוגדר) -->
-      <div class="hidden" id="accountSection">
-        <div class="section-head"><h2>חשבון</h2></div>
+      <!-- קבוצה גדולה 1: עליך — הפרופיל, המטרות, התוכניות והתפריט שלך -->
+      <div class="settings-supergroup">
+        <div class="settings-supergroup-label">עליך</div>
+
+        <div class="section-head"><h2>פרופיל</h2></div>
         <div class="settings-group">
-          <div class="settings-item is-static" id="accountRow">
-            <span class="si-ico">🔑</span>
-            <span class="si-main"><b id="accountName">—</b><small id="accountSub">—</small></span>
-          </div>
-          <button class="settings-item hidden" id="setUsersBtn">
-            <span class="si-ico">👥</span>
-            <span class="si-main"><b>ניהול משתמשים</b><small id="setUsersSub">מי נכנס לאפליקציה</small></span>
+          <button class="settings-item" id="setNameBtn">
+            <span class="si-ico">👤</span>
+            <span class="si-main"><b>השם שלי</b><small id="setNameSub">—</small></span>
             <span class="si-arrow">‹</span>
           </button>
-          <button class="settings-item" id="cloudStatusBtn">
-            <span class="si-ico">☁️</span>
-            <span class="si-main"><b>מצב הסנכרון</b><small id="cloudStatusSub">—</small></span>
+          <button class="settings-item" id="setHeightBtn">
+            <span class="si-ico">📏</span>
+            <span class="si-main"><b>פרטי גוף</b><small id="setHeightSub">—</small></span>
             <span class="si-arrow">‹</span>
           </button>
-          <button class="settings-item" id="signOutBtn">
-            <span class="si-ico">🚪</span>
-            <span class="si-main"><b>התנתקות</b><small>יציאה מהחשבון במכשיר הזה</small></span>
+        </div>
+
+        <div class="section-head"><h2>מוטיבציה</h2></div>
+        <div class="settings-group">
+          <button class="settings-item" id="setQuotesBtn">
+            <span class="si-ico">🧠</span>
+            <span class="si-main"><b>דף מנטלי</b><small id="setQuotesSub">—</small></span>
+            <span class="si-arrow">‹</span>
+          </button>
+          <button class="settings-item" id="setGoalsBtn">
+            <span class="si-ico">🎯</span>
+            <span class="si-main"><b>מטרות</b><small id="setGoalsSub">—</small></span>
+            <span class="si-arrow">‹</span>
+          </button>
+          <button class="settings-item" id="setChallengeBtn">
+            <span class="si-ico">🥊</span>
+            <span class="si-main"><b>אתגר</b><small id="setChallengeSub">—</small></span>
+            <span class="si-arrow">‹</span>
+          </button>
+          <button class="settings-item" id="setBadgesBtn">
+            <span class="si-ico">🏅</span>
+            <span class="si-main"><b>מדליות</b><small id="setBadgesSub">—</small></span>
+            <span class="si-arrow">‹</span>
+          </button>
+        </div>
+
+        <div class="section-head"><h2>אימונים</h2></div>
+        <div class="settings-group">
+          <button class="settings-item" id="setRoutinesBtn">
+            <span class="si-ico">📋</span>
+            <span class="si-main"><b>תוכניות אימון</b><small id="setRoutinesSub">—</small></span>
+            <span class="si-arrow">‹</span>
+          </button>
+          <button class="settings-item" id="setWeeklyGoalBtn">
+            <span class="si-ico">🎯</span>
+            <span class="si-main"><b>יעד אימונים שבועי</b><small id="setWeeklyGoalSub">—</small></span>
+            <span class="si-arrow">‹</span>
+          </button>
+          <button class="settings-item" id="setScheduleBtn">
+            <span class="si-ico">📅</span>
+            <span class="si-main"><b>שיבוץ לימי השבוע</b><small id="setScheduleSub">—</small></span>
+            <span class="si-arrow">‹</span>
+          </button>
+          <button class="settings-item" id="setCardioBtn">
+            <span class="si-ico">🏃</span>
+            <span class="si-main"><b>סוגי אירובי</b><small id="setCardioSub">—</small></span>
+            <span class="si-arrow">‹</span>
+          </button>
+          <button class="settings-item" id="setCardioScheduleBtn">
+            <span class="si-ico">📅</span>
+            <span class="si-main"><b>שיבוץ אירובי</b><small id="setCardioScheduleSub">—</small></span>
+            <span class="si-arrow">‹</span>
+          </button>
+        </div>
+
+        <div class="section-head"><h2>תזונה</h2></div>
+        <div class="settings-group">
+          <button class="settings-item" id="setMealPlanBtn">
+            <span class="si-ico">🍽️</span>
+            <span class="si-main"><b>התפריט הקבוע</b><small id="setMealPlanSub">—</small></span>
+            <span class="si-arrow">‹</span>
+          </button>
+          <button class="settings-item" id="setGoalBtn">
+            <span class="si-ico">🎯</span>
+            <span class="si-main"><b>יעד קלוריות ומאקרו</b><small id="setGoalSub">—</small></span>
+            <span class="si-arrow">‹</span>
+          </button>
+          <button class="settings-item" id="setCalcBtn">
+            <span class="si-ico">🧮</span>
+            <span class="si-main"><b>מחשבון קלוריות</b><small id="setCalcSub">BMI + קלוריות מומלצות</small></span>
             <span class="si-arrow">‹</span>
           </button>
         </div>
       </div>
 
-      <div class="section-head"><h2>פרופיל</h2></div>
-      <div class="settings-group">
-        <button class="settings-item" id="setNameBtn">
-          <span class="si-ico">👤</span>
-          <span class="si-main"><b>השם שלי</b><small id="setNameSub">—</small></span>
-          <span class="si-arrow">‹</span>
-        </button>
-        <button class="settings-item" id="setHeightBtn">
-          <span class="si-ico">📏</span>
-          <span class="si-main"><b>פרטי גוף</b><small id="setHeightSub">—</small></span>
-          <span class="si-arrow">‹</span>
-        </button>
-      </div>
+      <!-- קבוצה גדולה 2: האפליקציה — איך היא נראית, מתנהגת ומתריעה -->
+      <div class="settings-supergroup">
+        <div class="settings-supergroup-label">האפליקציה</div>
 
-      <div class="section-head"><h2>מסך הבית ותצוגה</h2></div>
-      <div class="settings-group">
-        <button class="settings-item" id="setHomeScreenBtn">
-          <span class="si-ico">🏠</span>
-          <span class="si-main"><b>מקטעים מוצגים</b><small id="setHomeScreenSub">—</small></span>
-          <span class="si-arrow">‹</span>
-        </button>
-        <label class="setting-row" for="themeSelect">
-          <span>
-            <b>ערכת צבעים</b>
-            <small>קרם בהיר, או שחור למקרה שאתה מתאמן בלילה</small>
-          </span>
-          <select id="themeSelect">
-            <option value="light">קרם (בהיר)</option>
-            <option value="dark">שחור (לילה)</option>
-            <option value="system">לפי המכשיר</option>
-          </select>
-        </label>
-        <label class="setting-row" for="autoAdvanceSelect">
-          <span>
-            <b>קפיצה אוטומטית בין שדות</b>
-            <small>אחרי הפסקה בהקלדה, המסך עובר לשדה הבא לבד</small>
-          </span>
-          <select id="autoAdvanceSelect">
-            <option value="0">כבוי</option>
-            <option value="700">מהיר (0.7 שנ')</option>
-            <option value="1000">רגיל (1 שנ')</option>
-            <option value="1400">איטי (1.4 שנ')</option>
-            <option value="2000">איטי מאוד (2 שנ')</option>
-          </select>
-        </label>
-      </div>
-      <p class="muted" style="font-size:.78rem;margin-top:8px;padding:0 4px">
-        גם כשהקפיצה האוטומטית כבויה, כפתור "הבא" במקלדת עדיין מעביר לשדה הבא.
-      </p>
+        <!-- החשבון המחובר. מוסתר כשאין התחברות (Firebase לא מוגדר) -->
+        <div class="hidden" id="accountSection">
+          <div class="section-head"><h2>חשבון</h2></div>
+          <div class="settings-group">
+            <div class="settings-item is-static" id="accountRow">
+              <span class="si-ico">🔑</span>
+              <span class="si-main"><b id="accountName">—</b><small id="accountSub">—</small></span>
+            </div>
+            <button class="settings-item hidden" id="setUsersBtn">
+              <span class="si-ico">👥</span>
+              <span class="si-main"><b>ניהול משתמשים</b><small id="setUsersSub">מי נכנס לאפליקציה</small></span>
+              <span class="si-arrow">‹</span>
+            </button>
+            <button class="settings-item" id="cloudStatusBtn">
+              <span class="si-ico">☁️</span>
+              <span class="si-main"><b>מצב הסנכרון</b><small id="cloudStatusSub">—</small></span>
+              <span class="si-arrow">‹</span>
+            </button>
+            <button class="settings-item" id="signOutBtn">
+              <span class="si-ico">🚪</span>
+              <span class="si-main"><b>התנתקות</b><small>יציאה מהחשבון במכשיר הזה</small></span>
+              <span class="si-arrow">‹</span>
+            </button>
+          </div>
+        </div>
 
-      <div class="section-head"><h2>תזכורות ומוטיבציה</h2></div>
-      <div class="settings-group">
-        <button class="settings-item" id="setPushBtn">
-          <span class="si-ico">🔔</span>
-          <span class="si-main"><b>התראות דחיפה</b><small id="setPushSub">—</small></span>
-          <span class="si-arrow">‹</span>
-        </button>
-        <button class="settings-item" id="setQuotesBtn">
-          <span class="si-ico">🧠</span>
-          <span class="si-main"><b>דף מנטלי</b><small id="setQuotesSub">—</small></span>
-          <span class="si-arrow">‹</span>
-        </button>
-        <button class="settings-item" id="setGoalsBtn">
-          <span class="si-ico">🎯</span>
-          <span class="si-main"><b>מטרות</b><small id="setGoalsSub">—</small></span>
-          <span class="si-arrow">‹</span>
-        </button>
-        <button class="settings-item" id="setChallengeBtn">
-          <span class="si-ico">🥊</span>
-          <span class="si-main"><b>אתגר</b><small id="setChallengeSub">—</small></span>
-          <span class="si-arrow">‹</span>
-        </button>
-        <button class="settings-item" id="setBadgesBtn">
-          <span class="si-ico">🏅</span>
-          <span class="si-main"><b>מדליות</b><small id="setBadgesSub">—</small></span>
-          <span class="si-arrow">‹</span>
-        </button>
-      </div>
+        <div class="section-head"><h2>תצוגה והתנהגות</h2></div>
+        <div class="settings-group">
+          <button class="settings-item" id="setHomeScreenBtn">
+            <span class="si-ico">🏠</span>
+            <span class="si-main"><b>מקטעים מוצגים בבית</b><small id="setHomeScreenSub">—</small></span>
+            <span class="si-arrow">‹</span>
+          </button>
+          <label class="setting-row" for="themeSelect">
+            <span>
+              <b>ערכת צבעים</b>
+              <small>קרם בהיר, או שחור למקרה שאתה מתאמן בלילה</small>
+            </span>
+            <select id="themeSelect">
+              <option value="light">קרם (בהיר)</option>
+              <option value="dark">שחור (לילה)</option>
+              <option value="system">לפי המכשיר</option>
+            </select>
+          </label>
+          <label class="setting-row" for="autoAdvanceSelect">
+            <span>
+              <b>קפיצה אוטומטית בין שדות</b>
+              <small>אחרי הפסקה בהקלדה, המסך עובר לשדה הבא לבד</small>
+            </span>
+            <select id="autoAdvanceSelect">
+              <option value="0">כבוי</option>
+              <option value="700">מהיר (0.7 שנ')</option>
+              <option value="1000">רגיל (1 שנ')</option>
+              <option value="1400">איטי (1.4 שנ')</option>
+              <option value="2000">איטי מאוד (2 שנ')</option>
+            </select>
+          </label>
+        </div>
+        <p class="muted" style="font-size:.78rem;margin-top:8px;padding:0 4px">
+          גם כשהקפיצה האוטומטית כבויה, כפתור "הבא" במקלדת עדיין מעביר לשדה הבא.
+        </p>
 
-      <div class="section-head"><h2>אימונים</h2></div>
-      <div class="settings-group">
-        <button class="settings-item" id="setRoutinesBtn">
-          <span class="si-ico">📋</span>
-          <span class="si-main"><b>תוכניות אימון</b><small id="setRoutinesSub">—</small></span>
-          <span class="si-arrow">‹</span>
-        </button>
-        <button class="settings-item" id="setWeeklyGoalBtn">
-          <span class="si-ico">🎯</span>
-          <span class="si-main"><b>יעד אימונים שבועי</b><small id="setWeeklyGoalSub">—</small></span>
-          <span class="si-arrow">‹</span>
-        </button>
-        <button class="settings-item" id="setScheduleBtn">
-          <span class="si-ico">📅</span>
-          <span class="si-main"><b>שיבוץ לימי השבוע</b><small id="setScheduleSub">—</small></span>
-          <span class="si-arrow">‹</span>
-        </button>
-        <button class="settings-item" id="setCardioBtn">
-          <span class="si-ico">🏃</span>
-          <span class="si-main"><b>סוגי אירובי</b><small id="setCardioSub">—</small></span>
-          <span class="si-arrow">‹</span>
-        </button>
-        <button class="settings-item" id="setCardioScheduleBtn">
-          <span class="si-ico">📅</span>
-          <span class="si-main"><b>שיבוץ אירובי</b><small id="setCardioScheduleSub">—</small></span>
-          <span class="si-arrow">‹</span>
-        </button>
-      </div>
+        <div class="section-head"><h2>התראות</h2></div>
+        <div class="settings-group">
+          <button class="settings-item" id="setPushBtn">
+            <span class="si-ico">🔔</span>
+            <span class="si-main"><b>התראות דחיפה</b><small id="setPushSub">—</small></span>
+            <span class="si-arrow">‹</span>
+          </button>
+        </div>
 
-      <div class="section-head"><h2>תזונה</h2></div>
-      <div class="settings-group">
-        <button class="settings-item" id="setMealPlanBtn">
-          <span class="si-ico">🍽️</span>
-          <span class="si-main"><b>התפריט הקבוע</b><small id="setMealPlanSub">—</small></span>
-          <span class="si-arrow">‹</span>
-        </button>
-        <button class="settings-item" id="setGoalBtn">
-          <span class="si-ico">🎯</span>
-          <span class="si-main"><b>יעד קלוריות ומאקרו</b><small id="setGoalSub">—</small></span>
-          <span class="si-arrow">‹</span>
-        </button>
-        <button class="settings-item" id="setCalcBtn">
-          <span class="si-ico">🧮</span>
-          <span class="si-main"><b>מחשבון קלוריות</b><small id="setCalcSub">BMI + קלוריות מומלצות</small></span>
-          <span class="si-arrow">‹</span>
-        </button>
-      </div>
-
-      <div class="section-head"><h2>תחזוקה</h2></div>
-      <div class="settings-group">
-        <button class="settings-item" id="rerunSetupBtn">
-          <span class="si-ico">🧙</span>
-          <span class="si-main"><b>הפעל מחדש את אשף ההגדרה</b><small>עובר שוב על ההגדרה הראשונית</small></span>
-          <span class="si-arrow">‹</span>
-        </button>
+        <div class="section-head"><h2>תחזוקה</h2></div>
+        <div class="settings-group">
+          <button class="settings-item" id="rerunSetupBtn">
+            <span class="si-ico">🧙</span>
+            <span class="si-main"><b>הפעל מחדש את אשף ההגדרה</b><small>עובר שוב על ההגדרה הראשונית</small></span>
+            <span class="si-arrow">‹</span>
+          </button>
+        </div>
       </div>
 
       <!-- אזור מסוכן — בכוונה לא בולט ורחוק משאר הפעולות -->

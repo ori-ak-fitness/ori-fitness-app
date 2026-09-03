@@ -1022,6 +1022,16 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .settings-intro h2 { font-size: 1.3rem; margin-bottom: 6px; }
 .settings-intro .muted { font-size: .86rem; line-height: 1.6; }
 
+/* חלוקה גדולה בהגדרות: עליך מול האפליקציה. קו עליון עדין ורווח גדול
+   יותר מסמנים החלפת נושא — לא רק עוד מקטע קטן כמו section-head */
+.settings-supergroup { margin-top: 40px; padding-top: 22px; border-top: 1px solid var(--line); }
+.settings-supergroup:first-of-type { margin-top: 4px; padding-top: 0; border-top: none; }
+.settings-supergroup-label {
+  font-size: .8rem; font-weight: 800; color: var(--text-faint); letter-spacing: .01em;
+}
+/* המקטע הראשון בתוך הקבוצה יושב צמוד לתווית שלה, לא ברווח הרגיל של 34px */
+.settings-supergroup-label + .section-head { margin-top: 10px; }
+
 .settings-group {
   display: flex; flex-direction: column;
   background: var(--bg-elev); border: 1px solid var(--line);
