@@ -58,6 +58,11 @@
   --today-mark: var(--gold-deep);
   --today-text: var(--gold-deep);
 
+  /* טקסט שנקבע שחור-קבוע (ברכת הבית, כותרת האתגר וכו') — שחור על הקרם
+     הבהיר של מצב יום נראה מצוין, אבל אותו #000 קבוע על רקע כהה כמעט
+     נעלם. נדרס לבאז' של האפליקציה בשני בלוקי מצב הלילה למטה */
+  --hard-black: #000;
+
   /*
    * חזרה לפונט המערכת. ניסינו כאן Heebo לגוף ו-Frank Ruhl Libre
    * לכותרות, ואורי ביקש את הכתב הקודם בחזרה.
@@ -105,6 +110,9 @@
   --today-mark: var(--gold);
   --today-text: var(--text);
 
+  /* אותו סיפור: שחור-קבוע נבלע ברקע הכהה, עובר לבאז' של האפליקציה */
+  --hard-black: var(--accent);
+
   --ok:            #25d366;
   --ok-soft:       rgba(37, 211, 102, .22);
   --warn:          #ffc247;
@@ -148,6 +156,8 @@
 
     --today-mark: var(--gold);
     --today-text: var(--text);
+
+    --hard-black: var(--accent);
 
     --ok:            #25d366;
     --ok-soft:       rgba(37, 211, 102, .22);
@@ -421,14 +431,14 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 /* ברכה בראש מסך הבית — לפי שעה + שם, אם הוגדר. פונט סריפי עברי לתחושה
    יוקרתית/עורכת-דין יותר מברירת המחדל, ותאריך מלא כשורת משנה איטלקית עדינה */
 .home-heading { margin: 2px 4px 20px; }
-/* שחור קבוע, לא הופך צבע לפי ערכת נושא — אורי ביקש שחור תמיד כאן */
+/* שחור בהיר, באז' במצב לילה — ראו --hard-black */
 .greeting {
   font-size: 1.65rem; font-weight: 700; letter-spacing: -.01em;
-  margin: 0; text-wrap: balance; color: #000;
+  margin: 0; text-wrap: balance; color: var(--hard-black);
 }
 .home-date {
   margin: 5px 0 0; font-size: .85rem; font-weight: 600;
-  color: #000; opacity: .75;
+  color: var(--hard-black); opacity: .75;
 }
 
 /* כותרות המקטעים במסך הבית — פונט רגיל, נקי, עקבי עם שאר האפליקציה */
@@ -560,7 +570,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 /* ---------- כרטיס האתגר (מסך הבית) ---------- */
 /* הכותרת יושבת מחוץ למסגרת, כמו כל section-head אחר בבית — לא בתוך הכרטיס */
 #challengeTitle {
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #000;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--hard-black);
 }
 .challenge-card {
   position: relative;
@@ -574,8 +584,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .challenge-card .bar-fill { background: linear-gradient(90deg, var(--gold-deep), var(--gold)); }
 .challenge-msg { font-size: .8rem; color: var(--text-dim); margin-top: 9px; }
 .challenge-msg.is-praise { font-size: .88rem; font-weight: 700; color: var(--text); }
-/* תמיד שחור, גם במצב לילה — לא הופך לבן כמו --text כי אורי ביקש שחור קבוע כאן */
-.challenge-msg.is-gentle { font-size: .86rem; font-weight: 600; color: #000; }
+.challenge-msg.is-gentle { font-size: .86rem; font-weight: 600; color: var(--hard-black); }
 .challenge-actions { display: flex; gap: 8px; margin-top: 10px; }
 .challenge-actions .btn { flex: 1; }
 .challenge-confetti { position: absolute; inset: -10px -10px auto -10px; height: 60px; overflow: visible; pointer-events: none; }
