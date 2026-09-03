@@ -44,6 +44,13 @@
   --gold-deep: #1d6b6f;
   --gold-ink:  #eaf6f6;
 
+  /* מילוי הכפתורים הראשיים — טורקיז בהיר, ובאז' של האפליקציה במצב לילה
+     (נדרס למטה בשני הבלוקים הכהים). לא --gold עצמו: זה נשאר קבוע
+     בכוונה לשימושים אחרים (תג "היום", פס התקדמות וכו') */
+  --btn-fill-a: var(--gold);
+  --btn-fill-b: var(--gold-deep);
+  --btn-ink:    var(--gold-ink);
+
   /*
    * חזרה לפונט המערכת. ניסינו כאן Heebo לגוף ו-Frank Ruhl Libre
    * לכותרות, ואורי ביקש את הכתב הקודם בחזרה.
@@ -81,6 +88,11 @@
   --accent-soft:   rgba(240, 227, 200, .13);
   --accent-2:      #35c9ff;
 
+  /* במצב לילה הכפתורים הראשיים עוברים מטורקיז לבאז' של האפליקציה */
+  --btn-fill-a: var(--accent);
+  --btn-fill-b: var(--accent);
+  --btn-ink:    var(--accent-ink);
+
   --ok:            #25d366;
   --ok-soft:       rgba(37, 211, 102, .22);
   --warn:          #ffc247;
@@ -117,6 +129,10 @@
     --accent-ink:    #1a1610;
     --accent-soft:   rgba(240, 227, 200, .13);
     --accent-2:      #35c9ff;
+
+    --btn-fill-a: var(--accent);
+    --btn-fill-b: var(--accent);
+    --btn-ink:    var(--accent-ink);
 
     --ok:            #25d366;
     --ok-soft:       rgba(37, 211, 102, .22);
@@ -336,8 +352,8 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 }
 .food-action {
   display: flex; flex-direction: column; align-items: center; gap: 4px;
-  background: linear-gradient(155deg, rgba(255,255,255,.28), rgba(0,0,0,.08)), linear-gradient(150deg, var(--gold), var(--gold-deep));
-  border: 1px solid transparent; color: var(--gold-ink);
+  background: linear-gradient(155deg, rgba(255,255,255,.28), rgba(0,0,0,.08)), linear-gradient(150deg, var(--btn-fill-a), var(--btn-fill-b));
+  border: 1px solid transparent; color: var(--btn-ink);
   border-radius: var(--r-md); padding: 10px 2px; font-size: .72rem; font-weight: 700;
   cursor: pointer; transition: transform .08s ease, border-color .15s ease;
 }
@@ -361,8 +377,8 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .btn:active { transform: scale(.97); }
 /* כל כפתור פעולה ראשי — הטורקיז שלנו, עם שכבת ברק אלכסונית עדינה, לא רק בבית */
 .btn-primary {
-  background: linear-gradient(155deg, rgba(255,255,255,.3), rgba(0,0,0,.08)), linear-gradient(150deg, var(--gold), var(--gold-deep));
-  color: var(--gold-ink);
+  background: linear-gradient(155deg, rgba(255,255,255,.3), rgba(0,0,0,.08)), linear-gradient(150deg, var(--btn-fill-a), var(--btn-fill-b));
+  color: var(--btn-ink);
   box-shadow: 0 8px 18px -6px rgba(29, 107, 111, .45), 0 2px 4px rgba(29, 107, 111, .3);
   letter-spacing: .01em;
 }
@@ -1657,14 +1673,14 @@ body.gate-open main { display: none !important; }
   inset-block-end: calc(var(--tabbar-h) + var(--safe-bottom) + 10px);
   z-index: 40;
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  background: linear-gradient(150deg, var(--gold), var(--gold-deep));
-  color: var(--gold-ink);
+  background: linear-gradient(150deg, var(--btn-fill-a), var(--btn-fill-b));
+  color: var(--btn-ink);
   border-radius: var(--r-md); padding: 11px 14px;
   box-shadow: 0 10px 24px -8px rgba(0, 0, 0, .45);
   font-size: .9rem; font-weight: 600;
 }
 .update-bar button {
-  background: var(--gold-ink); color: var(--gold-deep);
+  background: var(--btn-ink); color: var(--btn-fill-b);
   border: 0; font-weight: 800; flex: none;
 }
 
