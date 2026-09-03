@@ -119,6 +119,23 @@ async function openPushSheet() {
           await renderSettings();
         }),
       }, has ? 'כבה התראות' : 'הפעל התראות'));
+
+      if (has) {
+        const hourRow = (label, key, from, to, current) => {
+          const select = el('select', {},
+            ...Array.from({ length: to - from + 1 }, (_, i) => from + i).map((h) =>
+              el('option', { value: String(h), selected: h === current }, `${String(h).padStart(2, '0')}:00`)));
+          select.addEventListener('change', guard(async () => {
+            await db.setSetting(key, num(select.value, current));
+          }));
+          return el('label', { class: 'setting-row', style: 'margin-top:14px' },
+            el('span', {}, el('b', {}, label)), select);
+        };
+        const weighInHour = num(await db.getSetting('weighInReminderHour', 5), 5);
+        const workoutHour = num(await db.getSetting('workoutReminderHour', 18), 18);
+        rows.push(hourRow('שעת תזכורת שקילה (שלישי)', 'weighInReminderHour', 4, 11, weighInHour));
+        rows.push(hourRow('שעת תזכורת אימון', 'workoutReminderHour', 14, 23, workoutHour));
+      }
     }
   }
 
@@ -463,6 +480,7 @@ const RESET_SETTING_KEYS = [
   // תוכן פרופיל/תוכן שהמשתמש הזין בעצמו — לא רק הגדרת תצוגה, לכן כן נמחק
   'userName', 'userHeightCm', 'userAge', 'userSex', 'userActivityLevel',
   'fullMenuNote', 'myBarcodeProducts', 'weeklyWorkoutGoal', 'pushSubscription',
+  'weighInReminderHour', 'workoutReminderHour',
 ];
 
 const CONFIRM_PHRASE = 'מחק הכל';

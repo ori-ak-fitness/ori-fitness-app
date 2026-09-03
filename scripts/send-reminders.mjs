@@ -13,6 +13,11 @@
    מה זה קורא: users/{uid}/records — אותו מבנה בדיוק שהאפליקציה
    כותבת אליו דרך cloud.js. שום דבר כאן לא כותב נתוני אימון/תזונה,
    רק קורא אותם ומחליט אם לשלוח.
+
+   תזמון: ה-workflow מריץ את זה כל שעה עגולה (לא בשעה קבועה אחת),
+   והסקריפט עצמו משווה את השעה המקומית בישראל מול שעות שאורי בחר
+   בהגדרות האפליקציה (weighInReminderHour/workoutReminderHour).
+   ככה שינוי שעה הוא שינוי הגדרה רגיל באפליקציה — לא עריכת קובץ כאן.
    =================================================================== */
 
 import { initializeApp, cert } from 'firebase-admin/app';
@@ -23,6 +28,13 @@ const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
 const VAPID_PUBLIC_KEY = process.env.VAPID_PUBLIC_KEY;
 const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY;
 const APP_URL = 'https://ori-ak-fitness.github.io/ori-fitness-app/';
+// workflow_dispatch (הפעלה ידנית מהלשונית Actions) שולח תמיד הודעת
+// בדיקה אחת מיידית, בלי תלות בשעה או בתנאים — זו הדרך לבדוק שהצינור
+// עובד קצה-לקצה בלי לחכות לזמן האמיתי
+const IS_MANUAL_TEST = process.env.GITHUB_EVENT_NAME === 'workflow_dispatch';
+
+const DEFAULT_WEIGH_IN_HOUR = 5;
+const DEFAULT_WORKOUT_HOUR = 18;
 
 webpush.setVapidDetails(`mailto:${process.env.VAPID_CONTACT_EMAIL || 'noreply@example.com'}`, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
 
@@ -30,7 +42,6 @@ initializeApp({ credential: cert(serviceAccount) });
 const db = getFirestore();
 
 const DAY_NAMES = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
-const WORKOUT_REMINDER_HOUR = 18; // תואם WORKOUT_REMINDER_HOUR ב-reminders.js
 
 /** תאריך/שעה נכונים לישראל, לא לשעון ה-UTC של ה-runner */
 function israelNow() {
@@ -43,7 +54,7 @@ function israelNow() {
   return {
     dateKey: `${get('year')}-${get('month')}-${get('day')}`,
     weekday: weekdayIdx,
-    hour: Number(get('hour')),
+    hour: Number(get('hour')) % 24, // "24" בפורמט הזה מייצג חצות — מנרמלים ל-0
   };
 }
 
@@ -104,11 +115,20 @@ async function run() {
     const subscription = bySettingKey.pushSubscription;
     if (!subscription) continue;
 
+    if (IS_MANUAL_TEST) {
+      const ok = await send(uid, subscription, {
+        title: 'בדיקה 🔔', body: 'אם זה הגיע — ההתראות עובדות.', url: APP_URL,
+      });
+      if (ok) sent++;
+      continue;
+    }
+
     const pushLogSnap = await db.collection('pushLog').doc(uid).get();
     const pushLog = pushLogSnap.exists ? pushLogSnap.data() : {};
 
-    // ---- תזכורת שקילה: יום שלישי, אם לא נשקל השבוע ----
-    if (now.weekday === 2 && pushLog.weighIn !== now.dateKey) {
+    // ---- תזכורת שקילה: יום שלישי, בשעה שנבחרה, אם לא נשקל השבוע ----
+    const weighInHour = Number(bySettingKey.weighInReminderHour ?? DEFAULT_WEIGH_IN_HOUR);
+    if (now.weekday === 2 && now.hour === weighInHour && pushLog.weighIn !== now.dateKey) {
       const sunday = sundayOf(now.dateKey);
       const weighedThisWeek = bodyWeight.some((e) => e?.date >= sunday && e?.date <= now.dateKey);
       if (!weighedThisWeek) {
@@ -119,8 +139,9 @@ async function run() {
       }
     }
 
-    // ---- תזכורת אימון: אחרי השעה שנקבעה, אם יש אימון מתוכנן להיום ולא בוצע ----
-    if (now.hour >= WORKOUT_REMINDER_HOUR && pushLog.workout !== now.dateKey) {
+    // ---- תזכורת אימון: בשעה שנבחרה, אם יש אימון מתוכנן להיום ולא בוצע ----
+    const workoutHour = Number(bySettingKey.workoutReminderHour ?? DEFAULT_WORKOUT_HOUR);
+    if (now.hour === workoutHour && pushLog.workout !== now.dateKey) {
       const schedule = Array.isArray(bySettingKey.weekSchedule) ? bySettingKey.weekSchedule : [];
       const routineId = schedule[now.weekday];
       if (routineId) {
