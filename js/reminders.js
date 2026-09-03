@@ -80,6 +80,29 @@ async function workoutReminder(dismissed) {
   };
 }
 
+/* נפרדת מתזכורת האימון בכוונה — יום יכול להכיל גם כוח וגם אירובי,
+   ואם שניהם לא סומנו רוצים שתי תזכורות, לא אחת שמסתירה את השנייה */
+async function cardioReminder(dismissed) {
+  const today = dateKey();
+  if (dismissed.cardio === today) return null;
+  if (new Date().getHours() < WORKOUT_REMINDER_HOUR) return null;
+
+  const template = await deps.cardioTemplateForDay?.(new Date().getDay());
+  if (!template) return null;                           // אין אירובי מתוכנן היום
+
+  const logs = await deps.cardioForDate?.(today) ?? [];
+  if (logs.some((w) => w.templateId === template.id)) return null;
+
+  return {
+    id: 'cardio',
+    icon: template.icon || '🏃',
+    title: 'האירובי של היום',
+    text: `${template.name} עוד לא סומן היום.`,
+    action: 'סמן',
+    onAction: () => deps.goToCardio?.(),
+  };
+}
+
 /* ---------- תצוגה ---------- */
 
 export async function renderReminders() {
@@ -90,6 +113,7 @@ export async function renderReminders() {
   const items = (await Promise.all([
     weighInReminder(dismissed),
     workoutReminder(dismissed),
+    cardioReminder(dismissed),
   ])).filter(Boolean);
 
   if (!items.length) { host.replaceChildren(); return; }
@@ -113,7 +137,8 @@ export async function renderReminders() {
 
 /**
  * @param {{getWeightEntries:Function, getRoutines:Function, getSchedule:Function,
- *          isDoneToday:Function, startWorkout:Function, goToWeighIn:Function}} api
+ *          isDoneToday:Function, startWorkout:Function, goToWeighIn:Function,
+ *          cardioTemplateForDay:Function, cardioForDate:Function, goToCardio:Function}} api
  */
 export function initReminders(api) {
   deps = api;

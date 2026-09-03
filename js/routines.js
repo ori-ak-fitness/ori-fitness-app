@@ -7,6 +7,7 @@ import * as db from './db.js';
 import {
   $, el, toast, openSheet, closeSheet, confirmSheet, heCount, guard, keepScroll, dateKey, shiftDateKey,
 } from './ui.js';
+import { getCardioSchedule, getCardioTemplates } from './cardio.js';
 
 const SCHEDULE_KEY = 'weekSchedule';
 
@@ -104,12 +105,14 @@ async function setSchedule(schedule) {
 /* ---------- תצוגה ---------- */
 
 export async function renderPlan() {
-  const [routines, schedule] = await Promise.all([getRoutines(), getSchedule()]);
+  const [routines, schedule, cardioSchedule, cardioTemplates] = await Promise.all([
+    getRoutines(), getSchedule(), getCardioSchedule(), getCardioTemplates(),
+  ]);
   const today = new Date().getDay();
   const todayRoutine = schedule[today] ? routines.find((r) => r.id === schedule[today]) : null;
 
   await renderTodayCard(todayRoutine, today, routines);
-  await renderWeekStrip(routines, schedule, today);
+  await renderWeekStrip(routines, schedule, today, 'weekStrip', cardioSchedule, cardioTemplates);
   renderRoutineList(routines, schedule);
 }
 
@@ -180,7 +183,7 @@ async function renderTodayCard(routine, today, allRoutines = []) {
  * האימון המשובץ מקבל וי ירוק ישירות על התג שלו, לא ברשימה נפרדת.
  * hostId ניתן לשינוי כדי לרנדר את אותו הרכיב גם במסך הבית וגם במסך האימון.
  */
-export async function renderWeekStrip(routines, schedule, today, hostId = 'weekStrip') {
+export async function renderWeekStrip(routines, schedule, today, hostId = 'weekStrip', cardioSchedule = null, cardioTemplates = null) {
   const host = $('#' + hostId);
   if (!host) return;
   const todayKey = dateKey();
@@ -188,19 +191,32 @@ export async function renderWeekStrip(routines, schedule, today, hostId = 'weekS
 
   const days = await Promise.all(DAY_SHORT.map(async (short, i) => {
     const routine = schedule[i] ? routines.find((r) => r.id === schedule[i]) : null;
+    const cardio = cardioSchedule?.[i] ? cardioTemplates?.find((c) => c.id === cardioSchedule[i]) : null;
     const dayKey = shiftDateKey(weekStart, i);
     const done = routine && dayKey <= todayKey ? !!(await onCheckDoneOnDate?.(routine.id, dayKey)) : false;
-    return { short, i, routine, done };
+    return { short, i, routine, cardio, done };
   }));
 
-  host.replaceChildren(...days.map(({ short, i, routine, done }) => el('div', {
-    class: `day-chip is-static${i === today ? ' is-today' : ''}${routine ? ' has-plan' : ''}${done ? ' is-done' : ''}`,
-    'aria-label': `יום ${DAY_NAMES[i]}: ${routine ? routine.name : 'מנוחה'}${done ? ' — בוצע' : ''}`,
-  },
-    done ? checkIcon('day-check') : null,
-    el('span', { class: 'day-letter' }, short),
-    el('span', { class: 'day-plan' }, routine ? routine.name : 'מנוחה'),
-  )));
+  /*
+   * כוח ואירובי באותו יום: שם התוכנית נשאר הטקסט הראשי (כמו קודם),
+   * והאירובי מתווסף כאייקון קטן בפינה — לא כטקסט נוסף, כי "שם · אירובי"
+   * בתג ברוחב 50 פיקסלים היה נחתך מיד ומעלים בדיוק את מה שרוצים להראות.
+   * יום בלי כוח אבל עם אירובי — שם האירובי הופך להיות הטקסט הראשי,
+   * במקום "מנוחה".
+   */
+  host.replaceChildren(...days.map(({ short, i, routine, cardio, done }) => {
+    const label = routine ? routine.name : (cardio ? cardio.name : 'מנוחה');
+    const ariaExtra = routine && cardio ? ` + ${cardio.name}` : '';
+    return el('div', {
+      class: `day-chip is-static${i === today ? ' is-today' : ''}${(routine || cardio) ? ' has-plan' : ''}${done ? ' is-done' : ''}`,
+      'aria-label': `יום ${DAY_NAMES[i]}: ${label}${ariaExtra}${done ? ' — בוצע' : ''}`,
+    },
+      done ? checkIcon('day-check') : null,
+      el('span', { class: 'day-letter' }, short),
+      el('span', { class: 'day-plan' }, label),
+      ...(routine && cardio ? [el('span', { class: 'day-cardio-badge' }, cardio.icon || '🏃')] : []),
+    );
+  }));
 }
 
 function renderRoutineList(routines, schedule) {

@@ -71,14 +71,17 @@ async function loadRecords(uid) {
   const bySettingKey = {};
   const bodyWeight = [];
   const workouts = [];
+  const cardioTemplates = [];
   for (const doc of snap.docs) {
     const rec = doc.data();
     if (rec.deleted) continue;
     if (rec.store === 'settings') bySettingKey[rec.key] = rec.value;
     else if (rec.store === 'bodyWeight') bodyWeight.push(rec.value);
     else if (rec.store === 'workouts') workouts.push(rec.value);
+    // תבניות אירובי חיות באותו מאגר routines כמו תוכניות כוח, מסומנות kind
+    else if (rec.store === 'routines' && rec.value?.kind === 'cardio') cardioTemplates.push(rec.value);
   }
-  return { bySettingKey, bodyWeight, workouts };
+  return { bySettingKey, bodyWeight, workouts, cardioTemplates };
 }
 
 async function markSent(uid, field, dateKey) {
@@ -111,7 +114,7 @@ async function run() {
     const uid = userDoc.id;
     if (userDoc.data()?.status !== 'approved') continue;
 
-    const { bySettingKey, bodyWeight, workouts } = await loadRecords(uid);
+    const { bySettingKey, bodyWeight, workouts, cardioTemplates } = await loadRecords(uid);
     const subscription = bySettingKey.pushSubscription;
     if (!subscription) continue;
 
@@ -151,6 +154,23 @@ async function run() {
             title: 'האימון של היום', body: `יום ${DAY_NAMES[now.weekday]} — עוד לא סימנת שהתאמנת היום.`, url: APP_URL,
           });
           if (ok) { await markSent(uid, 'workout', now.dateKey); sent++; }
+        }
+      }
+    }
+
+    // ---- תזכורת אירובי: נפרדת מתזכורת האימון בכוונה — יום עם שניהם
+    // צריך שתי תזכורות, לא אחת שמסתירה את השנייה (אותה שעה: workoutHour) ----
+    if (now.hour === workoutHour && pushLog.cardio !== now.dateKey) {
+      const cardioSchedule = Array.isArray(bySettingKey.cardioWeekSchedule) ? bySettingKey.cardioWeekSchedule : [];
+      const templateId = cardioSchedule[now.weekday];
+      const template = templateId ? cardioTemplates.find((t) => t.id === templateId) : null;
+      if (template) {
+        const doneToday = workouts.some((w) => w?.kind === 'cardio' && w?.date === now.dateKey && w?.templateId === templateId);
+        if (!doneToday) {
+          const ok = await send(uid, subscription, {
+            title: 'האירובי של היום', body: `${template.name} עוד לא סומן היום.`, url: APP_URL,
+          });
+          if (ok) { await markSent(uid, 'cardio', now.dateKey); sent++; }
         }
       }
     }

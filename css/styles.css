@@ -798,6 +798,15 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .day-chip.is-done .day-letter,
 .day-chip.is-done .day-plan { position: relative; z-index: 1; }
 
+/* יום עם גם כוח וגם אירובי — האייקון של האירובי בפינה, לא עוד טקסט
+   שנחתך; שם התוכנית עצמו נשאר הטקסט הראשי של האריח */
+.day-cardio-badge {
+  position: absolute; z-index: 2;
+  inset-block-start: 3px; inset-inline-end: 3px;
+  font-size: .58rem; line-height: 1;
+  filter: drop-shadow(0 1px 1px var(--shadow-strong));
+}
+
 .list-item.is-selected { border-color: var(--accent); background: var(--accent-soft); }
 .list-item.is-static { cursor: default; }
 .list-item.is-static:active { background: var(--bg-elev); }

@@ -9,7 +9,7 @@ import {
 } from './ui.js';
 import { getAllWorkouts } from './workouts.js';
 import { totalsForDate, goalForDate } from './nutrition.js';
-import { weeklyCardioSummary } from './cardio.js';
+import { weeklyCardioSummary, getCardioSchedule, getCardioTemplates } from './cardio.js';
 import { renderWeekStrip, getRoutines, getSchedule } from './routines.js';
 
 const QUOTES = [
@@ -368,8 +368,10 @@ export async function renderStats() {
     $('#hsCardioCard').classList.toggle('hidden', cardioSummary.length === 0);
 
     // אותו לוח שבוע (עם וי על ימים שבוצעו) שיש במסך האימון, גם כאן בבית
-    const [hsRoutines, hsSchedule] = await Promise.all([getRoutines(), getSchedule()]);
-    await renderWeekStrip(hsRoutines, hsSchedule, new Date().getDay(), 'hsWeekStrip');
+    const [hsRoutines, hsSchedule, hsCardioSchedule, hsCardioTemplates] = await Promise.all([
+      getRoutines(), getSchedule(), getCardioSchedule(), getCardioTemplates(),
+    ]);
+    await renderWeekStrip(hsRoutines, hsSchedule, new Date().getDay(), 'hsWeekStrip', hsCardioSchedule, hsCardioTemplates);
   }
 
   if (showNutrition) {

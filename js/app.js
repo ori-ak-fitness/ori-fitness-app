@@ -5,7 +5,7 @@
 
 import * as db from './db.js';
 import { $, $$, toast, initSheet, setAutoAdvanceMs, AUTO_ADVANCE_DEFAULT_MS, dateKey } from './ui.js';
-import { initCardio, renderCardio, invalidateCardioCache } from './cardio.js';
+import { initCardio, renderCardio, invalidateCardioCache, cardioTemplateForDay, cardioForDate } from './cardio.js';
 import { initWorkouts, startWorkout, hasActiveWorkout, renderHistory, getAllWorkouts } from './workouts.js';
 import {
   initNutrition, renderNutrition, invalidateGoalsCache, resetToToday, currentNutritionDate,
@@ -479,6 +479,9 @@ async function main() {
       // ממקדים את שדה המשקל אחרי שהמסך כבר מוצג, אחרת אין למה למקד
       setTimeout(() => $('#weightInput')?.focus(), 150);
     },
+    cardioTemplateForDay,
+    cardioForDate,
+    goToCardio: () => showScreen('workout'),
   });
   await renderReminders();
 
