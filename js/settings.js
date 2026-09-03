@@ -416,11 +416,18 @@ function renderAccount() {
   }[state.status] || state.status);
   $('#accountSub').textContent = `${state.email || ''} · ${role}`;
 
-  // רשימת המשתמשים נטענת מהרשת, ולכן התקציר מתעדכן אחרי שהמסך כבר מוצג
+  /*
+   * ניהול משתמשים ומצב הסנכרון — רק למנהל. משתמש רגיל צריך רק לדעת
+   * מי הוא ואיך להתנתק, לא את פרטי הסנכרון של כל האפליקציה.
+   */
+  const admin = isAdminUser();
   const usersBtn = $('#setUsersBtn');
-  if (!usersBtn) return;
-  if (!isAdminUser()) { usersBtn.classList.add('hidden'); return; }
-  usersBtn.classList.remove('hidden');
+  const cloudBtn = $('#cloudStatusBtn');
+  usersBtn?.classList.toggle('hidden', !admin);
+  cloudBtn?.classList.toggle('hidden', !admin);
+  if (!admin) return;
+
+  // רשימת המשתמשים נטענת מהרשת, ולכן התקציר מתעדכן אחרי שהמסך כבר מוצג
   usersSummary().then((text) => { $('#setUsersSub').textContent = text; });
 }
 
