@@ -22,7 +22,6 @@ import { initReminders, renderReminders } from './reminders.js';
 import { renderChallengeWidget, invalidateChallengeCache } from './challenge.js';
 import { initRoutines, renderPlan, invalidateRoutinesCache, getRoutines, getSchedule } from './routines.js';
 import { initMealPlan, invalidatePlanCache } from './mealplan.js';
-import { initBackup, renderBackupInfo } from './backup.js';
 import { initSettingsScreen, renderSettings } from './settings.js';
 import {
   initOnboarding, shouldRunWizard, openWizard, rerunWizard, closeWizardIfDone,
@@ -70,7 +69,7 @@ function showScreen(name, fromHistory = false, slideFrom = null) {
   if (name === 'workout' && !hasActiveWorkout()) { renderPlan(); renderCardio(); }
   if (name === 'nutrition') { renderNutrition(); }
   if (name === 'progress') { renderProgress(); renderBodyWeight(); }
-  if (name === 'settings') { renderSettings(); renderBackupInfo(); }
+  if (name === 'settings') { renderSettings(); }
 
   /*
    * מסך הבית הוא תמיד הבסיס: הוא מחליף את הרשומה הנוכחית, וכל מסך אחר
@@ -433,30 +432,6 @@ async function main() {
     // אימון פעיל אם יש, אחרת כרטיס הבחירה של היום (המשובץ, או רשימת
     // התוכניות אם לא שיבצת). לא מתחילים כלום מאחורי הגב.
     onStartWorkout: () => showScreen('workout'),
-  });
-  initBackup({
-    onImported: async () => {
-      // אחרי ייבוא צריך לרענן הכל — הנתונים השתנו מתחת לכל המסכים.
-      // קודם מאפסים מטמונים, אחרת המסכים יציירו את המצב הישן.
-      invalidateRoutinesCache();
-      invalidatePlanCache();
-      invalidateGoalsCache();
-      invalidateCardioCache();
-      invalidateWeightCache();
-      invalidatePersonalGoalsCache();
-      invalidateChallengeCache();
-      await renderHistory();
-      await renderPlan();
-      await renderCardio();
-      await renderNutrition();
-      await renderStats();
-      await renderBackupInfo();
-      await renderSettings();
-      await renderQuote();
-      await renderGoals();
-      await renderChallengeWidget();
-      if (currentScreen === 'progress') { renderProgress(); renderBodyWeight(); }
-    },
   });
   initProgress();
   initBodyWeight();
