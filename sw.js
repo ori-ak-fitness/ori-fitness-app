@@ -3,7 +3,7 @@
    העלה את CACHE_VERSION בכל שחרור גרסה כדי לרענן קבצים.
    =================================================================== */
 
-const CACHE_VERSION = 'ori-fitness-v82';
+const CACHE_VERSION = 'ori-fitness-v83';
 
 const APP_SHELL = [
   './',
@@ -36,6 +36,7 @@ const APP_SHELL = [
   './js/cloud.js',
   './js/snacks.js',
   './js/reminders.js',
+  './js/push.js',
   './icons/logo.svg',
   './icons/icon-192.png',
   './icons/icon-512.png',
@@ -150,5 +151,38 @@ self.addEventListener('fetch', (event) => {
     }).catch(() => null);
 
     return cached || (await network) || new Response('', { status: 504 });
+  })());
+});
+
+/*
+ * התראת דחיפה — מגיעה מה-GitHub Action המתוזמן, לא מהאפליקציה עצמה
+ * (ראה .github/workflows/push-reminders.yml). התוכן הוא JSON פשוט:
+ * {title, body, url}. אין כאן שום החלטה על *מה* להזכיר — זה כבר הוחלט
+ * בצד השרת; ה-Service Worker רק מציג את מה שהגיע.
+ */
+self.addEventListener('push', (event) => {
+  let data = { title: 'Ori AK Fitness', body: '' };
+  try { if (event.data) data = { ...data, ...event.data.json() }; } catch { /* טקסט רגיל, לא JSON */ }
+
+  event.waitUntil(self.registration.showNotification(data.title, {
+    body: data.body,
+    icon: './icons/icon-192.png',
+    badge: './icons/icon-192.png',
+    dir: 'rtl',
+    lang: 'he',
+    data: { url: data.url || './' },
+  }));
+});
+
+// לחיצה על ההתראה — פותחת חלון קיים אם יש, אחרת חלון חדש
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const targetUrl = new URL(event.notification.data?.url || './', self.location).href;
+  event.waitUntil((async () => {
+    const clientsList = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    for (const client of clientsList) {
+      if (client.url === targetUrl && 'focus' in client) return client.focus();
+    }
+    if (self.clients.openWindow) return self.clients.openWindow(targetUrl);
   })());
 });

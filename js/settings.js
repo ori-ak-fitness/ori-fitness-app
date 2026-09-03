@@ -92,6 +92,39 @@ async function openHeightSheet() {
   setTimeout(() => input.focus(), 120);
 }
 
+/* ---------- התראות דחיפה ---------- */
+
+async function openPushSheet() {
+  const push = await import('./push.js');
+  const supported = push.isPushSupported();
+  const has = supported && await push.hasPushSubscription();
+  const perm = push.pushPermission();
+
+  const rows = [
+    el('p', { class: 'muted', style: 'margin-bottom:16px' }, supported
+      ? 'תזכורת שקילה (יום שלישי) ותזכורת אימון (אם לא סימנת עד הערב) יגיעו כהתראה לטלפון, גם כשהאפליקציה סגורה.'
+      : 'הדפדפן הזה לא תומך בהתראות דחיפה.'),
+  ];
+  if (supported) {
+    if (perm === 'denied') {
+      rows.push(el('p', { class: 'muted', style: 'color:var(--danger)' },
+        'ההרשאה נחסמה בהגדרות הדפדפן. צריך לאשר אותה שם ידנית כדי להפעיל.'));
+    } else {
+      rows.push(el('button', {
+        class: `btn btn-block ${has ? 'btn-ghost' : 'btn-primary'}`,
+        onclick: guard(async () => {
+          if (has) await push.unsubscribeFromPush();
+          else await push.subscribeToPush();
+          closeSheet();
+          await renderSettings();
+        }),
+      }, has ? 'כבה התראות' : 'הפעל התראות'));
+    }
+  }
+
+  openSheet('התראות', el('div', {}, ...rows));
+}
+
 /* ---------- מצב הסנכרון ---------- */
 
 /*
@@ -360,6 +393,11 @@ export async function renderSettings() {
   $('#setNameSub').textContent = name ? name : 'לא הוגדר — לחץ כדי להוסיף';
   const height = await getUserHeightCm();
   $('#setHeightSub').textContent = height ? `${height} ס"מ` : 'לא הוגדר — לחץ כדי להוסיף';
+
+  const push = await import('./push.js');
+  $('#setPushSub').textContent = !push.isPushSupported()
+    ? 'לא נתמך בדפדפן הזה'
+    : (await push.hasPushSubscription() ? 'פעילות' : 'כבויות — לחץ להפעיל');
   $('#setWeeklyGoalSub').textContent = `${weeklyGoal} אימונים בשבוע`;
 
   $('#setGoalsSub').textContent = personalGoals.length
@@ -424,7 +462,7 @@ const RESET_SETTING_KEYS = [
   'remindersDismissed',
   // תוכן פרופיל/תוכן שהמשתמש הזין בעצמו — לא רק הגדרת תצוגה, לכן כן נמחק
   'userName', 'userHeightCm', 'userAge', 'userSex', 'userActivityLevel',
-  'fullMenuNote', 'myBarcodeProducts', 'weeklyWorkoutGoal',
+  'fullMenuNote', 'myBarcodeProducts', 'weeklyWorkoutGoal', 'pushSubscription',
 ];
 
 const CONFIRM_PHRASE = 'מחק הכל';
@@ -490,6 +528,7 @@ export function initSettingsScreen({ onRerun, onCloudRefresh } = {}) {
 
   $('#setNameBtn').addEventListener('click', guard(openNameSheet));
   $('#setHeightBtn').addEventListener('click', guard(openHeightSheet));
+  $('#setPushBtn').addEventListener('click', guard(openPushSheet));
   $('#setHomeScreenBtn').addEventListener('click', guard(openHomeScreenSheet));
   $('#setQuotesBtn').addEventListener('click', guard(openQuotesSheet));
   $('#setGoalsBtn').addEventListener('click', guard(openGoalsEditor));
