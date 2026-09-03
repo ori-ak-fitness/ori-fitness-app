@@ -51,6 +51,13 @@
   --btn-fill-b: var(--gold-deep);
   --btn-ink:    var(--gold-ink);
 
+  /* מסגרת/טקסט "היום" באריחי השבוע — טורקיז מותר להישאר שם (יום, לא
+     כפתור), אבל gold-deep על רקע כהה יוצא ניגודיות נמוכה מדי לקריאה
+     (~2.8:1, מתחת לסף). gold הבהיר יותר עובר (~4.7:1); הטקסט עצמו
+     במצב לילה עובר לגמרי לצבע הטקסט הרגיל, קריא ולבן כמעט */
+  --today-mark: var(--gold-deep);
+  --today-text: var(--gold-deep);
+
   /*
    * חזרה לפונט המערכת. ניסינו כאן Heebo לגוף ו-Frank Ruhl Libre
    * לכותרות, ואורי ביקש את הכתב הקודם בחזרה.
@@ -93,6 +100,11 @@
   --btn-fill-b: var(--accent);
   --btn-ink:    var(--accent-ink);
 
+  /* "היום" באריחי השבוע: מסגרת בטורקיז הבהיר יותר (קריא על רקע כהה),
+     והטקסט עצמו לבן כמו כל טקסט רגיל — לא טורקיז כהה שנבלע ברקע */
+  --today-mark: var(--gold);
+  --today-text: var(--text);
+
   --ok:            #25d366;
   --ok-soft:       rgba(37, 211, 102, .22);
   --warn:          #ffc247;
@@ -133,6 +145,9 @@
     --btn-fill-a: var(--accent);
     --btn-fill-b: var(--accent);
     --btn-ink:    var(--accent-ink);
+
+    --today-mark: var(--gold);
+    --today-text: var(--text);
 
     --ok:            #25d366;
     --ok-soft:       rgba(37, 211, 102, .22);
@@ -536,8 +551,8 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 }
 .goal-num {
   flex: none; width: 30px; height: 30px; border-radius: 10px;
-  background: linear-gradient(155deg, rgba(255,255,255,.35), rgba(0,0,0,.06)), linear-gradient(150deg, var(--gold), var(--gold-deep));
-  color: var(--gold-ink); box-shadow: 0 2px 6px rgba(29, 107, 111, .35);
+  background: linear-gradient(155deg, rgba(255,255,255,.35), rgba(0,0,0,.06)), linear-gradient(150deg, var(--btn-fill-a), var(--btn-fill-b));
+  color: var(--btn-ink); box-shadow: 0 2px 6px rgba(29, 107, 111, .35);
   display: grid; place-items: center; font-size: .82rem; font-weight: 800;
 }
 .goal-text { font-size: .94rem; font-weight: 600; }
@@ -787,11 +802,11 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 /* היום מסומן במסגרת טורקיז, לא במילוי מלא — המילוי המלא נשמר לכפתור
    הפעולה הראשי בלבד, כדי שטורקיז ימשיך לומר דבר אחד ולא חמישה */
 .day-chip.is-today {
-  background: var(--bg-elev); color: var(--gold-deep);
-  border-color: var(--gold-deep); box-shadow: none;
+  background: var(--bg-elev); color: var(--today-text);
+  border-color: var(--today-mark); box-shadow: none;
 }
 .day-chip.is-today .day-letter,
-.day-chip.is-today .day-plan { color: var(--gold-deep); }
+.day-chip.is-today .day-plan { color: var(--today-text); }
 .day-chip.is-static { cursor: default; }
 /* התג כולו נצבע ירוק שקוף כשהאימון שלו כבר בוצע השבוע — וי גדול ושקוף
    ברקע, כדי שהצבע יראה "מהרקע" ובכל זאת יישאר אפשר לקרוא איזה יום ומה
@@ -799,7 +814,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .day-chip.is-done { background: var(--ok-soft); border-color: var(--ok); box-shadow: none; }
 /* יום שהוא גם היום וגם כבר בוצע: מילוי הירוק הרגיל של "בוצע" נשאר,
    ומעליו רק מסגרת טורקיז שמסמנת שזה גם היום */
-.day-chip.is-today.is-done { border-color: var(--gold-deep); }
+.day-chip.is-today.is-done { border-color: var(--today-mark); }
 /* וי אמיתי מ-SVG (קו קצר וקו ארוך, כמו וי אמיתי) — לא תו טקסט מעוגל,
    פינות חדות לגמרי (stroke-linecap/linejoin לא round) */
 .day-check {
