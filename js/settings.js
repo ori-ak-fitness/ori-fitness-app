@@ -12,7 +12,7 @@ import {
 import { getRoutines, getSchedule, openRoutinesListSheet, openScheduleSheet, DAY_SHORT } from './routines.js';
 import { getCardioTemplates, openCardioEditor, openCardioScheduleSheet, getCardioSchedule } from './cardio.js';
 import { getPlan, openPlanEditor } from './mealplan.js';
-import { goalForDate, openGoalSheet, openCalorieCalculatorSheet } from './nutrition.js';
+import { goalForDate, openGoalSheet, openCalorieCalculatorSheet, ACTIVITY_LEVELS } from './nutrition.js';
 import {
   renderGreeting, getWeeklyWorkoutGoal, setWeeklyWorkoutGoal, renderStats,
   getBuiltinQuotes, getGoals, openGoalsEditor, getPhotos, addPhotos, openLightbox,
@@ -22,7 +22,10 @@ import {
 } from './dashboard.js';
 import { getChallenge, challengeStatus, openChallengeSettings } from './challenge.js';
 import { getBadgeStatus, openBadgesSheet } from './badges.js';
-import { getUserHeightCm, setUserHeightCm, renderBodyWeight } from './bodyweight.js';
+import {
+  getUserHeightCm, setUserHeightCm, getUserAge, setUserAge,
+  getUserSex, setUserSex, getActivityLevel, setActivityLevel, renderBodyWeight,
+} from './bodyweight.js';
 import { isConfigured } from './firebase-config.js';
 import { isAdminUser, openUsersSheet, usersSummary } from './admin.js';
 import { cloudStatus, syncNow, cloudReport } from './cloud.js';
@@ -66,30 +69,52 @@ function openNameSheet() {
   db.getSetting(NAME_SETTING_KEY, '').then((v) => { input.value = v || ''; input.focus(); });
 }
 
-async function openHeightSheet() {
-  const current = await getUserHeightCm();
-  const input = el('input', {
-    type: 'number', inputmode: 'numeric', min: '0', max: '260', placeholder: '170', value: current ?? '',
+/*
+ * גובה, גיל, מין ורמת פעילות — כולם יחד בשדה אחד ולא מפוזרים. הם
+ * משמשים גם את מחשבון הקלוריות (תזונה) וגם את גרף ה-BMI (התקדמות),
+ * אז יש להם גם כניסה משלהם כאן בפרופיל, לא רק דרך המחשבון.
+ */
+async function openBodyDetailsSheet() {
+  const [height, age, sex, activity] = await Promise.all([
+    getUserHeightCm(), getUserAge(), getUserSex(), getActivityLevel(),
+  ]);
+
+  const heightInput = el('input', {
+    type: 'number', inputmode: 'numeric', min: '0', max: '260', placeholder: '170', value: height ?? '',
   });
+  const ageInput = el('input', {
+    type: 'number', inputmode: 'numeric', min: '0', max: '120', placeholder: '30', value: age ?? '',
+  });
+  const sexSelect = el('select', {},
+    el('option', { value: '', selected: !sex }, 'לא צוין'),
+    el('option', { value: 'male', selected: sex === 'male' }, 'זכר'),
+    el('option', { value: 'female', selected: sex === 'female' }, 'נקבה'));
+  const activitySelect = el('select', {},
+    ...ACTIVITY_LEVELS.map((a) => el('option', { value: a.key, selected: a.key === activity }, a.label)));
 
   const save = guard(async () => {
-    await setUserHeightCm(num(input.value, 0));
+    await setUserHeightCm(num(heightInput.value, 0));
+    await setUserAge(num(ageInput.value, 0));
+    await setUserSex(sexSelect.value);
+    await setActivityLevel(activitySelect.value);
     await renderSettings();
     await renderBodyWeight();
     closeSheet();
     toast('נשמר', 'ok');
   });
-  input.addEventListener('keydown', (e) => { if (e.key === 'Enter') save(); });
 
   const body = el('div', {},
-    el('div', { class: 'field' }, el('label', {}, 'גובה (ס"מ)'), input),
+    el('div', { class: 'field' }, el('label', {}, 'גובה (ס"מ)'), heightInput),
+    el('div', { class: 'field' }, el('label', {}, 'גיל'), ageInput),
+    el('div', { class: 'field' }, el('label', {}, 'מין'), sexSelect),
+    el('div', { class: 'field' }, el('label', {}, 'רמת פעילות'), activitySelect),
     el('p', { class: 'muted', style: 'font-size:.8rem;margin-bottom:14px' },
-      'נדרש כדי לחשב BMI במסך ההתקדמות. אפשר להשאיר ריק כדי לבטל את זה.'),
+      'משמש לחישוב BMI וקלוריות מומלצות. אפשר להשאיר שדה ריק.'),
     el('button', { class: 'btn btn-primary btn-block', onclick: save }, 'שמור'),
   );
 
-  openSheet('גובה', body);
-  setTimeout(() => input.focus(), 120);
+  openSheet('פרטי גוף', body);
+  setTimeout(() => heightInput.focus(), 120);
 }
 
 /* ---------- התראות דחיפה ---------- */
@@ -408,8 +433,10 @@ export async function renderSettings() {
   renderAccount();
   renderCloudRow();
   $('#setNameSub').textContent = name ? name : 'לא הוגדר — לחץ כדי להוסיף';
-  const height = await getUserHeightCm();
-  $('#setHeightSub').textContent = height ? `${height} ס"מ` : 'לא הוגדר — לחץ כדי להוסיף';
+  const [height, age] = await Promise.all([getUserHeightCm(), getUserAge()]);
+  $('#setHeightSub').textContent = height || age
+    ? [height ? `${height} ס"מ` : null, age ? `${age}` : null].filter(Boolean).join(' · ')
+    : 'לא הוגדר — לחץ כדי להוסיף';
 
   const push = await import('./push.js');
   $('#setPushSub').textContent = !push.isPushSupported()
@@ -545,7 +572,7 @@ export function initSettingsScreen({ onRerun, onCloudRefresh } = {}) {
   $('#cloudStatusBtn').addEventListener('click', guard(openCloudSheet));
 
   $('#setNameBtn').addEventListener('click', guard(openNameSheet));
-  $('#setHeightBtn').addEventListener('click', guard(openHeightSheet));
+  $('#setHeightBtn').addEventListener('click', guard(openBodyDetailsSheet));
   $('#setPushBtn').addEventListener('click', guard(openPushSheet));
   $('#setHomeScreenBtn').addEventListener('click', guard(openHomeScreenSheet));
   $('#setQuotesBtn').addEventListener('click', guard(openQuotesSheet));
