@@ -1026,6 +1026,11 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 }
 .settings-group .settings-item:last-child { border-bottom: none; }
 .settings-item:active { background: var(--bg-elev-2); }
+/* שורת select (ערכת צבעים, קפיצה אוטומטית) בתוך אותה קבוצת הגדרות —
+   אותו ריפוד וקו הפרדה כמו settings-item, כדי שזה ייראה שורה אחת
+   ולא שני סוגי כרטיס שונים */
+.settings-group > .setting-row { padding: 14px 16px; border-bottom: 1px solid var(--line); }
+.settings-group > .setting-row:last-child { border-bottom: none; }
 .si-ico { font-size: 1.25rem; flex: none; width: 26px; text-align: center; }
 .si-main { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .si-main b { font-size: .95rem; font-weight: 700; }

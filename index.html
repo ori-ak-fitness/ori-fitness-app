@@ -289,26 +289,49 @@
         </button>
       </div>
 
-      <div class="section-head"><h2>מסך בית</h2></div>
+      <div class="section-head"><h2>מסך הבית ותצוגה</h2></div>
       <div class="settings-group">
         <button class="settings-item" id="setHomeScreenBtn">
           <span class="si-ico">🏠</span>
           <span class="si-main"><b>מקטעים מוצגים</b><small id="setHomeScreenSub">—</small></span>
           <span class="si-arrow">‹</span>
         </button>
+        <label class="setting-row" for="themeSelect">
+          <span>
+            <b>ערכת צבעים</b>
+            <small>קרם בהיר, או שחור למקרה שאתה מתאמן בלילה</small>
+          </span>
+          <select id="themeSelect">
+            <option value="light">קרם (בהיר)</option>
+            <option value="dark">שחור (לילה)</option>
+            <option value="system">לפי המכשיר</option>
+          </select>
+        </label>
+        <label class="setting-row" for="autoAdvanceSelect">
+          <span>
+            <b>קפיצה אוטומטית בין שדות</b>
+            <small>אחרי הפסקה בהקלדה, המסך עובר לשדה הבא לבד</small>
+          </span>
+          <select id="autoAdvanceSelect">
+            <option value="0">כבוי</option>
+            <option value="700">מהיר (0.7 שנ')</option>
+            <option value="1000">רגיל (1 שנ')</option>
+            <option value="1400">איטי (1.4 שנ')</option>
+            <option value="2000">איטי מאוד (2 שנ')</option>
+          </select>
+        </label>
       </div>
+      <p class="muted" style="font-size:.78rem;margin-top:8px;padding:0 4px">
+        גם כשהקפיצה האוטומטית כבויה, כפתור "הבא" במקלדת עדיין מעביר לשדה הבא.
+      </p>
 
-      <div class="section-head"><h2>התראות</h2></div>
+      <div class="section-head"><h2>תזכורות ומוטיבציה</h2></div>
       <div class="settings-group">
         <button class="settings-item" id="setPushBtn">
           <span class="si-ico">🔔</span>
           <span class="si-main"><b>התראות דחיפה</b><small id="setPushSub">—</small></span>
           <span class="si-arrow">‹</span>
         </button>
-      </div>
-
-      <div class="section-head"><h2>מוטיבציה</h2></div>
-      <div class="settings-group">
         <button class="settings-item" id="setQuotesBtn">
           <span class="si-ico">🧠</span>
           <span class="si-main"><b>דף מנטלי</b><small id="setQuotesSub">—</small></span>
@@ -379,42 +402,7 @@
         </button>
       </div>
 
-      <div class="section-head"><h2>מראה</h2></div>
-      <div class="card">
-        <label class="setting-row" for="themeSelect">
-          <span>
-            <b>ערכת צבעים</b>
-            <small>קרם בהיר, או שחור למקרה שאתה מתאמן בלילה</small>
-          </span>
-          <select id="themeSelect">
-            <option value="light">קרם (בהיר)</option>
-            <option value="dark">שחור (לילה)</option>
-            <option value="system">לפי המכשיר</option>
-          </select>
-        </label>
-      </div>
-
-      <div class="section-head"><h2>התנהגות</h2></div>
-      <div class="card">
-        <label class="setting-row" for="autoAdvanceSelect">
-          <span>
-            <b>קפיצה אוטומטית בין שדות</b>
-            <small>אחרי הפסקה בהקלדה, המסך עובר לשדה הבא לבד</small>
-          </span>
-          <select id="autoAdvanceSelect">
-            <option value="0">כבוי</option>
-            <option value="700">מהיר (0.7 שנ')</option>
-            <option value="1000">רגיל (1 שנ')</option>
-            <option value="1400">איטי (1.4 שנ')</option>
-            <option value="2000">איטי מאוד (2 שנ')</option>
-          </select>
-        </label>
-        <p class="muted" style="font-size:.78rem;margin-top:10px">
-          גם כשזה כבוי, כפתור "הבא" במקלדת עדיין מעביר לשדה הבא.
-        </p>
-      </div>
-
-      <div class="section-head"><h2>גיבוי הנתונים</h2></div>
+      <div class="section-head"><h2>תחזוקה</h2></div>
       <div class="settings-group">
         <button class="settings-item" id="exportBackupBtn">
           <span class="si-ico">⬇️</span>
@@ -426,14 +414,15 @@
           <span class="si-main"><b>ייבוא גיבוי</b><small>שחזור מקובץ או מטקסט שהעתקת</small></span>
           <span class="si-arrow">‹</span>
         </button>
+        <button class="settings-item" id="rerunSetupBtn">
+          <span class="si-ico">🧙</span>
+          <span class="si-main"><b>הפעל מחדש את אשף ההגדרה</b><small>עובר שוב על ההגדרה הראשונית</small></span>
+          <span class="si-arrow">‹</span>
+        </button>
       </div>
       <p class="muted" style="font-size:.8rem;margin-top:10px;padding:0 4px">
         הנתונים נשמרים במכשיר הזה בלבד. גיבוי מדי פעם שומר עליהם.
       </p>
-
-      <button class="btn btn-ghost btn-block" id="rerunSetupBtn" style="margin-top:22px">
-        הפעל מחדש את אשף ההגדרה
-      </button>
 
       <!-- אזור מסוכן — בכוונה לא בולט ורחוק משאר הפעולות -->
       <div class="danger-zone">
