@@ -1228,8 +1228,15 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 /* חצי הניווט היו טקסט דק וקטן שנבלע ליד ה"היום" — עכשיו עיגול מלא,
    גדול וברור, כמו כפתור אמיתי ולא רק תו צף */
 .date-nav .icon-btn {
-  width: 44px; height: 44px; font-size: 1.4rem; font-weight: 700;
+  width: 44px; height: 44px;
   background: var(--bg-elev); border: 1px solid var(--line); color: var(--text);
+}
+.chevron-icon {
+  width: 20px; height: 20px;
+}
+.chevron-icon polyline {
+  fill: none; stroke: currentColor; stroke-width: 2.6;
+  stroke-linecap: round; stroke-linejoin: round;
 }
 .hidden-date { position: fixed; opacity: 0; pointer-events: none; width: 1px; height: 1px; }
 
