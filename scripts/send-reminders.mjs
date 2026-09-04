@@ -66,21 +66,54 @@ function sundayOf(dateKey) {
   return date.toISOString().slice(0, 10);
 }
 
+/* מזהה הרשומה בפיירסטור - חייב להתאים בול לפורמט ב-cloud.js (recordId),
+   כדי שנוכל לקרוא הגדרה ספציפית לפי מזהה בלי לסרוק אותה */
+function settingRecordId(key) {
+  return `settings__${encodeURIComponent(key)}`;
+}
+
+/* רק המפתחות שהתזכורות באמת צריכות - לא כל ההגדרות */
+const NEEDED_SETTING_KEYS = [
+  'pushSubscription', 'weighInReminderHour', 'workoutReminderHour',
+  'weekSchedule', 'cardioWeekSchedule',
+];
+
+/*
+ * במקור זה קרא את כל הרשומות של המשתמש - כולל ארוחות, מטרות ותפריט,
+ * שהתזכורות בכלל לא נוגעות בהן - בכל הרצה, כל שעה, 24 פעם ביום. אצל
+ * משתמש פעיל עם שנה של נתונים זה לבד יכול לצרוך עשרות אלפי קריאות
+ * ביום ולגמור את המכסה החינמית של פיירבייס עם רק כמה משתמשים פעילים.
+ * עכשיו: שאילתה אחת ממוקדת לאימונים/שקילות/תוכניות, ובנוסף רק חמש
+ * הגדרות ספציפיות לפי מזהה - לא כל ה-settings.
+ */
 async function loadRecords(uid) {
-  const snap = await db.collection('users').doc(uid).collection('records').get();
+  const recordsRef = db.collection('users').doc(uid).collection('records');
+
+  const [bulkSnap, settingDocs] = await Promise.all([
+    recordsRef.where('store', 'in', ['workouts', 'bodyWeight', 'routines']).get(),
+    Promise.all(NEEDED_SETTING_KEYS.map((key) => recordsRef.doc(settingRecordId(key)).get())),
+  ]);
+
   const bySettingKey = {};
   const bodyWeight = [];
   const workouts = [];
   const cardioTemplates = [];
-  for (const doc of snap.docs) {
+
+  for (const doc of bulkSnap.docs) {
     const rec = doc.data();
     if (rec.deleted) continue;
-    if (rec.store === 'settings') bySettingKey[rec.key] = rec.value;
-    else if (rec.store === 'bodyWeight') bodyWeight.push(rec.value);
+    if (rec.store === 'bodyWeight') bodyWeight.push(rec.value);
     else if (rec.store === 'workouts') workouts.push(rec.value);
     // תבניות אירובי חיות באותו מאגר routines כמו תוכניות כוח, מסומנות kind
     else if (rec.store === 'routines' && rec.value?.kind === 'cardio') cardioTemplates.push(rec.value);
   }
+  for (const doc of settingDocs) {
+    if (!doc.exists) continue;
+    const rec = doc.data();
+    if (rec.deleted) continue;
+    bySettingKey[rec.key] = rec.value;
+  }
+
   return { bySettingKey, bodyWeight, workouts, cardioTemplates };
 }
 
