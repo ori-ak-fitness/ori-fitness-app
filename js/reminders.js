@@ -32,6 +32,12 @@ async function workoutReminderHour() {
   return Number.isFinite(n) ? n : DEFAULT_WORKOUT_REMINDER_HOUR;
 }
 
+const DEFAULT_WEIGH_IN_REMINDER_HOUR = 5;
+async function weighInReminderHour() {
+  const n = Number(await db.getSetting('weighInReminderHour', DEFAULT_WEIGH_IN_REMINDER_HOUR));
+  return Number.isFinite(n) ? n : DEFAULT_WEIGH_IN_REMINDER_HOUR;
+}
+
 async function readDismissed() {
   const raw = await db.getSetting(DISMISS_KEY, null);
   return raw && typeof raw === 'object' ? raw : {};
@@ -50,6 +56,8 @@ async function weighInReminder(dismissed) {
   const today = dateKey();
   if (new Date().getDay() !== 2) return null;          // 2 = יום שלישי
   if (dismissed.weighIn === today) return null;
+  // כמו התראת ה-push: לא לפני השעה שנבחרה, גם אם פותחים את האפליקציה מוקדם יותר
+  if (new Date().getHours() < await weighInReminderHour()) return null;
 
   const entries = await deps.getWeightEntries();
   const sunday = shiftDateKey(today, -new Date().getDay());
