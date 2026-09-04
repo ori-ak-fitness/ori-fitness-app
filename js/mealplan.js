@@ -129,7 +129,13 @@ export async function renderMealPlan(date, loggedMeals) {
   const library = await getPlan();
   const defaults = library.filter((m) => m.isDefault);
 
-  const eatenCount = defaults.filter((item) => loggedMeals.some((m) => m.planId === item.id)).length;
+  // רק סימון דרך ה-checkbox (fromToggle) סופר כ"אכלתי" — אם מסתכלים על
+  // כל planId תואם, לוגיסטית "מנה נוספת" שנרשמה דרך "+ מהמאגר" הייתה
+  // מסמנת ✓ לפני שבאמת סימנו, ומבטלת את ה-toggle הייתה מוסיפה רשומה
+  // כפולה במקום למחוק — זה בדיוק הבאג שכבר תוקן פעם אחת ב-toggleDefault
+  // עצמו, אבל נשאר כאן
+  const eatenCount = defaults.filter((item) =>
+    loggedMeals.some((m) => m.planId === item.id && m.fromToggle)).length;
   const badge = $('#mealProgress');
   if (badge) {
     badge.textContent = defaults.length ? `${eatenCount} מתוך ${defaults.length}` : '';
@@ -146,7 +152,7 @@ export async function renderMealPlan(date, loggedMeals) {
   }
 
   host.replaceChildren(...defaults.map((item) => {
-    const eaten = loggedMeals.some((m) => m.planId === item.id);
+    const eaten = loggedMeals.some((m) => m.planId === item.id && m.fromToggle);
     const row = el('div', {
       class: `plan-meal${eaten ? ' is-eaten' : ''}`,
       onclick: () => toggleDefault(item, date, row),

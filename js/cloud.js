@@ -40,6 +40,11 @@ const META_KEY = '__syncMeta';
 /* הגדרות שאין טעם לסנכרן: מצב רגעי של המכשיר הזה, לא נתונים אישיים */
 const LOCAL_ONLY_SETTINGS = new Set([
   'activeWorkout',   // אימון שרץ עכשיו על המכשיר הזה
+  /* מנוי Push הוא endpoint ספציפי לדפדפן/מכשיר הזה בלבד — אם זה היה
+     מסתנכרן, מכשיר ב' היה "גונב" את הרישום של מכשיר א' (או מוחק אותו
+     בניסיון "לבטל" מנוי שמעולם לא היה שלו), ושני הצדדים היו נשארים
+     בלי התראות בלי שום שגיאה מוצגת */
+  'pushSubscription',
   META_KEY,
 ]);
 
@@ -54,6 +59,23 @@ const CLOCK_SLACK_MS = 24 * 60 * 60 * 1000;
 let enabled = false;
 let queue = new Map();   // recordId -> {store, key, value|null}
 let flushTimer = null;
+
+/*
+ * pull() ו-flush() שניהם קוראים-משנים-כותבים את אותו מטא (meta.at/
+ * lastPull) בלי נעילה. בלי תיאום, שני מכשירים... לא, אותו מכשיר: אם
+ * pull() הראשוני עדיין ממתין לרשת (readMeta כבר קרה) וחל flush()
+ * מהדיבאונס בינתיים (למשל עריכה שנייה שהמשתמש עשה תוך כדי), ה-flush
+ * קורא מטא, כותב חזרה עם ה-at המעודכן שלו — ואז ה-pull חוזר וכותב את
+ * המטא *שלו* (שנקרא לפני ה-flush), דורס את מה שה-flush בדיוק רשם.
+ * ברשומה שהמשתמש ערך שוב בחלון הזה, זה יכול להחזיר ערך ישן על גבי חדש.
+ * שרשור דרך תור יחיד מבטיח שרק פעולה אחת נוגעת במטא בכל רגע נתון.
+ */
+let syncChain = Promise.resolve();
+function serialized(fn) {
+  const run = syncChain.then(fn);
+  syncChain = run.catch(() => {}); // כישלון לא תוקע את התור להבא
+  return run;
+}
 
 /*
  * מצב אחרון של הסנכרון, לתצוגה בהגדרות.
@@ -142,7 +164,8 @@ function scheduleFlush() {
   flushTimer = setTimeout(() => { flush().catch(() => {}); }, 900);
 }
 
-async function flush() {
+/** דוחף מה שבתור. לא לקרוא ישירות — ראו flush() העוטפת למטה */
+async function flushImpl() {
   if (!enabled || !queue.size) return;
   const pending = queue;
   queue = new Map();
@@ -177,6 +200,9 @@ async function flush() {
   }
 }
 
+/** דוחף את התור, משורשר כדי לא להתנגש עם pull() על אותו מטא */
+function flush() { return serialized(flushImpl); }
+
 /** נקרא מ-db.js בכל כתיבה ומחיקה */
 function onLocalChange(store, key, value) {
   if (!enabled || !isSyncable(store, key)) return;
@@ -187,10 +213,11 @@ function onLocalChange(store, key, value) {
 /* ---------- משיכה ---------- */
 
 /**
- * מושך מהענן ומחיל רק מה שחדש ממה שיש כאן.
+ * מושך מהענן ומחיל רק מה שחדש ממה שיש כאן. לא לקרוא ישירות — ראו
+ * pull() העוטפת למטה.
  * @returns {Promise<number>} כמה רשומות התעדכנו בפועל
  */
-async function pull() {
+async function pullImpl() {
   const meta = await readMeta();
   const since = meta.lastPull ? Math.max(0, meta.lastPull - CLOCK_SLACK_MS) : 0;
   const records = await fetchRecords(since);
@@ -217,6 +244,9 @@ async function pull() {
   await writeMeta(meta);
   return applied;
 }
+
+/** מושך, משורשר כדי לא להתנגש עם flush() על אותו מטא */
+function pull() { return serialized(pullImpl); }
 
 /* ---------- העלאה ראשונית ---------- */
 

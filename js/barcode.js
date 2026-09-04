@@ -14,7 +14,7 @@
    =================================================================== */
 
 import * as db from './db.js';
-import { $, el, toast, guard, num, fmtNum, openSheet, closeSheet } from './ui.js';
+import { $, el, toast, guard, num, fmtNum, openSheet, closeSheet, dateKey } from './ui.js';
 
 const OFF_API = 'https://world.openfoodfacts.org/api/v2/product/';
 const ZXING_CDN = 'https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.4/+esm';
@@ -160,11 +160,11 @@ function openProductSheet(product) {
   const save = guard(async () => {
     const c = calc();
     if (c.grams <= 0) { toast('הזן כמות תקינה', 'err'); return; }
-    if (!per.calories) { toast('למוצר הזה אין נתוני קלוריות במאגר', 'err'); return; }
+    if (per.calories == null) { toast('למוצר הזה אין נתוני קלוריות במאגר', 'err'); return; }
 
     await db.put(db.STORES.meals, {
       id: db.uid(),
-      date: getDate ? getDate() : new Date().toISOString().slice(0, 10),
+      date: getDate ? getDate() : dateKey(),
       createdAt: Date.now(),
       name: [product.brand, product.name].filter(Boolean).join(' — ') || 'מוצר סרוק',
       calories: c.calories,

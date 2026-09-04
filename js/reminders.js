@@ -18,11 +18,19 @@ import { $, el, dateKey, shiftDateKey } from './ui.js';
 
 const DISMISS_KEY = 'remindersDismissed';
 
-/* מאיזו שעה שואלים על אימון שלא סומן. לפני זה עוד יש את כל היום
-   לעשות אותו, ותזכורת בבוקר היא רק נדנוד. */
-const WORKOUT_REMINDER_HOUR = 18;
+/* מאיזו שעה שואלים על אימון שלא סומן — ברירת מחדל, נדרסת ע"י ההגדרה
+   הניתנת לעריכה 'workoutReminderHour' (ראו settings.js). לפני השעה הזו
+   עוד יש את כל היום לעשות אותו, ותזכורת בבוקר היא רק נדנוד. */
+const DEFAULT_WORKOUT_REMINDER_HOUR = 18;
 
 let deps = {};
+
+/* אותה שעה גם לתזכורת האימון וגם לאירובי — זו אותה הגדרה בהגדרות
+   ('שעת תזכורת אימון'), לא שתיים נפרדות */
+async function workoutReminderHour() {
+  const n = Number(await db.getSetting('workoutReminderHour', DEFAULT_WORKOUT_REMINDER_HOUR));
+  return Number.isFinite(n) ? n : DEFAULT_WORKOUT_REMINDER_HOUR;
+}
 
 async function readDismissed() {
   const raw = await db.getSetting(DISMISS_KEY, null);
@@ -60,7 +68,7 @@ async function weighInReminder(dismissed) {
 async function workoutReminder(dismissed) {
   const today = dateKey();
   if (dismissed.workout === today) return null;
-  if (new Date().getHours() < WORKOUT_REMINDER_HOUR) return null;
+  if (new Date().getHours() < await workoutReminderHour()) return null;
 
   const [routines, schedule] = await Promise.all([deps.getRoutines(), deps.getSchedule()]);
   const routineId = schedule[new Date().getDay()];
@@ -85,7 +93,7 @@ async function workoutReminder(dismissed) {
 async function cardioReminder(dismissed) {
   const today = dateKey();
   if (dismissed.cardio === today) return null;
-  if (new Date().getHours() < WORKOUT_REMINDER_HOUR) return null;
+  if (new Date().getHours() < await workoutReminderHour()) return null;
 
   const template = await deps.cardioTemplateForDay?.(new Date().getDay());
   if (!template) return null;                           // אין אירובי מתוכנן היום

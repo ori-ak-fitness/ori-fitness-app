@@ -146,7 +146,14 @@ export async function openUsersSheet() {
     }
 
     const onChange = async (user, status) => {
-      await setUserStatus(user.uid, status);
+      try {
+        await setUserStatus(user.uid, status);
+      } catch (err) {
+        // בלי זה הכפתור פשוט חוזר למצבו הקודם ולא רואים שום סימן שהפעולה נכשלה
+        console.warn('[Ori Fitness] עדכון סטטוס משתמש נכשל:', err);
+        toast('הפעולה נכשלה - בדוק חיבור לאינטרנט ונסה שוב', 'err');
+        throw err; // actionButton תופס את זה ומאפס את מצב הכפתור
+      }
       toast(status === 'approved'
         ? `${user.name || user.email} אושר/ה`
         : `הגישה של ${user.name || user.email} הוסרה`, 'ok');

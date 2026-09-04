@@ -347,6 +347,7 @@ async function refreshFromCloud() {
   await renderNutrition();
   await renderBodyWeight();
   await renderProgress();
+  await renderReminders(); // סנכרון ממכשיר אחר יכול לסגור תזכורת (למשל שקילה) - לא לחכות למחר
   if (currentScreen === 'settings') await renderSettings();
   await closeWizardIfDone();
 }
@@ -497,8 +498,17 @@ async function main() {
     if (res.ok && res.applied) toast(`התקבלו ${res.applied} עדכונים ממכשיר אחר`, 'ok');
   });
 
-  // סגירת האפליקציה לא אמורה לאבד שינוי שנרשם שנייה קודם
+  /*
+   * סגירת האפליקציה לא אמורה לאבד שינוי שנרשם שנייה קודם. pagehide
+   * לבד לא מספיק: זו כתיבה לרשת, והדפדפן רשאי לבטל בקשות רשת שעדיין
+   * באוויר ברגע שהדף באמת נסגר. visibilitychange יורה מוקדם יותר —
+   * במעבר אפליקציות/נעילת מסך, לפני שהדף נסגר בפועל — ונותן לכתיבה
+   * זמן אמיתי להשלים. אותו רעיון בדיוק כמו השמירה של אימון פעיל.
+   */
   addEventListener('pagehide', () => { flushNow(); });
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') flushNow();
+  });
 }
 
 document.addEventListener('DOMContentLoaded', main);

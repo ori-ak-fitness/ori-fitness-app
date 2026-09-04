@@ -63,14 +63,16 @@ export async function endChallenge() {
 export function challengeStatus(challenge) {
   if (!challenge) return null;
   const today = dateKey();
+  const days = Math.max(1, challenge.days || 1); // הגנה מפני days:0/חסר -> NaN בפס ההתקדמות
+  const checks = challenge.checks || {};          // הגנה מפני checks חסר -> קריסה ב-Object.values
   const dayIndex = Math.round((parseDateKey(today) - parseDateKey(challenge.startDate)) / 86400000) + 1;
-  const marks = Object.values(challenge.checks);
+  const marks = Object.values(checks);
   return {
-    dayIndex: Math.min(Math.max(dayIndex, 1), challenge.days),
+    dayIndex: Math.min(Math.max(dayIndex, 1), days),
     keptCount: marks.filter((v) => v === true).length,
     brokenCount: marks.filter((v) => v === false).length,
-    isFinished: dayIndex > challenge.days,
-    todayMark: challenge.checks[today],
+    isFinished: dayIndex > days,
+    todayMark: checks[today],
   };
 }
 
@@ -127,7 +129,7 @@ export async function renderChallengeWidget() {
     // replaceChildren, בניגוד ל-el(), לא מסנן null בעצמו — צריך לפרוס מערך ריק
     ...(justCompleted ? [el('div', { class: 'challenge-confetti' })] : []),
     el('div', { class: 'bar' },
-      el('div', { class: 'bar-fill', style: `width:${Math.min(status.dayIndex / challenge.days, 1) * 100}%` })),
+      el('div', { class: 'bar-fill', style: `width:${Math.min(status.dayIndex / Math.max(1, challenge.days || 1), 1) * 100}%` })),
   ];
 
   if (status.isFinished) {

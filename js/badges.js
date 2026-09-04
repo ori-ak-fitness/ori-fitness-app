@@ -46,7 +46,7 @@ async function buildContext() {
     const wk = weekKey(w.date);
     perWeek.set(wk, (perWeek.get(wk) ?? 0) + 1);
   }
-  const hadPerfectWeek = [...perWeek.values()].some((n) => n >= weeklyGoal);
+  const hadPerfectWeek = weeklyGoal > 0 && [...perWeek.values()].some((n) => n >= weeklyGoal);
 
   return { workoutCount: workouts.length, prCount, weighInCount: weightEntries.length, hadPerfectWeek, completedChallenges };
 }

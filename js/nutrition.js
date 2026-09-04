@@ -9,7 +9,7 @@ import {
   dateKey, formatDateHe, formatTime, shiftDateKey,
   num, fmtNum, guard, resizeImage, blobUrl, pickFileOnce, macroLine,
 } from './ui.js';
-import { renderMealPlan, getPlan, openFoodPicker } from './mealplan.js';
+import { renderMealPlan, openFoodPicker } from './mealplan.js';
 import {
   getUserHeightCm, getUserAge, getUserSex, getActivityLevel,
   setUserHeightCm, setUserAge, setUserSex, setActivityLevel,
@@ -180,18 +180,13 @@ export async function renderNutrition() {
   // התפריט הקבוע — סימון "אכלתי"
   await renderMealPlan(currentDate, meals);
 
-  // כאן מוצג כל מה שנרשם היום, חוץ מהפעם הראשונה שסימנו כל פריט קבוע —
-  // זו כבר מוצגת למעלה עם ✓. אם אותו פריט קבוע נוסף שוב (מנה נוספת,
-  // דרך "+ מהמאגר"), הוא כן מופיע כאן — אחרת הוא היה נספר בקלוריות
-  // בלי שיהיה אפשר לראות אותו או למחוק אותו.
-  const defaultIds = new Set((await getPlan()).filter((p) => p.isDefault).map((p) => p.id));
-  const seenDefault = new Set();
-  const extras = meals.filter((m) => {
-    if (!m.planId || !defaultIds.has(m.planId)) return true;
-    if (seenDefault.has(m.planId)) return true;   // מנה נוספת של אותו פריט קבוע
-    seenDefault.add(m.planId);
-    return false;                                  // המופע הראשון — כבר מוצג למעלה
-  });
+  // כאן מוצג כל מה שנרשם היום, חוץ מרשומות שמקורן בסימון "אכלתי" בתפריט
+  // הקבוע (fromToggle) — אלה כבר מוצגות למעלה עם ✓. כל הוספה אחרת של אותו
+  // פריט קבוע (למשל דרך "+ מהמאגר") היא מנה נפרדת ומוצגת כאן, גם אם זו
+  // הפעם הראשונה שהפריט נרשם היום — אחרת היא הייתה נספרת בקלוריות בלי
+  // שיהיה אפשר לראות אותה או למחוק אותה (נספר פעם, פוגש דרך זיהוי לפי
+  // planId בלבד ולא fromToggle — תוקן).
+  const extras = meals.filter((m) => !m.fromToggle);
 
   const host = $('#mealList');
   if (!extras.length) {
