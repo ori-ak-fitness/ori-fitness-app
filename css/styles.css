@@ -1225,6 +1225,12 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
   background: var(--bg-elev); border: 1px solid var(--line); color: var(--text);
   border-radius: 999px; padding: 8px 20px; font-weight: 700; cursor: pointer;
 }
+/* חצי הניווט היו טקסט דק וקטן שנבלע ליד ה"היום" — עכשיו עיגול מלא,
+   גדול וברור, כמו כפתור אמיתי ולא רק תו צף */
+.date-nav .icon-btn {
+  width: 44px; height: 44px; font-size: 1.4rem; font-weight: 700;
+  background: var(--bg-elev); border: 1px solid var(--line); color: var(--text);
+}
 .hidden-date { position: fixed; opacity: 0; pointer-events: none; width: 1px; height: 1px; }
 
 /* ---------- קלוריות ---------- */

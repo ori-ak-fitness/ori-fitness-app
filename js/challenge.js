@@ -121,7 +121,7 @@ export async function renderChallengeWidget() {
   section.classList.remove('hidden');
 
   $('#challengeTitle').textContent = challenge.goalText;
-  $('#challengeDay').textContent = status.isFinished ? 'הסתיים 🎉' : `יום ${status.dayIndex} מתוך ${challenge.days}`;
+  $('#challengeDay').textContent = status.isFinished ? 'הסתיים 🎉' : `${status.dayIndex}/${challenge.days}`;
 
   const rows = [
     // replaceChildren, בניגוד ל-el(), לא מסנן null בעצמו — צריך לפרוס מערך ריק
