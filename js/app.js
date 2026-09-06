@@ -206,7 +206,10 @@ function applyTheme(value) {
 }
 
 async function initThemeSetting() {
-  const saved = await db.getSetting(THEME_KEY, 'light');
+  // ברירת מחדל: לפי המכשיר - כולל מצב "אוטומטי/שקיעה" שאייפון כבר
+  // מחליט לפיו לבד. מי שלא נגע בהגדרה הזו בכלל היה תקוע על "בהיר"
+  // קבוע לנצח, גם אם הטלפון עצמו עובר למצב לילה
+  const saved = await db.getSetting(THEME_KEY, 'system');
   applyTheme(saved);
 
   const select = $('#themeSelect');
