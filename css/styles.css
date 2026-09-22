@@ -1666,6 +1666,15 @@ body.gate-open main { display: none !important; }
 .gate-lede { color: var(--text-dim); font-size: 1rem; margin-bottom: 26px; }
 
 .gate-auth { margin-bottom: 34px; }
+.gate-consent {
+  display: flex; align-items: flex-start; gap: 10px; cursor: pointer;
+  margin-bottom: 16px; padding: 8px 2px; text-align: start;
+}
+.gate-consent input { width: 20px; height: 20px; flex-shrink: 0; margin-top: 1px; accent-color: var(--gold-deep); }
+.gate-consent span { font-size: .88rem; color: var(--text-dim); line-height: 1.5; }
+.gate-consent a { color: var(--gold-deep); font-weight: 600; }
+/* מהבהב לרגע כדי למשוך תשומת לב אם לוחצים על "התחברות" בלי לסמן */
+.gate-consent.is-required span { color: var(--danger); font-weight: 600; }
 .gate-note { font-size: .85rem; color: var(--text-dim); margin-top: 12px; }
 .gate-note.is-pending { color: var(--warn); font-weight: 700; }
 .gate-note.is-denied { color: var(--danger); font-weight: 700; }

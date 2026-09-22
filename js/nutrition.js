@@ -389,6 +389,9 @@ export async function openCalorieCalculatorSheet() {
     ),
     el('div', { class: 'field' }, el('label', {}, 'המטרה שלך'), goalSelect),
     resultBox,
+    el('p', { class: 'muted', style: 'font-size:.78rem;margin:2px 0 14px' },
+      'הערכה כללית לפי נוסחה מקובלת (Mifflin-St Jeor) — לא ייעוץ רפואי או תזונתי. ' +
+      'למצב רפואי קיים או שינוי משמעותי, מומלץ להתייעץ עם רופא או דיאטן/ית.'),
     el('button', {
       class: 'btn btn-primary btn-block',
       onclick: guard(async () => {

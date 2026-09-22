@@ -42,6 +42,28 @@ function setNote(text, state = '') {
  *
  * @returns {Promise<boolean>}
  */
+/*
+ * חוסם את הלחיצה על "התחברות" כל עוד תיבת ההסכמה לא מסומנת — בשלב
+ * ה-capture, לפני שה-listener של auth.js (המוקצה ל-onclick, לא
+ * addEventListener) בכלל מקבל את האירוע. כך זה לא נוגע ולא מתחרה עם
+ * ניהול ה-disabled/onclick הדינמי שכבר קיים שם לכל שאר מצבי הכפתור.
+ */
+function requireConsent(btn) {
+  const check = $('#gateConsentCheck');
+  const label = check?.closest('.gate-consent');
+  if (!check) return;
+  btn.addEventListener('click', (e) => {
+    if (check.checked) { label?.classList.remove('is-required'); return; }
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    label?.classList.add('is-required');
+    check.focus();
+  }, true);
+  check.addEventListener('change', () => {
+    if (check.checked) label?.classList.remove('is-required');
+  });
+}
+
 export async function initGate() {
   if (!isConfigured()) {
     // אין עדיין פרויקט Firebase — לא נועלים את האפליקציה על עצמה
@@ -56,6 +78,7 @@ export async function initGate() {
   if (btn) {
     btn.disabled = true;
     btn.textContent = 'טוען…';
+    requireConsent(btn);
   }
 
   return new Promise((resolve) => {
