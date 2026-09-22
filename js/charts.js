@@ -73,8 +73,15 @@ export function lineChart(host, points, opts = {}) {
   if (points.length === 1) {
     const single = document.createElement('div');
     single.className = 'chart-empty';
-    single.innerHTML = `<b style="font-size:1.6rem;color:${color}">${points[0].value}${unit ? ' ' + unit : ''}</b>` +
-                       `<div style="margin-top:6px">${points[0].label} — צריך עוד רישום אחד כדי לראות מגמה</div>`;
+    // DOM אמיתי ולא innerHTML - נתוני points מגיעים גם מסנכרון ענן,
+    // שלא עובר את אותה ולידציה כמו קלט מהטופס עצמו
+    const big = document.createElement('b');
+    big.style.cssText = `font-size:1.6rem;color:${color}`;
+    big.textContent = `${points[0].value}${unit ? ' ' + unit : ''}`;
+    const sub = document.createElement('div');
+    sub.style.marginTop = '6px';
+    sub.textContent = `${points[0].label} — צריך עוד רישום אחד כדי לראות מגמה`;
+    single.append(big, sub);
     host.append(single);
     return;
   }

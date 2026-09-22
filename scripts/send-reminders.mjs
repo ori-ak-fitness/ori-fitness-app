@@ -132,7 +132,10 @@ async function send(uid, subscription, payload) {
     await webpush.sendNotification(subscription, JSON.stringify(payload));
     return true;
   } catch (err) {
-    console.warn(`[${uid}] שליחה נכשלה:`, err.statusCode || err.message);
+    // רק קוד הסטטוס, לא err.message - זה ריפו ציבורי ולוגים של
+    // Actions גלויים לכל אחד; אין סיבה שפרטי endpoint/subscription
+    // ידלפו לשם, גם אם זה רק לצורך דיבוג
+    console.warn(`[${uid}] שליחה נכשלה, קוד:`, err.statusCode ?? 'לא ידוע');
     if (err.statusCode === 404 || err.statusCode === 410) await clearSubscription(uid);
     return false;
   }
@@ -147,69 +150,84 @@ async function run() {
     const uid = userDoc.id;
     if (userDoc.data()?.status !== 'approved') continue;
 
-    const { bySettingKey, bodyWeight, workouts, cardioTemplates } = await loadRecords(uid);
-    const subscription = bySettingKey.pushSubscription;
-    if (!subscription) continue;
-
-    if (IS_MANUAL_TEST) {
-      const ok = await send(uid, subscription, {
-        title: 'בדיקה 🔔', body: 'אם זה הגיע — ההתראות עובדות.', url: APP_URL,
-      });
-      if (ok) sent++;
-      continue;
-    }
-
-    const pushLogSnap = await db.collection('pushLog').doc(uid).get();
-    const pushLog = pushLogSnap.exists ? pushLogSnap.data() : {};
-
-    // ---- תזכורת שקילה: יום שלישי, בשעה שנבחרה, אם לא נשקל השבוע ----
-    const weighInHour = Number(bySettingKey.weighInReminderHour ?? DEFAULT_WEIGH_IN_HOUR);
-    if (now.weekday === 2 && now.hour === weighInHour && pushLog.weighIn !== now.dateKey) {
-      const sunday = sundayOf(now.dateKey);
-      const weighedThisWeek = bodyWeight.some((e) => e?.date >= sunday && e?.date <= now.dateKey);
-      if (!weighedThisWeek) {
-        const ok = await send(uid, subscription, {
-          title: 'שקילה שבועית', body: 'יום שלישי — עוד לא נשקלת השבוע.', url: APP_URL,
-        });
-        if (ok) { await markSent(uid, 'weighIn', now.dateKey); sent++; }
-      }
-    }
-
-    // ---- תזכורת אימון: בשעה שנבחרה, אם יש אימון מתוכנן להיום ולא בוצע ----
-    const workoutHour = Number(bySettingKey.workoutReminderHour ?? DEFAULT_WORKOUT_HOUR);
-    if (now.hour === workoutHour && pushLog.workout !== now.dateKey) {
-      const schedule = Array.isArray(bySettingKey.weekSchedule) ? bySettingKey.weekSchedule : [];
-      const routineId = schedule[now.weekday];
-      if (routineId) {
-        const doneToday = workouts.some((w) => w?.date === now.dateKey && w?.routineId === routineId);
-        if (!doneToday) {
-          const ok = await send(uid, subscription, {
-            title: 'האימון של היום', body: `יום ${DAY_NAMES[now.weekday]} — עוד לא סימנת שהתאמנת היום.`, url: APP_URL,
-          });
-          if (ok) { await markSent(uid, 'workout', now.dateKey); sent++; }
-        }
-      }
-    }
-
-    // ---- תזכורת אירובי: נפרדת מתזכורת האימון בכוונה — יום עם שניהם
-    // צריך שתי תזכורות, לא אחת שמסתירה את השנייה (אותה שעה: workoutHour) ----
-    if (now.hour === workoutHour && pushLog.cardio !== now.dateKey) {
-      const cardioSchedule = Array.isArray(bySettingKey.cardioWeekSchedule) ? bySettingKey.cardioWeekSchedule : [];
-      const templateId = cardioSchedule[now.weekday];
-      const template = templateId ? cardioTemplates.find((t) => t.id === templateId) : null;
-      if (template) {
-        const doneToday = workouts.some((w) => w?.kind === 'cardio' && w?.date === now.dateKey && w?.templateId === templateId);
-        if (!doneToday) {
-          const ok = await send(uid, subscription, {
-            title: 'האירובי של היום', body: `${template.name} עוד לא סומן היום.`, url: APP_URL,
-          });
-          if (ok) { await markSent(uid, 'cardio', now.dateKey); sent++; }
-        }
-      }
+    /*
+     * לפני התיקון: רק send() עצמה הייתה עטופה ב-try/catch. שגיאה בכל
+     * קריאת Firestore אחרת כאן (loadRecords, pushLog, markSent) הייתה
+     * קורסת מחוץ ללולאה כולה - משתמש אחד עם תקלה חוסם את התזכורות
+     * לכל שאר המשתמשים שבתור אחריו, בכל ריצה שעתית.
+     */
+    try {
+      await processUser(userDoc, now, (n) => { sent += n; });
+    } catch (err) {
+      console.warn(`[${uid}] עיבוד נכשל, ממשיך למשתמש הבא:`, err.code ?? err.message?.slice(0, 80));
     }
   }
 
   console.log(`נשלחו ${sent} התראות.`);
+}
+
+async function processUser(userDoc, now, addSent) {
+  const uid = userDoc.id;
+  const { bySettingKey, bodyWeight, workouts, cardioTemplates } = await loadRecords(uid);
+  const subscription = bySettingKey.pushSubscription;
+  if (!subscription) return;
+
+  if (IS_MANUAL_TEST) {
+    const ok = await send(uid, subscription, {
+      title: 'בדיקה 🔔', body: 'אם זה הגיע — ההתראות עובדות.', url: APP_URL,
+    });
+    if (ok) addSent(1);
+    return;
+  }
+
+  const pushLogSnap = await db.collection('pushLog').doc(uid).get();
+  const pushLog = pushLogSnap.exists ? pushLogSnap.data() : {};
+
+  // ---- תזכורת שקילה: יום שלישי, בשעה שנבחרה, אם לא נשקל השבוע ----
+  const weighInHour = Number(bySettingKey.weighInReminderHour ?? DEFAULT_WEIGH_IN_HOUR);
+  if (now.weekday === 2 && now.hour === weighInHour && pushLog.weighIn !== now.dateKey) {
+    const sunday = sundayOf(now.dateKey);
+    const weighedThisWeek = bodyWeight.some((e) => e?.date >= sunday && e?.date <= now.dateKey);
+    if (!weighedThisWeek) {
+      const ok = await send(uid, subscription, {
+        title: 'שקילה שבועית', body: 'יום שלישי — עוד לא נשקלת השבוע.', url: APP_URL,
+      });
+      if (ok) { await markSent(uid, 'weighIn', now.dateKey); addSent(1); }
+    }
+  }
+
+  // ---- תזכורת אימון: בשעה שנבחרה, אם יש אימון מתוכנן להיום ולא בוצע ----
+  const workoutHour = Number(bySettingKey.workoutReminderHour ?? DEFAULT_WORKOUT_HOUR);
+  if (now.hour === workoutHour && pushLog.workout !== now.dateKey) {
+    const schedule = Array.isArray(bySettingKey.weekSchedule) ? bySettingKey.weekSchedule : [];
+    const routineId = schedule[now.weekday];
+    if (routineId) {
+      const doneToday = workouts.some((w) => w?.date === now.dateKey && w?.routineId === routineId);
+      if (!doneToday) {
+        const ok = await send(uid, subscription, {
+          title: 'האימון של היום', body: `יום ${DAY_NAMES[now.weekday]} — עוד לא סימנת שהתאמנת היום.`, url: APP_URL,
+        });
+        if (ok) { await markSent(uid, 'workout', now.dateKey); addSent(1); }
+      }
+    }
+  }
+
+  // ---- תזכורת אירובי: נפרדת מתזכורת האימון בכוונה — יום עם שניהם
+  // צריך שתי תזכורות, לא אחת שמסתירה את השנייה (אותה שעה: workoutHour) ----
+  if (now.hour === workoutHour && pushLog.cardio !== now.dateKey) {
+    const cardioSchedule = Array.isArray(bySettingKey.cardioWeekSchedule) ? bySettingKey.cardioWeekSchedule : [];
+    const templateId = cardioSchedule[now.weekday];
+    const template = templateId ? cardioTemplates.find((t) => t.id === templateId) : null;
+    if (template) {
+      const doneToday = workouts.some((w) => w?.kind === 'cardio' && w?.date === now.dateKey && w?.templateId === templateId);
+      if (!doneToday) {
+        const ok = await send(uid, subscription, {
+          title: 'האירובי של היום', body: `${template.name} עוד לא סומן היום.`, url: APP_URL,
+        });
+        if (ok) { await markSent(uid, 'cardio', now.dateKey); addSent(1); }
+      }
+    }
+  }
 }
 
 run().catch((err) => { console.error(err); process.exit(1); });

@@ -20,7 +20,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - run: npm install firebase-admin web-push
+      # גרסאות מוצמדות בכוונה, לא latest: בלי הצמדה, כל הרצה שעתית
+      # מושכת ומריצה מיד כל גרסה חדשה שמתפרסמת ל-npm - עם הרשאות
+      # Firebase Admin מלאות (קריאה/כתיבה לכל משתמש) ומפתח ה-VAPID,
+      # בלי בדיקה אנושית. לעדכן ידנית כשרוצים גרסה חדשה, לא אוטומטית.
+      - run: npm install firebase-admin@14.4.0 web-push@3.6.7
       - run: node scripts/send-reminders.mjs
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
