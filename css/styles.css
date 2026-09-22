@@ -1081,7 +1081,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
   display: flex; align-items: center; gap: 13px;
   background: none; border: none; border-bottom: 1px solid var(--line);
   color: var(--text); padding: 14px 16px; cursor: pointer; text-align: start;
-  font-family: inherit; width: 100%;
+  font-family: inherit; width: 100%; text-decoration: none; box-sizing: border-box;
 }
 .settings-group .settings-item:last-child { border-bottom: none; }
 .settings-item:active { background: var(--bg-elev-2); }
@@ -1669,6 +1669,7 @@ body.gate-open main { display: none !important; }
 .gate-note { font-size: .85rem; color: var(--text-dim); margin-top: 12px; }
 .gate-note.is-pending { color: var(--warn); font-weight: 700; }
 .gate-note.is-denied { color: var(--danger); font-weight: 700; }
+.gate-note a { color: var(--gold-deep); font-weight: 600; }
 
 .gate-features { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 @media (max-width: 430px) { .gate-features { grid-template-columns: 1fr; } }
@@ -1685,6 +1686,7 @@ body.gate-open main { display: none !important; }
   text-align: center; color: var(--text-faint); font-size: .82rem;
   margin-top: 30px; padding-top: 18px; border-top: 1px solid var(--line);
 }
+.gate-foot a { color: var(--text-dim); }
 
 /* ---------- ניהול משתמשים ---------- */
 
