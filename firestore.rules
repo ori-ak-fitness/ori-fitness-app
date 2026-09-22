@@ -27,6 +27,17 @@ service cloud.firestore {
       return request.auth != null && request.auth.uid == uid;
     }
 
+    // עצמו + מאושר בפועל (status=='approved') על מסמך /users/{uid} שלו.
+    // בלי הבדיקה הזו, מי שנרשם (create עם status:'pending') או מי
+    // שהוסרה לו הגישה (status:'blocked') עדיין יכול לקרוא ולכתוב
+    // ברשומות שלו ישירות מול Firestore, בלי לעבור דרך המסך בכלל —
+    // "הסרת גישה" בתפריט הניהול הייתה מסתירה את זה בממשק בלבד, לא
+    // סוגרת את זה בפועל
+    function isApprovedSelf(uid) {
+      return isSelf(uid)
+        && get(/databases/$(database)/documents/users/$(uid)).data.status == 'approved';
+    }
+
     match /users/{uid} {
       // משתמש רואה רק את עצמו; המנהל רואה את כולם כדי לאשר
       allow read: if isAdmin() || isSelf(uid);
@@ -53,7 +64,7 @@ service cloud.firestore {
      * ואחסון קבצים בענן הוא החלק היחיד שאינו חינם.
      */
     match /users/{uid}/records/{recordId} {
-      allow read, write: if isSelf(uid);
+      allow read, write: if isApprovedSelf(uid);
     }
 
     // כל השאר סגור. פיצ'ר חדש בענן מוסיף כאן match משלו במפורש.
