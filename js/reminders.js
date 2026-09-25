@@ -15,7 +15,8 @@
 
 import * as db from './db.js';
 import { $, el, dateKey, shiftDateKey } from './ui.js';
-import { isPushSupported, hasPushSubscription, subscribeToPush } from './push.js';
+import { pushStatus, subscribeToPush } from './push.js';
+import { openSheet, closeSheet } from './ui.js';
 
 /* הצעת ההתראות חוזרת בכל פתיחה של האפליקציה עד שמפעילים (כך ביקש אורי —
    לא חד-פעמית כמו אישור מצלמה). "✕" מסתיר רק עד הפתיחה הבאה: sessionStorage
@@ -24,10 +25,6 @@ const PUSH_PROMPT_KEY = 'pushPromptHiddenThisSession';
 const pushPromptDismissed = () => { try { return !!sessionStorage.getItem(PUSH_PROMPT_KEY); } catch { return false; } };
 const dismissPushPrompt = () => { try { sessionStorage.setItem(PUSH_PROMPT_KEY, '1'); } catch { /* לא קריטי */ } };
 
-const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent)
-  || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-const isInstalledApp = () => navigator.standalone === true
-  || matchMedia('(display-mode: standalone)').matches;
 
 const DISMISS_KEY = 'remindersDismissed';
 
@@ -143,20 +140,16 @@ async function pushPrompt() {
   if (pushPromptDismissed()) return null;
   const base = { id: 'pushPrompt', icon: '🔔', title: 'התראות לטלפון', onDismiss: dismissPushPrompt };
 
+  const status = await pushStatus();
   // אייפון: התראות עובדות רק מאפליקציה שהוספה למסך הבית, לא מלשונית ספארי
-  if (!isPushSupported()) {
-    if (isIOS() && !isInstalledApp()) {
-      return { ...base, text: 'כדי לקבל תזכורות באייפון: בספארי לחץ שתף ← "הוסף למסך הבית", ופתח את האפליקציה משם.' };
-    }
-    return null;   // דפדפן שלא תומך בכלל — אין מה להציע
+  if (status === 'ios-install') {
+    return { ...base, text: 'כדי לקבל תזכורות באייפון: בספארי לחץ שתף ← "הוסף למסך הבית", ופתח את האפליקציה משם.' };
   }
-
   // חסום: אי אפשר לבקש שוב מתוך האפליקציה, רק להסביר איפה מתירים
-  if (Notification.permission === 'denied') {
+  if (status === 'denied') {
     return { ...base, text: 'ההתראות חסומות. להפעלה: הגדרות הטלפון ← התראות ← האפליקציה ← אפשר התראות.' };
   }
-
-  if (await hasPushSubscription()) return null;
+  if (status !== 'available') return null;   // כבר מופעל / דפדפן שלא תומך בכלל
 
   return {
     ...base,
@@ -165,6 +158,36 @@ async function pushPrompt() {
     // הלחיצה עצמה חייבת להפעיל את בקשת ההרשאה (דרישה של הדפדפנים)
     onAction: async () => { if (await subscribeToPush()) await renderReminders(); },
   };
+}
+
+/**
+ * גיליון "בפעם הראשונה שנכנסים": מוצג פעם אחת אחרי שהעדכון הזה מגיע
+ * למשתמש קיים, ורק אם אפשר להפעיל התראות עכשיו (לא חסום, לא מופעל,
+ * לא אייפון בלי התקנה - שם הכרטיס בבית מסביר). אחרי זה הכרטיס בבית
+ * ממשיך להזכיר בכל פתיחה. לא נפתח מעל האשף - שם יש שלב משלו.
+ */
+export async function maybeShowPushIntro() {
+  const FLAG = 'pushIntroSeen';
+  try { if (localStorage.getItem(FLAG)) return; } catch { return; }
+  if (!$('#wizard')?.classList.contains('hidden')) return;
+  if ((await pushStatus()) !== 'available') return;
+  try { localStorage.setItem(FLAG, '1'); } catch { /* לא קריטי */ }
+
+  const body = el('div', {},
+    el('p', { style: 'margin-bottom:16px;line-height:1.6' },
+      'קבל תזכורת לשקילה, לאימון ולאירובי — גם כשהאפליקציה סגורה, כמו הודעה רגילה. ' +
+      'את השעות אפשר לשנות בהגדרות.'),
+    el('button', {
+      class: 'btn btn-primary btn-block',
+      // בקשת ההרשאה יוצאת ישירות מהלחיצה, בלי await לפניה
+      onclick: () => { subscribeToPush().then((ok) => { if (ok) { closeSheet(); renderReminders(); } }); },
+    }, 'הפעל התראות'),
+    el('button', {
+      class: 'btn btn-ghost btn-block', style: 'margin-top:9px',
+      onclick: () => closeSheet(),
+    }, 'לא עכשיו'),
+  );
+  openSheet('🔔 תזכורות לטלפון', body);
 }
 
 /* ---------- תצוגה ---------- */

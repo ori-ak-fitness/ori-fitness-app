@@ -18,7 +18,7 @@ import {
 } from './dashboard.js';
 import { initProgress, renderProgress } from './progress.js';
 import { initBodyWeight, renderBodyWeight, invalidateWeightCache, getWeightEntries } from './bodyweight.js';
-import { initReminders, renderReminders } from './reminders.js';
+import { initReminders, renderReminders, maybeShowPushIntro } from './reminders.js';
 import { syncPushSubscription } from './push.js';
 import { renderChallengeWidget, invalidateChallengeCache } from './challenge.js';
 import { initRoutines, renderPlan, invalidateRoutinesCache, getRoutines, getSchedule } from './routines.js';
@@ -493,6 +493,8 @@ async function main() {
   initDayWatcher();
 
   if (await shouldRunWizard()) openWizard();
+  // משתמש קיים: פעם אחת אחרי העדכון, הצעה להפעיל התראות (לא מעל האשף)
+  maybeShowPushIntro();
 
   /*
    * הסנכרון עולה אחרון ובלי await לפניו: הוא תלוי ברשת, ואסור שהוא

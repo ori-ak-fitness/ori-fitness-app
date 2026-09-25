@@ -9,6 +9,7 @@ import { $, el, toast, num, fmtNum, keepScroll, dateKey } from './ui.js';
 import { getRoutines, getSchedule, DAY_NAMES, DAY_SHORT } from './routines.js';
 import { getCardioTemplates } from './cardio.js';
 import { getPlan } from './mealplan.js';
+import { pushStatus, subscribeToPush } from './push.js';
 import { calcRecommendedCalories, ACTIVITY_LEVELS, GOAL_KINDS } from './nutrition.js';
 import {
   calcBMI, bmiCategory, setUserHeightCm, setUserAge, setUserSex, setActivityLevel,
@@ -41,7 +42,7 @@ const CARDIO_OPTIONS = [
 
 /* ---------- שלבים ---------- */
 
-const steps = [stepWelcome, stepRoutines, stepSchedule, stepCardio, stepMenu, stepBodyStats, stepGoal, stepDone];
+const steps = [stepWelcome, stepRoutines, stepSchedule, stepCardio, stepMenu, stepBodyStats, stepGoal, stepNotifications, stepDone];
 
 function stepWelcome() {
   const nameInput = el('input', {
@@ -369,6 +370,44 @@ function stepGoal() {
         f('obGoalC', 'פחמימות (ג\')', draft.goal.carbs, 'carbs'),
         f('obGoalF', 'שומן (ג\')', draft.goal.fat, 'fat'),
       ),
+    ),
+  };
+}
+
+/**
+ * שלב התראות: כפתור אחד שמבקש את ההרשאה (הלחיצה עצמה מפעילה את הבקשה,
+ * כמו שהדפדפנים דורשים), והמצב מוצג לפי מה שאפשר במכשיר הזה.
+ * אפשר לדלג — ההצעה ממשיכה להופיע בבית בכל פתיחה.
+ */
+function stepNotifications() {
+  const status = el('p', { class: 'muted', style: 'margin:14px 0;line-height:1.6' });
+  const btn = el('button', {
+    class: 'btn btn-primary btn-block',
+    onclick: () => { subscribeToPush().then((ok) => { if (ok) refresh(); }); },
+  }, 'הפעל התראות');
+
+  const refresh = async () => {
+    const s = await pushStatus();
+    btn.classList.toggle('hidden', s !== 'available');
+    status.textContent = {
+      available: 'אפשר לשנות את השעות בהגדרות, ולכבות בכל רגע.',
+      subscribed: '✅ ההתראות מופעלות.',
+      denied: 'ההתראות חסומות בטלפון. להפעלה: הגדרות הטלפון ← התראות ← האפליקציה.',
+      'ios-install': 'באייפון התראות עובדות רק מאפליקציה שהוספה למסך הבית: בספארי לחץ שתף ← "הוסף למסך הבית", ופתח משם.',
+      unsupported: 'הדפדפן הזה לא תומך בהתראות.',
+    }[s];
+  };
+  refresh();
+
+  return {
+    canSkip: true,
+    node: el('div', {},
+      el('div', { class: 'wizard-emoji' }, '🔔'),
+      el('h2', {}, 'תזכורות לטלפון'),
+      el('p', { class: 'muted' },
+        'תזכורת לשקילה, לאימון ולאירובי — גם כשהאפליקציה סגורה, כמו הודעה רגילה.'),
+      btn,
+      status,
     ),
   };
 }

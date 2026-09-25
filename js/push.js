@@ -50,6 +50,26 @@ export function pushPermission() {
   return isPushSupported() ? Notification.permission : 'unsupported';
 }
 
+export const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent)
+  || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+export const isInstalledApp = () => navigator.standalone === true
+  || matchMedia('(display-mode: standalone)').matches;
+
+/**
+ * מצב ההתראות במכשיר הזה, במקום אחד לכל מי שצריך להציג אותו (כרטיס הבית,
+ * הגיליון של הכניסה הראשונה, שלב בשאלון):
+ *  'ios-install' - אייפון בלשונית ספארי, צריך להוסיף למסך הבית
+ *  'unsupported' - דפדפן שלא תומך בכלל
+ *  'denied'      - נחסם, אי אפשר לבקש שוב מתוך האפליקציה
+ *  'subscribed'  - כבר מופעל
+ *  'available'   - אפשר להפעיל עכשיו (לחיצה => חלון אישור)
+ */
+export async function pushStatus() {
+  if (!isPushSupported()) return isIOS() && !isInstalledApp() ? 'ios-install' : 'unsupported';
+  if (Notification.permission === 'denied') return 'denied';
+  return (await hasPushSubscription()) ? 'subscribed' : 'available';
+}
+
 /** VAPID דורש את המפתח כ-Uint8Array, לא כמחרוזת */
 function urlBase64ToUint8Array(base64) {
   const padding = '='.repeat((4 - (base64.length % 4)) % 4);
