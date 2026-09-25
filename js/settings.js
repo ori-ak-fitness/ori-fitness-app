@@ -28,7 +28,7 @@ import {
 } from './bodyweight.js';
 import { isConfigured } from './firebase-config.js';
 import { isAdminUser, openUsersSheet, usersSummary } from './admin.js';
-import { cloudStatus, syncNow, cloudReport } from './cloud.js';
+import { cloudStatus, syncNow, cloudReport, flushNow } from './cloud.js';
 
 let onRerunSetup = null;
 
@@ -195,7 +195,7 @@ async function openCloudSheet() {
     el('p', { class: 'muted', style: 'margin-bottom:14px' },
       'האימונים, התזונה, המשקל, התוכניות וההגדרות שלך נשמרים גם בענן, ' +
       'כדי שיופיעו בכל מכשיר שתיכנס בו לאותו חשבון. ' +
-      'תמונות הגלריה נשארות במכשיר בלבד — לכן חשוב להמשיך לייצא גיבוי.'),
+      'תמונות הגלריה ותמונות הארוחות נשארות במכשיר בלבד ולא עולות לענן.'),
     el('div', { class: 'list' },
       el('div', { class: 'list-item is-static' },
         el('div', { class: 'li-main' }, el('div', { class: 'li-title' }, 'מצב'),
@@ -560,10 +560,13 @@ function openResetConfirm() {
 async function performReset() {
   for (const store of RESET_STORES) await db.clearStore(store);
   for (const key of RESET_SETTING_KEYS) await db.delSetting(key);
-  // מנויי Push לכל מכשיר ('pushSub_<id>') — מפתחות דינמיים, לא ברשימה הקבועה
-  for (const row of await db.getAll(db.STORES.settings)) {
-    if (typeof row.key === 'string' && row.key.startsWith('pushSub_')) await db.delSetting(row.key);
-  }
+  // מנוי ה-Push של המכשיר הזה בלבד. פעם נמחקו כל ה-'pushSub_*', כולל של
+  // מכשירים אחרים, ואז התזכורות שלהם נעצרו עד שפתחו את האפליקציה שם
+  await db.delSetting(push.currentSubKey());
+  // איפוס שמבטיח "גם מהענן" חייב לוודא שהמחיקות יצאו לפני שהדף נטען מחדש:
+  // המתנה של 900ms בתור נהרגת ברענון, ורשת בזמן סגירה אינה מובטחת. (אם
+  // עדיין נכשל - התור נשמר על הדיסק ויישלח בפתיחה הבאה)
+  await flushNow();
 }
 
 export function initSettingsScreen({ onRerun, onCloudRefresh } = {}) {

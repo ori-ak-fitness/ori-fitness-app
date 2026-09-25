@@ -226,7 +226,9 @@ export async function startAuthFlow({ openGate, closeGate, setNote }) {
     if (cached?.status === 'approved') { closeGate(); return; }
     openGate();
     setNote('אין חיבור לאינטרנט. צריך להתחבר פעם אחת כדי להיכנס.', 'pending');
-    if (btn) { btn.disabled = false; btn.textContent = 'נסה שוב'; }
+    // לכפתור הזה לא הייתה שום פעולה, והשער לא התאושש כשהרשת חזרה בלי רענון ידני
+    if (btn) { btn.disabled = false; btn.textContent = 'נסה שוב'; btn.onclick = () => location.reload(); }
+    addEventListener('online', () => location.reload(), { once: true });
     return;
   }
 

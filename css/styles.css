@@ -58,6 +58,13 @@
   --today-mark: var(--gold-deep);
   --today-text: var(--gold-deep);
 
+  /* טורקיז כטקסט/קישור: --gold-deep כהה מדי על רקע כהה (2.8:1 על כרטיס),
+     ולכן במצב לילה משתמשים ב-gold הבהיר יותר (4.7:1) */
+  --gold-text: var(--gold-deep);
+
+  /* מסנן לפי הערכה - שדות טופס, תפריטים נפתחים וגלילה נצבעים כמו הערכה */
+  color-scheme: light;
+
   /* טקסט שנקבע שחור-קבוע (ברכת הבית, כותרת האתגר וכו') — שחור על הקרם
      הבהיר של מצב יום נראה מצוין, אבל אותו #000 קבוע על רקע כהה כמעט
      נעלם. נדרס לבאז' של האפליקציה בשני בלוקי מצב הלילה למטה */
@@ -112,6 +119,8 @@
 
   /* אותו סיפור: שחור-קבוע נבלע ברקע הכהה, עובר לבאז' של האפליקציה */
   --hard-black: var(--accent);
+  --gold-text: var(--gold);
+  color-scheme: dark;
 
   --ok:            #25d366;
   --ok-soft:       rgba(37, 211, 102, .22);
@@ -158,6 +167,8 @@
     --today-text: var(--text);
 
     --hard-black: var(--accent);
+    --gold-text: var(--gold);
+    color-scheme: dark;
 
     --ok:            #25d366;
     --ok-soft:       rgba(37, 211, 102, .22);
@@ -409,6 +420,9 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 }
 .btn-secondary { background: var(--bg-elev-2); border: 1px solid var(--line); }
 .btn-danger { background: var(--danger); color: #fff; }
+/* כפתור כבוי חייב להיראות כבוי: ל-.btn-primary וחבריו יש צבע/רקע משלהם שדורס את
+   מראה הדפדפן, ובלי זה "טוען…" ו"שומר…" נראים כמו כפתור פעיל שלא מגיב */
+.btn:disabled { opacity: .55; cursor: default; pointer-events: none; }
 .btn-ghost { background: transparent; border: 1px solid var(--line); color: var(--text-dim); }
 .btn-sm { padding: 8px 13px; font-size: .85rem; border-radius: var(--r-sm); }
 .btn-xl { width: 100%; padding: 17px; font-size: 1.08rem; border-radius: var(--r-lg); margin-top: 4px; }
@@ -1493,7 +1507,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 }
 .li-tag {
   display: inline-block; margin-inline-start: 7px; vertical-align: 1px;
-  background: rgba(29, 107, 111, .1); border: 1px solid rgba(29, 107, 111, .35); color: var(--gold-deep);
+  background: rgba(29, 107, 111, .1); border: 1px solid rgba(29, 107, 111, .35); color: var(--gold-text);
   border-radius: 999px; padding: 1px 8px;
   font-size: .68rem; font-weight: 700; white-space: nowrap;
 }
@@ -1576,7 +1590,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .snack-count { min-width: 26px; text-align: center; font-size: 1.05rem; }
 .snack-total {
   text-align: center; font-weight: 700; margin-bottom: 10px;
-  color: var(--gold-deep);
+  color: var(--gold-text);
 }
 .snack-total.is-empty { color: var(--text-dim); font-weight: 400; }
 .snack-quick { margin-top: 14px; }
@@ -1662,7 +1676,7 @@ body.gate-open main { display: none !important; }
   font-size: .8rem; font-weight: 700; color: var(--text-dim); margin-bottom: 18px;
 }
 .gate-title { font-size: 1.9rem; line-height: 1.2; margin-bottom: 14px; text-wrap: balance; }
-.gate-title span { color: var(--gold-deep); }
+.gate-title span { color: var(--gold-text); }
 .gate-lede { color: var(--text-dim); font-size: 1rem; margin-bottom: 26px; }
 
 .gate-auth { margin-bottom: 34px; }
@@ -1672,13 +1686,14 @@ body.gate-open main { display: none !important; }
 }
 .gate-consent input { width: 20px; height: 20px; flex-shrink: 0; margin-top: 1px; accent-color: var(--gold-deep); }
 .gate-consent span { font-size: .88rem; color: var(--text-dim); line-height: 1.5; }
-.gate-consent a { color: var(--gold-deep); font-weight: 600; }
+.gate-consent a { color: var(--gold-text); font-weight: 600; }
 /* מהבהב לרגע כדי למשוך תשומת לב אם לוחצים על "התחברות" בלי לסמן */
 .gate-consent.is-required span { color: var(--danger); font-weight: 600; }
+.gate-consent .consent-msg { display: block; margin-top: 4px; font-size: .82rem; font-weight: 700; color: var(--danger); }
 .gate-note { font-size: .85rem; color: var(--text-dim); margin-top: 12px; }
 .gate-note.is-pending { color: var(--warn); font-weight: 700; }
 .gate-note.is-denied { color: var(--danger); font-weight: 700; }
-.gate-note a { color: var(--gold-deep); font-weight: 600; }
+.gate-note a { color: var(--gold-text); font-weight: 600; }
 
 .gate-features { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 @media (max-width: 430px) { .gate-features { grid-template-columns: 1fr; } }
@@ -1734,7 +1749,7 @@ body.gate-open main { display: none !important; }
 
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
 
 /* ===================================================================

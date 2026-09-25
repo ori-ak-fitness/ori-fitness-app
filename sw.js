@@ -3,7 +3,7 @@
    העלה את CACHE_VERSION בכל שחרור גרסה כדי לרענן קבצים.
    =================================================================== */
 
-const CACHE_VERSION = 'ori-fitness-v106';
+const CACHE_VERSION = 'ori-fitness-v107';
 
 const APP_SHELL = [
   './',
@@ -199,7 +199,9 @@ self.addEventListener('notificationclick', (event) => {
   event.waitUntil((async () => {
     const clientsList = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
     for (const client of clientsList) {
-      if (client.url === targetUrl && 'focus' in client) return client.focus();
+      // האפליקציה רצה ב-.../index.html#home, ולכן השוואה מדויקת לא תפסה אף פעם
+      const norm = (u) => u.split('#')[0].replace(/index\.html$/, '');
+      if (norm(client.url) === norm(targetUrl) && 'focus' in client) return client.focus();
     }
     if (self.clients.openWindow) return self.clients.openWindow(targetUrl);
   })());

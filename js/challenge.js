@@ -77,13 +77,23 @@ export function challengeStatus(challenge) {
 }
 
 /** אם עברו כל הימים ועדיין לא נספר — סופרים פעם אחת בלבד להישג "אתגר הושלם" */
+let completing = null;   // ספירה בטיסה: שני ציורי מסך הבית במקביל ספרו פעמיים (read-then-write לא אטומי)
+
 async function ensureCompletionCounted(challenge) {
   if (!challenge || challenge.completedCounted) return { challenge, justCompleted: false };
   if (!challengeStatus(challenge).isFinished) return { challenge, justCompleted: false };
-  const updated = { ...challenge, completedCounted: true };
-  await save(updated);
-  await bumpCompletedCount();
-  return { challenge: updated, justCompleted: true };
+  if (completing) {
+    // מי שהגיע שני רק מקבל את התוצאה, בלי לספור שוב וגם בלי קונפטי כפול
+    const r = await completing;
+    return { challenge: r.challenge, justCompleted: false };
+  }
+  completing = (async () => {
+    const updated = { ...challenge, completedCounted: true };
+    await save(updated);
+    await bumpCompletedCount();
+    return { challenge: updated, justCompleted: true };
+  })();
+  try { return await completing; } finally { completing = null; }
 }
 
 export async function markToday(kept) {

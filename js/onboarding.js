@@ -10,7 +10,7 @@ import { getRoutines, getSchedule, DAY_NAMES, DAY_SHORT } from './routines.js';
 import { getCardioTemplates } from './cardio.js';
 import { getPlan } from './mealplan.js';
 import { pushStatus, subscribeToPush } from './push.js';
-import { calcRecommendedCalories, ACTIVITY_LEVELS, GOAL_KINDS } from './nutrition.js';
+import { calcRecommendedCalories, ACTIVITY_LEVELS, GOAL_KINDS, goalForDate } from './nutrition.js';
 import {
   calcBMI, bmiCategory, setUserHeightCm, setUserAge, setUserSex, setActivityLevel,
   getUserHeightCm, getUserAge, getUserSex, getActivityLevel, getWeightEntries,
@@ -383,7 +383,8 @@ function stepNotifications() {
   const status = el('p', { class: 'muted', style: 'margin:14px 0;line-height:1.6' });
   const btn = el('button', {
     class: 'btn btn-primary btn-block',
-    onclick: () => { subscribeToPush().then((ok) => { if (ok) refresh(); }); },
+    // refresh גם כשנדחה: אחרת נשאר כפתור וטקסט "אפשר להפעיל" למרות שנחסם עכשיו
+    onclick: () => { subscribeToPush().catch(() => {}).then(() => refresh()); },
   }, 'הפעל התראות');
 
   const refresh = async () => {
@@ -452,14 +453,24 @@ async function persist() {
   let order = 0;
   const idMap = new Map();
 
+  /*
+   * הרצה חוזרת מההגדרות עוברת כאן על נתונים קיימים. מזהים חדשים לכל
+   * דבר ניתקו אימונים שכבר בוצעו (routineId), סימון "בוצע" בשבוע, יעד
+   * האירובי ולוח האירובי, וארוחות ✓ שנרשמו היום (planId) - וכל השדות
+   * שהאשף לא מציג (משקל התחלתי, note, פירוט ארוחה...) אבדו. לכן שומרים
+   * את המזהה והשדות הנוספים כשיש (existing*), ומייצרים חדשים רק לחדשים.
+   */
   for (const r of draft.routines) {
     if (!r.name.trim()) continue;
-    const id = db.uid();
+    const id = r.existingId || db.uid();
     idMap.set(r.id, id);
     await db.put(db.STORES.routines, {
-      id, kind: 'strength', name: r.name.trim(), note: '',
-      exercises: r.exercises.map((x) => ({ id: db.uid(), name: x.name, sets: x.sets ?? 3, reps: x.reps ?? '8-12' })),
-      order: order++, createdAt: Date.now(),
+      id, kind: 'strength', name: r.name.trim(), note: r.note ?? '',
+      exercises: r.exercises.map((x) => ({
+        id: x.id || db.uid(), name: x.name, sets: x.sets ?? 3, reps: x.reps ?? '8-12',
+        ...(x.weight != null && x.weight !== '' ? { weight: x.weight } : {}),
+      })),
+      order: order++, createdAt: r.createdAt ?? Date.now(),
     });
   }
 
@@ -469,7 +480,8 @@ async function persist() {
   let cOrder = 0;
   for (const c of draft.cardio) {
     await db.put(db.STORES.routines, {
-      id: db.uid(), kind: 'cardio', name: c.name, minutes: c.minutes, icon: c.icon, order: cOrder++,
+      id: c.id || db.uid(), kind: 'cardio', name: c.name, minutes: c.minutes, icon: c.icon,
+      weeklyGoal: c.weeklyGoal ?? 0, order: cOrder++,
     });
   }
 
@@ -481,7 +493,8 @@ async function persist() {
     const empty = !num(m.calories, 0) && !num(m.protein, 0) && !num(m.carbs, 0) && !num(m.fat, 0);
     if (empty) continue;
     await db.put(db.STORES.mealPlan, {
-      id: db.uid(), name: m.name.trim(), kind: m.kind === 'snack' ? 'snack' : 'meal', isDefault: true,
+      id: m.id || db.uid(), name: m.name.trim(), kind: m.kind === 'snack' ? 'snack' : 'meal',
+      isDefault: m.isDefault ?? true, details: m.details ?? '',
       calories: num(m.calories, 0), protein: num(m.protein, 0),
       carbs: num(m.carbs, 0), fat: num(m.fat, 0), order: mOrder++,
     });
@@ -494,7 +507,9 @@ async function persist() {
     if (age > 0) await setUserAge(age);
     if (bs.sex) await setUserSex(bs.sex);
     if (bs.activity) await setActivityLevel(bs.activity);
-    if (weightKg > 0) {
+    // בהרצה חוזרת השדה מתמלא בשקילה האחרונה: אם לא שונה, אין שקילה חדשה
+    // (אחרת נרשמה שקילה פנטום להיום, והתזכורת השבועית נדמתה)
+    if (weightKg > 0 && String(weightKg) !== String(bs.origWeight ?? '')) {
       await db.put(db.STORES.bodyWeight, { date: dateKey(), weight: weightKg, loggedAt: Date.now() });
     }
   }
@@ -530,16 +545,24 @@ function render() {
   $('#wizardNext').textContent = config.nextLabel ?? 'המשך';
 }
 
+let advancing = false;   // הקשה כפולה על "המשך" דילגה על שלב, ועל "סיימתי" הריצה persist פעמיים במקביל
+
 async function next() {
-  if (step === steps.length - 1) {
-    await persist();
-    close();
-    onFinish?.();
-    toast('הכל מוכן. בהצלחה! 💪', 'ok', 3500);
-    return;
+  if (advancing) return;
+  advancing = true;
+  try {
+    if (step === steps.length - 1) {
+      await persist();
+      close();
+      onFinish?.();
+      toast('הכל מוכן. בהצלחה! 💪', 'ok', 3500);
+      return;
+    }
+    step++;
+    render();
+  } finally {
+    advancing = false;
   }
-  step++;
-  render();
 }
 
 function back() { if (step > 0) { step--; render(); } }
@@ -589,17 +612,25 @@ export async function rerunWizard() {
     getUserHeightCm(), getUserAge(), getUserSex(), getActivityLevel(), getWeightEntries(),
   ]);
   draft.name = name || '';
+  // existingId/id + השדות שהאשף לא מציג נשמרים, כדי ש-persist ישמור עליהם
   draft.routines = routines.map((r) => ({
-    id: r.id, name: r.name,
-    exercises: r.exercises.map((x) => ({ name: x.name, sets: x.sets, reps: x.reps })),
+    id: r.id, existingId: r.id, name: r.name, note: r.note, createdAt: r.createdAt,
+    exercises: r.exercises.map((x) => ({ id: x.id, name: x.name, sets: x.sets, reps: x.reps, weight: x.weight })),
   }));
   draft.schedule = [...schedule];
-  draft.cardio = cardio.map((c) => ({ name: c.name, minutes: c.minutes, icon: c.icon }));
+  draft.cardio = cardio.map((c) => ({ id: c.id, name: c.name, minutes: c.minutes, icon: c.icon, weeklyGoal: c.weeklyGoal }));
   draft.meals = plan.map((m) => ({ ...m }));
+  const lastWeight = entries.length ? String(entries[entries.length - 1].weight) : '';
   draft.bodyStats = {
-    weight: entries.length ? String(entries[entries.length - 1].weight) : '',
+    weight: lastWeight, origWeight: lastWeight,
     height: heightCm ?? '', age: age ?? '', sex: sex || 'male', activity: activity || 'moderate', goal: 'maintain',
   };
+  // היעד הנוכחי, לא ברירות המחדל של האשף (2200/150/220/70) - persist כותב יעד
+  // חדש להיום תמיד, והיה דורס את המאקרו שהמשתמש קבע
+  const currentGoal = await goalForDate(dateKey());
+  if (currentGoal?.calories > 0) {
+    draft.goal = { calories: currentGoal.calories, protein: currentGoal.protein, carbs: currentGoal.carbs, fat: currentGoal.fat };
+  }
   openWizard();
 }
 

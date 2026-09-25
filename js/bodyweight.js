@@ -178,8 +178,13 @@ export function initBodyWeight() {
   const input = $('#weightInput');
   const save = guard(async () => {
     const entriesBefore = await loadEntries();
-    const prevEntry = entriesBefore[entriesBefore.length - 1];
+    // השקילה הקודמת = אחרונה *לפני היום*. אם כבר יש שקילה להיום (תיקון טעות
+    // הקלדה מ-85 ל-80), ההשוואה מולה הציגה "ירדת 5 ק"ג — כל הכבוד!" על כלום
+    const today = dateKey();
+    const prevEntry = [...entriesBefore].reverse().find((e) => e.date < today);
     const newWeight = num(input.value, 0);
+    // גבול הגיוני: "825" במקום 82.5 נשמר עד עכשיו ועיוות את כל הגרפים
+    if (newWeight > 0 && (newWeight < 20 || newWeight > 400)) { toast('המשקל נראה לא הגיוני — בדוק שוב (20–400 ק"ג)', 'err'); return; }
     const ok = await logWeight(input.value);
     if (!ok) return;
     await renderBodyWeight();

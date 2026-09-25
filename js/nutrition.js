@@ -201,7 +201,9 @@ export async function renderNutrition() {
 }
 
 function renderMealRow(meal) {
-  const thumb = meal.thumb || meal.photo;
+  // instanceof Blob: רשומות שהגיעו מהענן יכלו להכיל photo:{} (Blob שעבר JSON)
+  const raw = meal.thumb || meal.photo;
+  const thumb = raw instanceof Blob ? raw : null;
   return el('div', { class: 'list-item', onclick: () => openMealSheet(meal) },
     thumb
       ? el('img', { class: 'li-thumb', src: blobUrl(thumb), alt: '' })
@@ -220,8 +222,8 @@ function renderMealRow(meal) {
 
 function openMealSheet(existing = null) {
   const isEdit = !!existing;
-  let photoBlob = existing?.photo ?? null;
-  let thumbBlob = existing?.thumb ?? null;
+  let photoBlob = existing?.photo instanceof Blob ? existing.photo : null;
+  let thumbBlob = existing?.thumb instanceof Blob ? existing.thumb : null;
   let photoChanged = false;
 
   const fileInput = el('input', { type: 'file', accept: 'image/*', hidden: true });
@@ -429,7 +431,10 @@ export async function openGoalSheet() {
   const body = el('div', {},
     el('p', { class: 'muted', style: 'margin-bottom:14px' },
       'היעד תקף מהתאריך שתבחר והלאה, עד שתגדיר יעד חדש. כך אפשר לעבור בין מחזורי חיטוב למסה בלי לאבד היסטוריה.'),
-    f('goalFrom', 'בתוקף מתאריך', current.effectiveFrom ?? currentDate, { type: 'date' }),
+    // ברירת המחדל: היום המוצג, לא תחילת היעד הנוכחי. שמירה עם התאריך של היעד
+    // הקיים דורסת אותו, וכל הימים שמאז ועד היום היו מקבלים את היעד החדש
+    // בדיעבד - בניגוד להסבר שלמעלה על היסטוריה שנשמרת
+    f('goalFrom', 'בתוקף מתאריך', currentDate, { type: 'date' }),
     f('goalKcal', 'קלוריות ליום', current.calories, { type: 'number', inputmode: 'numeric', min: '0' }),
     el('div', { class: 'field-row-3' },
       f('goalProtein', 'חלבון (ג\')', current.protein, { type: 'number', inputmode: 'numeric', min: '0' }),

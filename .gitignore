@@ -5,3 +5,6 @@ desktop.ini
 
 # הגדרות מקומיות של Claude Code — נתיבים מהמחשב הפרטי, לא חלק מהאפליקציה
 .claude/settings.local.json
+
+# תיקיות עבודה זמניות של סוכני בדיקה
+.claude/worktrees/

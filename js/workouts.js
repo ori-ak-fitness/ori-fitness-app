@@ -328,6 +328,8 @@ function renderSetRow(ex, set, index) {
 
   const mkInput = (field, placeholder, mode) => el('input', {
     type: 'text',
+    // בלי שם נגיש, קורא מסך שמע רק "0" ולא יודע אם זה משקל או חזרות, ובאיזה סט
+    'aria-label': `${field === 'weight' ? 'משקל' : 'חזרות'}, סט ${index + 1}, ${ex.name}`,
     inputmode: mode,
     enterkeyhint: 'next',
     autocomplete: 'off',

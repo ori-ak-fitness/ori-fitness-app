@@ -30,15 +30,32 @@ let getDate = null;   // התאריך שמוצג כרגע במסך התזונה
  * (product_quantity, תמיד בגרם או מ"ל), ובנוסף מחרוזת חופשית כמו
  * "500 ml". מעדיפים את המספרי, ונופלים למחרוזת רק אם הוא חסר.
  */
+// l ו-g בלי אות אחריהן: אחרת "12 large" נקרא כ-12 ליטר
+const AMOUNT_UNIT = '(kg|ק"ג|ליטר|cl|dl|ml|מ"ל|מל|גרם|גר|l(?![a-z])|g(?![a-z]))?';
+
+/** כמה גרם/מ"ל בכל יחידה. cl ו-dl חסרו, ו-"33 cl" נקרא כ-33 במקום 330 */
+function unitFactor(unit) {
+  const u = (unit || '').toLowerCase();
+  if (u === 'kg' || u === 'ק"ג' || u === 'l' || u === 'ליטר') return 1000;
+  if (u === 'cl') return 10;
+  if (u === 'dl') return 100;
+  return 1;
+}
+
 function parseAmount(text) {
-  const m = String(text || '').replace(',', '.').match(/([\d.]+)\s*(kg|ק"ג|l|ליטר|ml|מ"ל|מל|g|גרם|גר)?/i);
+  const s = String(text || '').replace(',', '.');
+  // מארז: "6 x 33 cl" = 6 פעמים 33, לא 6
+  const multi = s.match(new RegExp('(\\d+)\\s*[x×*]\\s*([\\d.]+)\\s*' + AMOUNT_UNIT, 'i'));
+  if (multi) {
+    const v = parseInt(multi[1], 10) * parseFloat(multi[2]) * unitFactor(multi[3]);
+    if (isFinite(v) && v > 0) return v;
+  }
+  const m = s.match(new RegExp('([\\d.]+)\\s*' + AMOUNT_UNIT, 'i'));
   if (!m) return null;
   const value = parseFloat(m[1]);
   if (!isFinite(value) || value <= 0) return null;
-  const unit = (m[2] || '').toLowerCase();
   // ק"ג וליטר מומרים ליחידת הבסיס, אחרת החישוב היה קטן פי אלף
-  if (unit === 'kg' || unit === 'ק"ג' || unit === 'l' || unit === 'ליטר') return value * 1000;
-  return value;
+  return value * unitFactor(m[2]);
 }
 
 /*
@@ -395,6 +412,9 @@ function openTeachSheet(code) {
 
   const save = guard(async () => {
     if (!name.value.trim()) { toast('צריך שם למוצר', 'err'); return; }
+    // שדה ריק נשמר כ-0 קלוריות (num נופל ל-0), והמוצר נשמר לצמיתות ומסתנכרן:
+    // כל סריקה עתידית הייתה רושמת ארוחה של 0 קק"ל בלי שום אזהרה
+    if (kcal.value.trim() === '') { toast('חסרות קלוריות ל-100 (הקלד 0 אם באמת אין)', 'err'); return; }
     const product = {
       code,
       name: name.value.trim(),

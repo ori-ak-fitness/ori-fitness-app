@@ -46,6 +46,7 @@ function deviceId() {
   }
 }
 const subKey = () => SUB_PREFIX + deviceId();
+export const currentSubKey = subKey;
 
 export function isPushSupported() {
   return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
@@ -81,6 +82,10 @@ function urlBase64ToUint8Array(base64) {
   const safe = (base64 + padding).replace(/-/g, '+').replace(/_/g, '/');
   const raw = atob(safe);
   return Uint8Array.from([...raw].map((c) => c.charCodeAt(0)));
+}
+
+function sameBytes(a, b) {
+  return a.length === b.length && a.every((v, i) => v === b[i]);
 }
 
 export async function hasPushSubscription() {
@@ -124,9 +129,28 @@ export async function syncPushSubscription() {
   } catch { /* אין Service Worker פעיל (למשל בבדיקות) — לא קריטי */ }
 }
 
+/** Service Worker מוכן, עם תקרת זמן: בלי SW פעיל `ready` לא נפתר לעולם והפעולה נתקעת בשקט */
+function swReady(ms = 8000) {
+  return Promise.race([
+    navigator.serviceWorker.ready,
+    new Promise((_, rej) => setTimeout(() => rej(new Error('sw-timeout')), ms)),
+  ]);
+}
+
+let subscribing = false;   // הקשה כפולה על "הפעל" הפעילה שתי בקשות במקביל ושתי הודעות
+
 export async function subscribeToPush() {
   if (!isPushSupported()) { toast('הדפדפן הזה לא תומך בהתראות', 'err'); return false; }
+  if (subscribing) return false;
+  subscribing = true;
+  try {
+    return await doSubscribe();
+  } finally {
+    subscribing = false;
+  }
+}
 
+async function doSubscribe() {
   const perm = await Notification.requestPermission();
   if (perm !== 'granted') {
     toast(perm === 'denied' ? 'ההרשאה נחסמה בדפדפן' : 'ההרשאה לא אושרה', 'err');
@@ -134,12 +158,20 @@ export async function subscribeToPush() {
   }
 
   try {
-    const reg = await navigator.serviceWorker.ready;
+    const reg = await swReady();
     let sub = await reg.pushManager.getSubscription();
+    // מנוי ישן שנוצר עם מפתח VAPID אחר (אם המפתח יוחלף בעתיד) מסומן "פעיל"
+    // אבל השרת כבר לא יכול לשלוח אליו: מבטלים ומנוי מחדש
+    const wanted = urlBase64ToUint8Array(VAPID_PUBLIC_KEY);
+    const have = sub?.options?.applicationServerKey;
+    if (sub && have && !sameBytes(new Uint8Array(have), wanted)) {
+      await sub.unsubscribe();
+      sub = null;
+    }
     if (!sub) {
       sub = await reg.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+        applicationServerKey: wanted,
       });
     }
     await db.setSetting(subKey(), sub.toJSON());
@@ -154,7 +186,7 @@ export async function subscribeToPush() {
 export async function unsubscribeFromPush() {
   if (!isPushSupported()) return;
   try {
-    const reg = await navigator.serviceWorker.ready;
+    const reg = await swReady();
     const sub = await reg.pushManager.getSubscription();
     if (sub) await sub.unsubscribe();
   } catch { /* גם אם הביטול בדפדפן נכשל, מוחקים את המנוי מהצד שלנו */ }

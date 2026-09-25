@@ -5,7 +5,7 @@
 
 import { $, el, num, fmtNum, shortDate, formatDateHe } from './ui.js';
 import { lineChart, barChart } from './charts.js';
-import { getAllWorkouts, calcVolume } from './workouts.js';
+import { getStrengthWorkouts, calcVolume } from './workouts.js';
 import { isSetDone } from './records.js';
 import { getRoutines } from './routines.js';
 
@@ -84,7 +84,7 @@ function buildExerciseSeries(workouts) {
 }
 
 export async function renderProgress() {
-  const workouts = await getAllWorkouts();
+  const workouts = await getStrengthWorkouts();   // אירובי לא שייך לנפח ולתרגילים: הופיע כעמודה של 0 ק"ג
   const chronological = [...workouts].sort((a, b) => a.startedAt - b.startedAt);
   const types = Array.from(new Set(chronological.map(workoutTypeLabel))).sort((a, b) => a.localeCompare(b, 'he'));
 

@@ -63,10 +63,23 @@ function requireConsent(btn) {
     e.preventDefault();
     e.stopImmediatePropagation();
     label?.classList.add('is-required');
+    // לא רק צבע אדום: הודעה בטקסט (מוקראת) ו-aria-invalid, ולא נשענים על צבע בלבד
+    check.setAttribute('aria-invalid', 'true');
+    if (label && !label.querySelector('.consent-msg')) {
+      const msg = document.createElement('span');
+      msg.className = 'consent-msg';
+      msg.setAttribute('role', 'alert');
+      msg.textContent = 'כדי להמשיך צריך לאשר את התנאים.';
+      (label.querySelector('span') || label).append(msg);
+    }
     check.focus();
   }, true);
   check.addEventListener('change', () => {
-    if (check.checked) label?.classList.remove('is-required');
+    if (check.checked) {
+      label?.classList.remove('is-required');
+      check.removeAttribute('aria-invalid');
+      label?.querySelector('.consent-msg')?.remove();
+    }
   });
 }
 

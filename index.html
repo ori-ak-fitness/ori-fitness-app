@@ -150,7 +150,7 @@
 
       <footer class="gate-foot">
         אורי AK פיטנס · Ori AK Fitness ·
-        <a href="privacy.html">פרטיות</a> · <a href="terms.html">תנאי שימוש</a>
+        <a href="privacy.html" target="_blank" rel="noopener">פרטיות</a> · <a href="terms.html" target="_blank" rel="noopener">תנאי שימוש</a>
       </footer>
     </div>
   </div>
@@ -517,7 +517,7 @@
           <svg class="chevron-icon" viewBox="0 0 24 24" aria-hidden="true"><polyline points="15,4 7,12 15,20"/></svg>
         </button>
       </div>
-      <input type="date" id="nutDatePicker" class="hidden-date">
+      <input type="date" id="nutDatePicker" class="hidden-date" tabindex="-1" aria-hidden="true">
 
       <div class="kcal-card" id="kcalCard">
         <div class="kcal-ring-wrap">
@@ -593,7 +593,7 @@
         <span class="head-badge" id="lastWeightBadge"></span>
       </div>
       <div class="weight-log-row">
-        <input type="number" id="weightInput" inputmode="decimal" placeholder="0" step="0.1" min="0">
+        <input type="number" id="weightInput" inputmode="decimal" placeholder="0" step="0.1" min="20" max="400" aria-label="משקל גוף בקילוגרם">
         <span class="weight-log-unit">ק"ג</span>
         <button class="btn btn-primary" id="weightSaveBtn">שמור שקילה</button>
       </div>
@@ -669,7 +669,7 @@
 
   <!-- ===== שכבות-על ===== -->
   <div class="sheet-backdrop hidden" id="sheetBackdrop"></div>
-  <div class="sheet hidden" id="sheet">
+  <div class="sheet hidden" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
     <div class="sheet-handle"></div>
     <div class="sheet-head">
       <h3 id="sheetTitle"></h3>
@@ -728,7 +728,7 @@
     <button class="btn btn-sm" id="updateBtn">רענן עכשיו</button>
   </div>
 
-  <div class="toast-host" id="toastHost"></div>
+  <div class="toast-host" id="toastHost" role="status" aria-live="polite"></div>
 
   <script type="module" src="js/app.js"></script>
 </body>

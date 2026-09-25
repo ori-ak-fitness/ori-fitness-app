@@ -150,7 +150,8 @@ export function openGoalsEditor() {
     el('button', {
       class: 'btn btn-primary btn-block',
       onclick: guard(async () => {
-        const parts = textInput.value.split(/[,\n]/).map((p) => p.trim()).filter(Boolean);
+        // פסיק בין ספרות ("82,5 ק"ג") הוא עשרוני ולא מפריד בין מטרות
+        const parts = textInput.value.split(/\n|,(?!\d)/).map((p) => p.trim()).filter(Boolean);
         if (!parts.length) { toast('כתוב משהו קודם', 'err'); return; }
         for (const part of parts) await addGoal(part);
         await renderGoals();

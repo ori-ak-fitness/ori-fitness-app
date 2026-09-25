@@ -46,6 +46,7 @@ const LOCAL_ONLY_SETTINGS = new Set([
      לא נוגע במנוי של מכשיר א'. הפיכת המפתח היחיד למקומי-בלבד (כפי
      שנעשה כאן קודם) הייתה שוברת שליחה למשתמשים חדשים לגמרי. */
   'pushSubscription',
+  '__syncQueue',     // רשימת הממתינים לשליחה - מצב של המכשיר הזה בלבד
   META_KEY,
 ]);
 
@@ -120,7 +121,19 @@ function clean(value) {
 /* בהגדרות נשמר הערך עצמו (כך זה נשמר בענן מהיום הראשון); בשאר
    המאגרים נשמרת הרשומה השלמה, שכבר מכילה את המזהה שלה */
 function payloadOf(store, value) {
-  return store === db.STORES.settings ? clean(value?.value ?? value) : clean(value);
+  if (store === db.STORES.settings) {
+    // 'value' in row ולא ?? : הגדרה שערכה null היא ערך תקין, ו-?? היה מחזיר
+    // את כל השורה ({key, value:null}) והמכשיר השני היה מקבל אובייקט מקונן
+    return clean(value && typeof value === 'object' && 'value' in value ? value.value : value);
+  }
+  if (store === db.STORES.meals && value) {
+    // תמונות ארוחה הן Blob: JSON הופך אותן ל-{} ומכשיר שני היה מקבל
+    // photo:{} (אמת) ומתרסק בציור הרשימה. תמונות נשארות במכשיר, כמו שכתוב
+    // בכל מקום באפליקציה - כאן זה פשוט לא נאכף עד עכשיו
+    const { photo, thumb, ...rest } = value;
+    return clean(rest);
+  }
+  return clean(value);
 }
 
 function rowFromPayload(store, key, payload) {
@@ -154,6 +167,42 @@ async function writeMeta(meta) {
   catch { /* לא קריטי */ }
 }
 
+/* ---------- תור שנשמר על הדיסק ---------- */
+
+/*
+ * התור היה בזיכרון בלבד. עריכה שנרשמה במצב לא מקוון (או בזמן שדחיפה
+ * נכשלה), ואז האפליקציה נסגרה - נעלמה מהתור, ו-seed() כבר לא רץ כי
+ * meta.seeded. העריכה נשארה רק במכשיר הזה, לעולם לא הגיעה לענן, ומכשירים
+ * אחרים התפצלו. עכשיו רשימת המפתחות הממתינים נשמרת (מקומית בלבד) ומשוחזרת
+ * בפתיחה; הערכים עצמם נקראים מחדש מהמסד, כך שתמיד נשלח המצב העדכני.
+ */
+const QUEUE_KEY = '__syncQueue';
+
+let inflight = null;   // מה שנשלח עכשיו ועוד לא אושר - חלק מהתור עד שהוא מצליח
+
+function persistQueue() {
+  const list = [...(inflight ? inflight.values() : []), ...queue.values()]
+    .map(({ store, key }) => ({ store, key }));
+  db.putQuiet(db.STORES.settings, { key: QUEUE_KEY, value: list }).catch(() => {});
+}
+
+async function restoreQueue() {
+  let list;
+  try { list = await db.getSetting(QUEUE_KEY, null); } catch { return; }
+  if (!Array.isArray(list) || !list.length) return;
+  for (const item of list) {
+    const { store, key } = item || {};
+    if (!store || key == null || !isSyncable(store, key)) continue;
+    const id = recordId(store, key);
+    if (queue.has(id)) continue;
+    let row;
+    try { row = await db.get(store, key); } catch { continue; }
+    // אין רשומה => נמחקה מקומית => נשלח מצבה (מחיקה)
+    queue.set(id, { store, key, value: row ?? null });
+  }
+  if (queue.size) scheduleFlush();
+}
+
 /* ---------- דחיפה ---------- */
 
 /*
@@ -170,6 +219,7 @@ async function flushImpl() {
   if (!enabled || !queue.size) return;
   const pending = queue;
   queue = new Map();
+  inflight = pending;
 
   const updatedAt = Date.now();
   const items = [];
@@ -193,11 +243,15 @@ async function flushImpl() {
     status.state = 'מסונכרן';
     status.reason = null;
     status.lastSyncAt = updatedAt;
+    inflight = null;
+    persistQueue();
   } catch (err) {
     console.warn('[Ori Fitness] שליחה לענן נכשלה:', err?.code || err);
     fail('שגיאה בשליחה', err);
     // מחזירים לתור כדי לנסות שוב, אלא אם כבר נכתב משהו חדש מאז
     for (const [id, entry] of pending) if (!queue.has(id)) queue.set(id, entry);
+    inflight = null;
+    persistQueue();
   }
 }
 
@@ -208,6 +262,7 @@ function flush() { return serialized(flushImpl); }
 function onLocalChange(store, key, value) {
   if (!enabled || !isSyncable(store, key)) return;
   queue.set(recordId(store, key), { store, key, value });
+  persistQueue();
   scheduleFlush();
 }
 
@@ -234,6 +289,11 @@ async function pullImpl() {
     // שווה בדיוק אינו "חדש יותר" — אחרת כל טעינה הייתה כותבת מחדש לחינם
     if (!(rec.updatedAt > (meta.at[rec.id] ?? 0))) continue;
 
+    // יש שינוי מקומי שעוד לא נשלח לרשומה הזו: המשיכה הייתה דורסת אותו
+    // בגרסת הענן הישנה, ואז הדחיפה שולחת את הערך הישן ומסמנת אותו כמעודכן
+    // (meta.at) - והפער לא היה מתוקן לעולם. מדלגים; הדחיפה קובעת
+    if (queue.has(rec.id) || (inflight && inflight.has(rec.id))) continue;
+
     /*
      * רשומה אחת פגומה (שדה חסר, טיפוס לא צפוי) זרקה מכאן, קטעה את כל
      * הפעולה לפני writeMeta, ובכל משיכה הבאה נתקעה על אותה רשומה - וכל
@@ -245,7 +305,16 @@ async function pullImpl() {
         await db.delQuiet(rec.store, rec.key);
       } else {
         if (rec.store !== db.STORES.settings && (!rec.value || typeof rec.value !== 'object')) continue;
-        await db.putQuiet(rec.store, rowFromPayload(rec.store, rec.key, rec.value));
+        let value = rec.value;
+        if (rec.store === db.STORES.meals) {
+          // תמונות לא עוברות בענן: משאירים את מה שכבר יש כאן, ומנקים
+          // photo:{} שגרסאות קודמות העלו (Blob שעבר JSON) - אחרת הציור נופל
+          const local = await db.get(rec.store, rec.key).catch(() => null);
+          value = { ...value, photo: local?.photo, thumb: local?.thumb };
+          if (!(value.photo instanceof Blob)) delete value.photo;
+          if (!(value.thumb instanceof Blob)) delete value.thumb;
+        }
+        await db.putQuiet(rec.store, rowFromPayload(rec.store, rec.key, value));
       }
     } catch (err) {
       console.warn('[Ori Fitness] רשומה מהענן דולגה:', rec.store, err?.name || err);
@@ -332,6 +401,9 @@ export async function initCloud(onPulled) {
   });
 
   try {
+    // קודם משחזרים מה שהמכשיר הזה עוד לא הספיק לשלוח בפעם הקודמת, ורק
+    // אחר כך מושכים (משיכה מדלגת על רשומות בתור, ראו pullImpl)
+    await restoreQueue();
     const applied = await pull();
     status.state = 'מסונכרן';
     status.reason = null;

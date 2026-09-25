@@ -226,7 +226,7 @@ async function logCardio(template, minutes) {
   onLogged?.();
 
   // רגע חגיגי בדיוק כשמגיעים ליעד השבועי — לא לפני ולא אחרי
-  const goal = num(template.weeklyGoal, 0);
+  const goal = Math.min(14, num(template.weeklyGoal, 0));
   if (goal > 0) {
     const weekCount = (await cardioThisWeek()).filter((c) => c.templateId === template.id).length;
     if (weekCount === goal) celebrateWeeklyGoal(template);
@@ -274,9 +274,10 @@ export async function renderCardio() {
   // עם יעד שבועי: עיגול לכל מפגש (לחיצה על ריק = הוספה, על מלא = הסרה).
   // מספר המפגשים ליעד (goal) נקבע רק דרך ההגדרות, לא כאן.
   host.replaceChildren(...templates.map((t) => {
-    const goal = num(t.weeklyGoal, 0);
+    const goal = Math.min(14, num(t.weeklyGoal, 0));
 
     if (goal > 0) {
+      // גם רשומה שכבר נשמרה (או הגיעה מהענן) עם ערך ענק לא תקרוס את מסך הבית
       const weekEntries = week.filter((c) => c.templateId === t.id).sort((a, b) => a.endedAt - b.endedAt);
       const count = weekEntries.length;
       const done = count >= goal;
@@ -367,7 +368,7 @@ export async function openCardioEditor() {
           el('input', {
             type: 'number', inputmode: 'numeric', min: '1', max: '600', value: t.minutes,
             'aria-label': 'דקות',
-            oninput: (e) => { t.minutes = Math.max(1, parseInt(e.target.value, 10) || 1); },
+            oninput: (e) => { t.minutes = Math.min(600, Math.max(1, parseInt(e.target.value, 10) || 1)); },
           }),
           el('span', {}, 'דקות כברירת מחדל'),
         ),
@@ -375,7 +376,9 @@ export async function openCardioEditor() {
           el('input', {
             type: 'number', inputmode: 'numeric', min: '0', max: '14', value: t.weeklyGoal || '',
             placeholder: '0', 'aria-label': 'יעד שבועי',
-            oninput: (e) => { t.weeklyGoal = Math.max(0, parseInt(e.target.value, 10) || 0); },
+            // תקרה 14, כמו ה-max של השדה: max לא נאכף מהקלדה, וערך ענק היה
+            // קורס את Array.from({length}) בציור, מסנכרן לענן ותוקע את כל המכשירים
+            oninput: (e) => { t.weeklyGoal = Math.min(14, Math.max(0, parseInt(e.target.value, 10) || 0)); },
           }),
           el('span', {}, 'פעמים בשבוע (0 = בלי יעד)'),
         ),

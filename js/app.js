@@ -286,7 +286,14 @@ async function registerSW() {
     });
 
     let reloading = false;
+    // בהתקנה הראשונה הראשונה אין controller קודם, ו-clients.claim() גורם
+    // ל-controllerchange בכל זאת: רענון שם היה קורע משתמש חדש באמצע התחברות
+    // או אשף. מרעננים רק כשהיה SW קודם שהוחלף בגרסה חדשה.
+    let hadController = !!navigator.serviceWorker.controller;
     navigator.serviceWorker.addEventListener('controllerchange', () => {
+      // השינוי הראשון בלי controller קודם הוא ה-claim של ההתקנה: מדלגים,
+      // אבל מכאן והלאה יש controller - עדכון הבא כן מרענן
+      if (!hadController) { hadController = true; return; }
       if (reloading) return;   // controllerchange יכול לירות יותר מפעם אחת
       reloading = true;
       location.reload();
