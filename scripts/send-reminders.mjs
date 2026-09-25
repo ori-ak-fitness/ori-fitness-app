@@ -83,10 +83,28 @@ const NEEDED_SETTING_KEYS = [
    ולכן טווח מזהי מסמכים אחד תופס את כולם בלי לסרוק את שאר ההגדרות */
 const SUB_ID_PREFIX = 'settings__pushSub';
 
+/*
+ * רק שירותי ה-push האמיתיים של הדפדפנים (Chrome/אנדרואיד, Firefox, Safari/אפל,
+ * Edge). ה-endpoint נשמר ע"י המשתמש בחשבון שלו, ולכן משתמש מאושר יכול לכתוב
+ * לשם כתובת של שרת משלו: הריצה השעתית (עם מפתח Firebase Admin ומפתח ה-VAPID
+ * בסביבה) הייתה שולחת אליו בקשות, ואם הוא פשוט לא עונה - נתקעת על כל המשתמשים
+ * שאחריו. רשימה סגורה של דומיינים סוגרת את זה.
+ */
+const ALLOWED_PUSH_HOSTS = ['googleapis.com', 'mozilla.com', 'push.apple.com', 'notify.windows.com'];
+const MAX_SUBSCRIPTIONS_PER_USER = 5;
+
+function isAllowedEndpoint(endpoint) {
+  try {
+    const u = new URL(endpoint);
+    return u.protocol === 'https:'
+      && ALLOWED_PUSH_HOSTS.some((h) => u.hostname === h || u.hostname.endsWith('.' + h));
+  } catch { return false; }
+}
+
 /** צורה מינימלית תקינה של מנוי — אחרת web-push זורק, ומנוי פגום לא צריך לתקוע אחרים */
 function isValidSubscription(s) {
   return s && typeof s === 'object'
-    && typeof s.endpoint === 'string' && s.endpoint.startsWith('https://')
+    && typeof s.endpoint === 'string' && isAllowedEndpoint(s.endpoint)
     && s.keys && typeof s.keys.p256dh === 'string' && typeof s.keys.auth === 'string';
 }
 
@@ -107,6 +125,7 @@ async function loadRecords(uid) {
     recordsRef
       .where(FieldPath.documentId(), '>=', SUB_ID_PREFIX)
       .where(FieldPath.documentId(), '<', SUB_ID_PREFIX + '')
+      .limit(20)   // משתמש לא אמור להחזיק יותר; מגן מהצפה של מסמכי מנוי
       .get(),
   ]);
 
@@ -120,6 +139,7 @@ async function loadRecords(uid) {
     if (seenEndpoints.has(rec.value.endpoint)) continue;
     seenEndpoints.add(rec.value.endpoint);
     subscriptions.push({ docId: doc.id, subscription: rec.value });
+    if (subscriptions.length >= MAX_SUBSCRIPTIONS_PER_USER) break;
   }
 
   const bySettingKey = {};
@@ -162,13 +182,14 @@ async function send(uid, subscriptions, payload) {
   let anyOk = false;
   for (const { docId, subscription } of subscriptions) {
     try {
-      await webpush.sendNotification(subscription, JSON.stringify(payload));
+      // timeout: שרת שלא עונה לא יכול לתקוע את הריצה השעתית של כולם
+      await webpush.sendNotification(subscription, JSON.stringify(payload), { timeout: 10000, TTL: 3600 });
       anyOk = true;
     } catch (err) {
       // רק קוד הסטטוס, לא err.message - זה ריפו ציבורי ולוגים של
       // Actions גלויים לכל אחד; אין סיבה שפרטי endpoint/subscription
       // ידלפו לשם, גם אם זה רק לצורך דיבוג
-      console.warn(`[${uid}] שליחה נכשלה, קוד:`, err.statusCode ?? 'לא ידוע');
+      console.warn('שליחה נכשלה, קוד:', err.statusCode ?? 'לא ידוע');
       if (err.statusCode === 404 || err.statusCode === 410) {
         try { await clearSubscription(uid, docId); } catch { /* לא קריטי, ננסה בהרצה הבאה */ }
       }
@@ -179,12 +200,13 @@ async function send(uid, subscriptions, payload) {
 
 async function run() {
   const now = israelNow();
-  const usersSnap = await db.collection('users').get();
+  // רק מאושרים, ובלי לשלוף את שאר השדות של מסמך המשתמש (מייל, תמונה, ...):
+  // גם מחסך קריאות מיותרות של משתמשים ממתינים/חסומים/ספאם בכל ריצה שעתית
+  const usersSnap = await db.collection('users').where('status', '==', 'approved').select().get();
   let sent = 0;
 
   for (const userDoc of usersSnap.docs) {
     const uid = userDoc.id;
-    if (userDoc.data()?.status !== 'approved') continue;
 
     /*
      * לפני התיקון: רק send() עצמה הייתה עטופה ב-try/catch. שגיאה בכל
@@ -195,11 +217,14 @@ async function run() {
     try {
       await processUser(userDoc, now, (n) => { sent += n; });
     } catch (err) {
-      console.warn(`[${uid}] עיבוד נכשל, ממשיך למשתמש הבא:`, err.code ?? err.message?.slice(0, 80));
+      // בלי uid: הלוגים של הריפו הציבורי גלויים לכולם
+      console.warn('עיבוד משתמש נכשל, ממשיך לבא:', err.code ?? 'לא ידוע');
     }
   }
 
-  console.log(`נשלחו ${sent} התראות.`);
+  // הספירה רק בהרצה ידנית - בהרצות השעתיות היא הייתה חושפת בלוג ציבורי
+  // כמה התראות יצאו בכל שעה (כלומר מתי המשתמשים פעילים)
+  if (IS_MANUAL_TEST) console.log(`נשלחו ${sent} התראות.`);
 }
 
 async function processUser(userDoc, now, addSent) {

@@ -3,7 +3,7 @@
    העלה את CACHE_VERSION בכל שחרור גרסה כדי לרענן קבצים.
    =================================================================== */
 
-const CACHE_VERSION = 'ori-fitness-v105';
+const CACHE_VERSION = 'ori-fitness-v106';
 
 const APP_SHELL = [
   './',
@@ -37,6 +37,8 @@ const APP_SHELL = [
   './js/snacks.js',
   './js/reminders.js',
   './js/push.js',
+  './privacy.html',
+  './terms.html',
   './icons/logo.svg',
   './icons/icon-192.png',
   './icons/icon-512.png',
@@ -96,6 +98,18 @@ self.addEventListener('fetch', (event) => {
      * האפליקציה. זה קרה בפועל בבדיקה: פתיחת האפליקציה החזירה את
      * תוכן קובץ האימות.
      */
+    // עמודי החוק (פרטיות/תנאים) עובדים גם בלי רשת: מהמטמון קודם, אחרת רשת.
+    // אלה שני עמודים ידועים ונבחרים במפורש - לא "כל דף באותו דומיין", כי זה
+    // בדיוק מה שהרעיל את ה-index.html בעבר (ראו ההערה למטה)
+    if (/\/(privacy|terms)\.html$/.test(url.pathname)) {
+      event.respondWith((async () => {
+        const cache = await caches.open(CACHE_VERSION);
+        return (await cache.match(req)) || fetch(req).catch(() =>
+          new Response('אופליין', { status: 503, headers: { 'Content-Type': 'text/plain; charset=utf-8' } }));
+      })());
+      return;
+    }
+
     const scope = new URL('./', self.location).pathname;
     const isAppRoot = url.pathname === scope || url.pathname === scope + 'index.html';
     if (!isAppRoot) return;   // דף אחר בדומיין — לא נוגעים בו בכלל
@@ -177,7 +191,11 @@ self.addEventListener('push', (event) => {
 // לחיצה על ההתראה — פותחת חלון קיים אם יש, אחרת חלון חדש
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  const targetUrl = new URL(event.notification.data?.url || './', self.location).href;
+  // רק כתובת מאותו origin: ה-payload מגיע רק מהסקריפט שלנו, אבל אין סיבה
+  // שהודעה תוכל לנווט את חלון האפליקציה לאתר חיצוני
+  let target = new URL(event.notification.data?.url || './', self.location);
+  if (target.origin !== self.location.origin) target = new URL('./', self.location);
+  const targetUrl = target.href;
   event.waitUntil((async () => {
     const clientsList = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
     for (const client of clientsList) {

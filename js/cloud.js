@@ -234,8 +234,23 @@ async function pullImpl() {
     // שווה בדיוק אינו "חדש יותר" — אחרת כל טעינה הייתה כותבת מחדש לחינם
     if (!(rec.updatedAt > (meta.at[rec.id] ?? 0))) continue;
 
-    if (rec.deleted) await db.delQuiet(rec.store, rec.key);
-    else await db.putQuiet(rec.store, rowFromPayload(rec.store, rec.key, rec.value));
+    /*
+     * רשומה אחת פגומה (שדה חסר, טיפוס לא צפוי) זרקה מכאן, קטעה את כל
+     * הפעולה לפני writeMeta, ובכל משיכה הבאה נתקעה על אותה רשומה - וכל
+     * מה שאחריה לא הגיע למכשיר לעולם. עכשיו: מדלגים עליה, ממשיכים הלאה.
+     * לא מסמנים אותה כמוחלת (meta.at), כך שאם תתוקן בענן - תיקלט.
+     */
+    try {
+      if (rec.deleted) {
+        await db.delQuiet(rec.store, rec.key);
+      } else {
+        if (rec.store !== db.STORES.settings && (!rec.value || typeof rec.value !== 'object')) continue;
+        await db.putQuiet(rec.store, rowFromPayload(rec.store, rec.key, rec.value));
+      }
+    } catch (err) {
+      console.warn('[Ori Fitness] רשומה מהענן דולגה:', rec.store, err?.name || err);
+      continue;
+    }
 
     meta.at[rec.id] = rec.updatedAt;
     applied++;

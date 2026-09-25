@@ -175,7 +175,14 @@ export async function fetchRecords(since = 0) {
  * לרשומה זה מאות נסיעות הלוך-ושוב ברשת סלולרית. Firestore מגביל
  * חבילה ל-500 פעולות, ולכן מפצלים.
  */
-const BATCH_LIMIT = 400;
+/*
+ * היה 400. חוקי האבטחה של רשומות (isApprovedSelf ב-firestore.rules) קוראים
+ * מסמך אחד עם get() בכל פעולת כתיבה, ו-Firestore מגביל ל-20 קריאות כאלה
+ * לכל batch (התיעוד מחשב אותן לפי פעולה: 3 כתיבות × 2 קריאות = 6 מתוך 20).
+ * לא בטוח אם קריאות זהות נספרות פעם אחת, ולכן שומרים על 15 פעולות ל-batch:
+ * בטוח בכל מקרה. המחיר הוא רק עוד כמה סבבי רשת בהעלאה ראשונית גדולה.
+ */
+const BATCH_LIMIT = 15;
 
 /** @param {Array<{id:string, data:object}>} items */
 export async function putRecords(items) {

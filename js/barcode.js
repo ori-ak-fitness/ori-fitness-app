@@ -181,7 +181,7 @@ function openProductSheet(product) {
 
   const body = el('div', {},
     el('div', { class: 'bc-head' },
-      ...(product.image ? [el('img', { src: product.image, alt: '', class: 'bc-img' })] : []),
+      ...(product.image ? [el('img', { src: product.image, alt: '', class: 'bc-img', referrerpolicy: 'no-referrer' })] : []),
       el('div', {},
         el('b', { class: 'bc-name' }, title),
         el('div', { class: 'muted', style: 'font-size:.82rem' },

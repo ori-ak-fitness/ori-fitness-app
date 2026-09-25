@@ -463,9 +463,6 @@ async function main() {
     cardioForDate,
     goToCardio: () => showScreen('workout'),
   });
-  // לפני התצוגה: מיישר את המנוי השמור עם מה שהדפדפן מחזיק (וגם מעלה
-  // מכשיר קיים למפתח החדש לכל מכשיר), כדי שההצעה לא תופיע למי שכבר הפעיל
-  await syncPushSubscription();
   await renderReminders();
 
   initSettingsScreen({
@@ -493,8 +490,6 @@ async function main() {
   initDayWatcher();
 
   if (await shouldRunWizard()) openWizard();
-  // משתמש קיים: פעם אחת אחרי העדכון, הצעה להפעיל התראות (לא מעל האשף)
-  maybeShowPushIntro();
 
   /*
    * הסנכרון עולה אחרון ובלי await לפניו: הוא תלוי ברשת, ואסור שהוא
@@ -506,6 +501,22 @@ async function main() {
   initCloud(refreshFromCloud).then((res) => {
     if (res.ok && res.applied) toast(`התקבלו ${res.applied} עדכונים ממכשיר אחר`, 'ok');
   });
+
+  /*
+   * מיישר את מנוי ההתראות של המכשיר עם מה שהדפדפן מחזיק - חייב לרוץ *אחרי*
+   * initCloud: רק שם נרשם המאזין לכתיבות (db.watchWrites), וכתיבה שקורית
+   * לפניו לא נכנסת לתור ולא עולה לענן, כך שהסקריפט שבענן לא היה רואה את
+   * המכשיר. בלי await: המתנה ל-Service Worker (עד 4 שניות בתקלה) לא
+   * תעכב את הפעלת הניווט. כשמסיים - מציירים מחדש את הכרטיס.
+   */
+  syncPushSubscription()
+    .then(async () => {
+      await renderReminders();
+      // משתמש קיים: פעם אחת אחרי העדכון, הצעה להפעיל התראות (לא מעל האשף).
+      // אחרי היישור, כדי שמי שכבר מופעל לא יקבל הצעה מיותרת
+      maybeShowPushIntro();
+    })
+    .catch(() => {});
 
   /*
    * סגירת האפליקציה לא אמורה לאבד שינוי שנרשם שנייה קודם. pagehide

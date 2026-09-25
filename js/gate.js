@@ -53,6 +53,12 @@ function requireConsent(btn) {
   const label = check?.closest('.gate-consent');
   if (!check) return;
   btn.addEventListener('click', (e) => {
+    /*
+     * אותו כפתור משמש ב-auth.js גם ל"נסה שוב" (רענון) ול"התנתק" - שם אין
+     * שום הסכמה לבקש, ומי שממתין לאישור או נחסם חייב להצליח להתנתק או
+     * לרענן בלי לסמן תיבה. חוסמים רק כשהכפתור באמת מציע "התחברות".
+     */
+    if (!btn.textContent.includes('התחברות')) return;
     if (check.checked) { label?.classList.remove('is-required'); return; }
     e.preventDefault();
     e.stopImmediatePropagation();

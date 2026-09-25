@@ -98,7 +98,9 @@ function userRow(user, { isMe, onChange }) {
   }
 
   return el('div', { class: 'list-item is-static user-row' },
-    user.photo
+    // תמונת הפרופיל נכתבת ע"י המשתמש בעצמו במסמך שלו: רק כתובות של גוגל,
+    // אחרת כתובת של שרת זר הייתה חושפת בפני הבעלים את ה-IP שלו כשהוא פותח את הרשימה
+    (typeof user.photo === 'string' && user.photo.startsWith('https://lh3.googleusercontent.com/'))
       ? el('img', { class: 'li-thumb user-avatar', src: user.photo, alt: '', referrerpolicy: 'no-referrer' })
       : el('span', { class: 'li-thumb user-avatar user-avatar-blank' }, '👤'),
     el('div', { class: 'li-main' },

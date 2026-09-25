@@ -32,13 +32,18 @@ export const VAPID_PUBLIC_KEY =
  */
 const SUB_PREFIX = 'pushSub_';
 
+let memoryDeviceId = null;   // כש-localStorage חסום: מזהה ייחודי לריצה הזו, לא קבוע משותף
 /** מזהה קבוע למכשיר/דפדפן הזה. לא מסתנכרן — זה בדיוק העניין */
 function deviceId() {
   try {
     let id = localStorage.getItem('oriDeviceId');
     if (!id) { id = db.uid(); localStorage.setItem('oriDeviceId', id); }
     return id;
-  } catch { return 'nodevice'; }
+  } catch {
+    // מזהה קבוע ('nodevice') היה משותף לכל מכשיר כזה בחשבון, והם היו
+    // דורסים ומוחקים זה לזה את המנוי - בדיוק מה שהמפתח לכל מכשיר בא למנוע
+    return memoryDeviceId ??= db.uid();
+  }
 }
 const subKey = () => SUB_PREFIX + deviceId();
 
@@ -99,8 +104,23 @@ export async function syncPushSubscription() {
     ]);
     const sub = await reg.pushManager.getSubscription();
     const saved = await db.getSetting(subKey(), null);
-    if (sub && !saved) await db.setSetting(subKey(), sub.toJSON());
-    else if (!sub && saved) await db.delSetting(subKey());
+    if (sub) {
+      /*
+       * כותבים גם כשכבר שמור מקומית, אם ה-endpoint הזה עוד לא הועלה מהמכשיר
+       * הזה: גרסאות קודמות שמרו את המפתח לפני שהסנכרון התחיל, והכתיבה לא
+       * נכנסה לתור. הסימון ב-localStorage מונע כתיבה בכל פתיחה. וגם אם
+       * מכשיר אחר איפס את הנתונים (מחק את הרשומה בענן ומכאן גם כאן) - חסר
+       * `saved`, ונכתב מחדש.
+       */
+      let uploaded = null;
+      try { uploaded = localStorage.getItem('pushSubUploaded'); } catch { /* חסום */ }
+      if (!saved || uploaded !== sub.endpoint) {
+        await db.setSetting(subKey(), sub.toJSON());
+        try { localStorage.setItem('pushSubUploaded', sub.endpoint); } catch { /* לא קריטי */ }
+      }
+    } else if (saved) {
+      await db.delSetting(subKey());
+    }
   } catch { /* אין Service Worker פעיל (למשל בבדיקות) — לא קריטי */ }
 }
 

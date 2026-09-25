@@ -12,11 +12,24 @@ on:
     - cron: '0 * * * *'
   workflow_dispatch:
 
+# הרשאות מינימליות: הג'וב הזה מריץ ספריות npm עם מפתח Firebase Admin ומפתח
+# VAPID בסביבה - אין סיבה שיחזיק גם טוקן כתיבה לריפו
+permissions:
+  contents: read
+
+# ריצה אחת בכל רגע: ריצה שנתקעה לא תיערם עם הבאות אחריה
+concurrency:
+  group: push-reminders
+  cancel-in-progress: false
+
 jobs:
   send:
     runs-on: ubuntu-latest
+    timeout-minutes: 15   # ברירת המחדל היא 6 שעות
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: 22   # firebase-admin@14 דורש Node >=22 (עם 20 הספרייה לא נטענת)
