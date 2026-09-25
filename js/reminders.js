@@ -15,6 +15,13 @@
 
 import * as db from './db.js';
 import { $, el, dateKey, shiftDateKey } from './ui.js';
+import { isPushSupported, hasPushSubscription, subscribeToPush } from './push.js';
+
+/* "לא עכשיו" על הצעת ההתראות — נשמר במכשיר הזה בלבד (localStorage) ולא
+   בהגדרות המסונכרנות: מי שסירב בטלפון לא צריך שהמחשב יפסיק להציע, ולהפך */
+const PUSH_PROMPT_KEY = 'pushPromptDismissed';
+const pushPromptDismissed = () => { try { return !!localStorage.getItem(PUSH_PROMPT_KEY); } catch { return false; } };
+const dismissPushPrompt = () => { try { localStorage.setItem(PUSH_PROMPT_KEY, '1'); } catch { /* לא קריטי */ } };
 
 const DISMISS_KEY = 'remindersDismissed';
 
@@ -119,6 +126,30 @@ async function cardioReminder(dismissed) {
   };
 }
 
+/*
+ * הצעה להפעיל התראות לטלפון — כרטיס בראש הבית, ולחיצה על "הפעל" פותחת
+ * את חלון האישור של המערכת (כמו אישור מצלמה). בלי זה ההפעלה קבורה
+ * בהגדרות ואף אחד לא מוצא אותה. מוצג רק למי שהדפדפן שלו תומך, שעוד לא
+ * הפעיל, ושלא חסם ולא ביקש "לא עכשיו". באייפון זה דורש אפליקציה
+ * שהותקנה למסך הבית — בלשונית רגילה של ספארי אין תמיכה, והכרטיס פשוט לא מופיע.
+ */
+async function pushPrompt() {
+  if (!isPushSupported() || pushPromptDismissed()) return null;
+  if (Notification.permission === 'denied') return null;
+  if (await hasPushSubscription()) return null;
+
+  return {
+    id: 'pushPrompt',
+    icon: '🔔',
+    title: 'התראות לטלפון',
+    text: 'תזכורת לאימון ולשקילה גם כשהאפליקציה סגורה.',
+    action: 'הפעל',
+    // הלחיצה עצמה חייבת להפעיל את בקשת ההרשאה (דרישה של הדפדפנים)
+    onAction: async () => { if (await subscribeToPush()) await renderReminders(); },
+    onDismiss: dismissPushPrompt,
+  };
+}
+
 /* ---------- תצוגה ---------- */
 
 export async function renderReminders() {
@@ -130,6 +161,7 @@ export async function renderReminders() {
     weighInReminder(dismissed),
     workoutReminder(dismissed),
     cardioReminder(dismissed),
+    pushPrompt(),                 // אחרון: תזכורות אמיתיות קודם, ההצעה מתחתן
   ])).filter(Boolean);
 
   if (!items.length) { host.replaceChildren(); return; }
@@ -142,11 +174,19 @@ export async function renderReminders() {
     ),
     el('button', {
       class: 'btn btn-primary btn-sm',
-      onclick: async () => { await dismiss(item.id); await renderReminders(); item.onAction(); },
+      // פריט עם onDismiss (ההצעה להפעיל התראות): הפעולה רצה מיד, בלי שום
+      // await לפניה — בקשת הרשאה חייבת לצאת מתוך הלחיצה עצמה, ואחרי
+      // await לקריאת מסד נתונים הדפדפן כבר לא רואה בה מחווה של משתמש
+      onclick: item.onDismiss
+        ? () => { item.onAction(); }
+        : async () => { await dismiss(item.id); await renderReminders(); item.onAction(); },
     }, item.action),
     el('button', {
       class: 'reminder-x', 'aria-label': 'הסתר',
-      onclick: async () => { await dismiss(item.id); await renderReminders(); },
+      onclick: async () => {
+        if (item.onDismiss) item.onDismiss(); else await dismiss(item.id);
+        await renderReminders();
+      },
     }, '✕'),
   )));
 }

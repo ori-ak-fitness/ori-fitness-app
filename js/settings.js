@@ -560,6 +560,10 @@ function openResetConfirm() {
 async function performReset() {
   for (const store of RESET_STORES) await db.clearStore(store);
   for (const key of RESET_SETTING_KEYS) await db.delSetting(key);
+  // מנויי Push לכל מכשיר ('pushSub_<id>') — מפתחות דינמיים, לא ברשימה הקבועה
+  for (const row of await db.getAll(db.STORES.settings)) {
+    if (typeof row.key === 'string' && row.key.startsWith('pushSub_')) await db.delSetting(row.key);
+  }
 }
 
 export function initSettingsScreen({ onRerun, onCloudRefresh } = {}) {

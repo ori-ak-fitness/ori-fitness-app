@@ -21,7 +21,7 @@
    =================================================================== */
 
 import { initializeApp, cert } from 'firebase-admin/app';
-import { getFirestore } from 'firebase-admin/firestore';
+import { getFirestore, FieldPath } from 'firebase-admin/firestore';
 import webpush from 'web-push';
 
 const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
@@ -74,9 +74,21 @@ function settingRecordId(key) {
 
 /* רק המפתחות שהתזכורות באמת צריכות - לא כל ההגדרות */
 const NEEDED_SETTING_KEYS = [
-  'pushSubscription', 'weighInReminderHour', 'workoutReminderHour',
+  'weighInReminderHour', 'workoutReminderHour',
   'weekSchedule', 'cardioWeekSchedule',
 ];
+
+/* מנויי Push: 'pushSub_<מזהה מכשיר>' לכל מכשיר, ועוד המפתח הישן
+   'pushSubscription' (תאימות לאחור). שניהם מתחילים ב-'settings__pushSub',
+   ולכן טווח מזהי מסמכים אחד תופס את כולם בלי לסרוק את שאר ההגדרות */
+const SUB_ID_PREFIX = 'settings__pushSub';
+
+/** צורה מינימלית תקינה של מנוי — אחרת web-push זורק, ומנוי פגום לא צריך לתקוע אחרים */
+function isValidSubscription(s) {
+  return s && typeof s === 'object'
+    && typeof s.endpoint === 'string' && s.endpoint.startsWith('https://')
+    && s.keys && typeof s.keys.p256dh === 'string' && typeof s.keys.auth === 'string';
+}
 
 /*
  * במקור זה קרא את כל הרשומות של המשתמש - כולל ארוחות, מטרות ותפריט,
@@ -89,10 +101,26 @@ const NEEDED_SETTING_KEYS = [
 async function loadRecords(uid) {
   const recordsRef = db.collection('users').doc(uid).collection('records');
 
-  const [bulkSnap, settingDocs] = await Promise.all([
+  const [bulkSnap, settingDocs, subSnap] = await Promise.all([
     recordsRef.where('store', 'in', ['workouts', 'bodyWeight', 'routines']).get(),
     Promise.all(NEEDED_SETTING_KEYS.map((key) => recordsRef.doc(settingRecordId(key)).get())),
+    recordsRef
+      .where(FieldPath.documentId(), '>=', SUB_ID_PREFIX)
+      .where(FieldPath.documentId(), '<', SUB_ID_PREFIX + '')
+      .get(),
   ]);
+
+  // כל מכשיר של המשתמש, בלי כפילויות: אותו endpoint יכול להופיע גם במפתח
+  // הישן וגם במפתח החדש של אותו טלפון — ואז הוא היה מקבל כל הודעה פעמיים
+  const subscriptions = [];
+  const seenEndpoints = new Set();
+  for (const doc of subSnap.docs) {
+    const rec = doc.data();
+    if (rec.deleted || !isValidSubscription(rec.value)) continue;
+    if (seenEndpoints.has(rec.value.endpoint)) continue;
+    seenEndpoints.add(rec.value.endpoint);
+    subscriptions.push({ docId: doc.id, subscription: rec.value });
+  }
 
   const bySettingKey = {};
   const bodyWeight = [];
@@ -114,31 +142,39 @@ async function loadRecords(uid) {
     bySettingKey[rec.key] = rec.value;
   }
 
-  return { bySettingKey, bodyWeight, workouts, cardioTemplates };
+  return { bySettingKey, bodyWeight, workouts, cardioTemplates, subscriptions };
 }
 
 async function markSent(uid, field, dateKey) {
   await db.collection('pushLog').doc(uid).set({ [field]: dateKey }, { merge: true });
 }
 
-async function clearSubscription(uid) {
-  // אותה צורת רשומה בדיוק שהאפליקציה כותבת — כך שהיא גם תלמד שהמנוי נעלם
-  await db.collection('users').doc(uid).collection('records').doc('settings__pushSubscription')
-    .set({ store: 'settings', key: 'pushSubscription', deleted: true, updatedAt: Date.now() });
+async function clearSubscription(uid, docId) {
+  // אותה צורת רשומה בדיוק שהאפליקציה כותבת (מצבה) — כך שהמכשיר הזה
+  // גם ילמד שהמנוי נעלם, ורק המנוי הפגום נמחק, לא של מכשירים אחרים
+  const key = decodeURIComponent(docId.slice('settings__'.length));
+  await db.collection('users').doc(uid).collection('records').doc(docId)
+    .set({ store: 'settings', key, deleted: true, updatedAt: Date.now() });
 }
 
-async function send(uid, subscription, payload) {
-  try {
-    await webpush.sendNotification(subscription, JSON.stringify(payload));
-    return true;
-  } catch (err) {
-    // רק קוד הסטטוס, לא err.message - זה ריפו ציבורי ולוגים של
-    // Actions גלויים לכל אחד; אין סיבה שפרטי endpoint/subscription
-    // ידלפו לשם, גם אם זה רק לצורך דיבוג
-    console.warn(`[${uid}] שליחה נכשלה, קוד:`, err.statusCode ?? 'לא ידוע');
-    if (err.statusCode === 404 || err.statusCode === 410) await clearSubscription(uid);
-    return false;
+/** שולח לכל מכשירי המשתמש. מחזיר true אם לפחות אחד קיבל */
+async function send(uid, subscriptions, payload) {
+  let anyOk = false;
+  for (const { docId, subscription } of subscriptions) {
+    try {
+      await webpush.sendNotification(subscription, JSON.stringify(payload));
+      anyOk = true;
+    } catch (err) {
+      // רק קוד הסטטוס, לא err.message - זה ריפו ציבורי ולוגים של
+      // Actions גלויים לכל אחד; אין סיבה שפרטי endpoint/subscription
+      // ידלפו לשם, גם אם זה רק לצורך דיבוג
+      console.warn(`[${uid}] שליחה נכשלה, קוד:`, err.statusCode ?? 'לא ידוע');
+      if (err.statusCode === 404 || err.statusCode === 410) {
+        try { await clearSubscription(uid, docId); } catch { /* לא קריטי, ננסה בהרצה הבאה */ }
+      }
+    }
   }
+  return anyOk;
 }
 
 async function run() {
@@ -168,12 +204,11 @@ async function run() {
 
 async function processUser(userDoc, now, addSent) {
   const uid = userDoc.id;
-  const { bySettingKey, bodyWeight, workouts, cardioTemplates } = await loadRecords(uid);
-  const subscription = bySettingKey.pushSubscription;
-  if (!subscription) return;
+  const { bySettingKey, bodyWeight, workouts, cardioTemplates, subscriptions } = await loadRecords(uid);
+  if (!subscriptions.length) return;
 
   if (IS_MANUAL_TEST) {
-    const ok = await send(uid, subscription, {
+    const ok = await send(uid, subscriptions, {
       title: 'בדיקה 🔔', body: 'אם זה הגיע — ההתראות עובדות.', url: APP_URL,
     });
     if (ok) addSent(1);
@@ -189,7 +224,7 @@ async function processUser(userDoc, now, addSent) {
     const sunday = sundayOf(now.dateKey);
     const weighedThisWeek = bodyWeight.some((e) => e?.date >= sunday && e?.date <= now.dateKey);
     if (!weighedThisWeek) {
-      const ok = await send(uid, subscription, {
+      const ok = await send(uid, subscriptions, {
         title: 'שקילה שבועית', body: 'יום שלישי — עוד לא נשקלת השבוע.', url: APP_URL,
       });
       if (ok) { await markSent(uid, 'weighIn', now.dateKey); addSent(1); }
@@ -204,7 +239,7 @@ async function processUser(userDoc, now, addSent) {
     if (routineId) {
       const doneToday = workouts.some((w) => w?.date === now.dateKey && w?.routineId === routineId);
       if (!doneToday) {
-        const ok = await send(uid, subscription, {
+        const ok = await send(uid, subscriptions, {
           title: 'האימון של היום', body: `יום ${DAY_NAMES[now.weekday]} — עוד לא סימנת שהתאמנת היום.`, url: APP_URL,
         });
         if (ok) { await markSent(uid, 'workout', now.dateKey); addSent(1); }
@@ -221,7 +256,7 @@ async function processUser(userDoc, now, addSent) {
     if (template) {
       const doneToday = workouts.some((w) => w?.kind === 'cardio' && w?.date === now.dateKey && w?.templateId === templateId);
       if (!doneToday) {
-        const ok = await send(uid, subscription, {
+        const ok = await send(uid, subscriptions, {
           title: 'האירובי של היום', body: `${template.name} עוד לא סומן היום.`, url: APP_URL,
         });
         if (ok) { await markSent(uid, 'cardio', now.dateKey); addSent(1); }

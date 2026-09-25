@@ -19,6 +19,7 @@ import {
 import { initProgress, renderProgress } from './progress.js';
 import { initBodyWeight, renderBodyWeight, invalidateWeightCache, getWeightEntries } from './bodyweight.js';
 import { initReminders, renderReminders } from './reminders.js';
+import { syncPushSubscription } from './push.js';
 import { renderChallengeWidget, invalidateChallengeCache } from './challenge.js';
 import { initRoutines, renderPlan, invalidateRoutinesCache, getRoutines, getSchedule } from './routines.js';
 import { initMealPlan, invalidatePlanCache } from './mealplan.js';
@@ -462,6 +463,9 @@ async function main() {
     cardioForDate,
     goToCardio: () => showScreen('workout'),
   });
+  // לפני התצוגה: מיישר את המנוי השמור עם מה שהדפדפן מחזיק (וגם מעלה
+  // מכשיר קיים למפתח החדש לכל מכשיר), כדי שההצעה לא תופיע למי שכבר הפעיל
+  await syncPushSubscription();
   await renderReminders();
 
   initSettingsScreen({
