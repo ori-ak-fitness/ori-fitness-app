@@ -17,11 +17,17 @@ import * as db from './db.js';
 import { $, el, dateKey, shiftDateKey } from './ui.js';
 import { isPushSupported, hasPushSubscription, subscribeToPush } from './push.js';
 
-/* "לא עכשיו" על הצעת ההתראות — נשמר במכשיר הזה בלבד (localStorage) ולא
-   בהגדרות המסונכרנות: מי שסירב בטלפון לא צריך שהמחשב יפסיק להציע, ולהפך */
-const PUSH_PROMPT_KEY = 'pushPromptDismissed';
-const pushPromptDismissed = () => { try { return !!localStorage.getItem(PUSH_PROMPT_KEY); } catch { return false; } };
-const dismissPushPrompt = () => { try { localStorage.setItem(PUSH_PROMPT_KEY, '1'); } catch { /* לא קריטי */ } };
+/* הצעת ההתראות חוזרת בכל פתיחה של האפליקציה עד שמפעילים (כך ביקש אורי —
+   לא חד-פעמית כמו אישור מצלמה). "✕" מסתיר רק עד הפתיחה הבאה: sessionStorage
+   נמחק כשסוגרים את האפליקציה, ואינו מסתנכרן בין מכשירים */
+const PUSH_PROMPT_KEY = 'pushPromptHiddenThisSession';
+const pushPromptDismissed = () => { try { return !!sessionStorage.getItem(PUSH_PROMPT_KEY); } catch { return false; } };
+const dismissPushPrompt = () => { try { sessionStorage.setItem(PUSH_PROMPT_KEY, '1'); } catch { /* לא קריטי */ } };
+
+const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent)
+  || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const isInstalledApp = () => navigator.standalone === true
+  || matchMedia('(display-mode: standalone)').matches;
 
 const DISMISS_KEY = 'remindersDismissed';
 
@@ -134,19 +140,30 @@ async function cardioReminder(dismissed) {
  * שהותקנה למסך הבית — בלשונית רגילה של ספארי אין תמיכה, והכרטיס פשוט לא מופיע.
  */
 async function pushPrompt() {
-  if (!isPushSupported() || pushPromptDismissed()) return null;
-  if (Notification.permission === 'denied') return null;
+  if (pushPromptDismissed()) return null;
+  const base = { id: 'pushPrompt', icon: '🔔', title: 'התראות לטלפון', onDismiss: dismissPushPrompt };
+
+  // אייפון: התראות עובדות רק מאפליקציה שהוספה למסך הבית, לא מלשונית ספארי
+  if (!isPushSupported()) {
+    if (isIOS() && !isInstalledApp()) {
+      return { ...base, text: 'כדי לקבל תזכורות באייפון: בספארי לחץ שתף ← "הוסף למסך הבית", ופתח את האפליקציה משם.' };
+    }
+    return null;   // דפדפן שלא תומך בכלל — אין מה להציע
+  }
+
+  // חסום: אי אפשר לבקש שוב מתוך האפליקציה, רק להסביר איפה מתירים
+  if (Notification.permission === 'denied') {
+    return { ...base, text: 'ההתראות חסומות. להפעלה: הגדרות הטלפון ← התראות ← האפליקציה ← אפשר התראות.' };
+  }
+
   if (await hasPushSubscription()) return null;
 
   return {
-    id: 'pushPrompt',
-    icon: '🔔',
-    title: 'התראות לטלפון',
+    ...base,
     text: 'תזכורת לאימון ולשקילה גם כשהאפליקציה סגורה.',
     action: 'הפעל',
     // הלחיצה עצמה חייבת להפעיל את בקשת ההרשאה (דרישה של הדפדפנים)
     onAction: async () => { if (await subscribeToPush()) await renderReminders(); },
-    onDismiss: dismissPushPrompt,
   };
 }
 
@@ -172,7 +189,7 @@ export async function renderReminders() {
       el('div', { class: 'reminder-title' }, item.title),
       el('div', { class: 'reminder-text' }, item.text),
     ),
-    el('button', {
+    item.action ? el('button', {
       class: 'btn btn-primary btn-sm',
       // פריט עם onDismiss (ההצעה להפעיל התראות): הפעולה רצה מיד, בלי שום
       // await לפניה — בקשת הרשאה חייבת לצאת מתוך הלחיצה עצמה, ואחרי
@@ -180,7 +197,7 @@ export async function renderReminders() {
       onclick: item.onDismiss
         ? () => { item.onAction(); }
         : async () => { await dismiss(item.id); await renderReminders(); item.onAction(); },
-    }, item.action),
+    }, item.action) : null,
     el('button', {
       class: 'reminder-x', 'aria-label': 'הסתר',
       onclick: async () => {
