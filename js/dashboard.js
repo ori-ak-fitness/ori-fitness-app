@@ -5,12 +5,12 @@
 import * as db from './db.js';
 import {
   $, el, toast, dateKey, shiftDateKey, fmtNum, blobUrl,
-  resizeImage, pickFileOnce, openSheet, guard, formatFullDateHe,
+  resizeImage, pickFileOnce, openSheet, guard, formatFullDateHe, heCount, formatDurationHe,
 } from './ui.js';
 import { getAllWorkouts } from './workouts.js';
 import { totalsForDate, goalForDate } from './nutrition.js';
 import { weeklyCardioSummary, getCardioSchedule, getCardioTemplates } from './cardio.js';
-import { getRoutines, getSchedule, DAY_SHORT } from './routines.js';
+import { getRoutines, getSchedule, DAY_SHORT, DAY_NAMES } from './routines.js';
 
 const QUOTES = [
   // הציטוטים שאורי בחר
@@ -454,7 +454,7 @@ export async function renderHomeWeek(workouts) {
     const strengthDone = logged.some((w) => (w.kind ?? 'strength') === 'strength');
     const cardioDone = logged.some((w) => w.kind === 'cardio');
     return {
-      i, short, key, routine, cardio, strengthDone, cardioDone,
+      i, short, key, routine, cardio, strengthDone, cardioDone, logged,
       name: [routine?.name, cardio?.name].filter(Boolean).join(' + '),
       planned: !!(routine || cardio),
       done: strengthDone || cardioDone,
@@ -489,10 +489,13 @@ export async function renderHomeWeek(workouts) {
     }
 
     const status = d.done ? (d.complete ? 'בוצע' : 'בוצע חלקית') : d.planned ? (d.isPast ? 'לא סומן' : 'מתוכנן') : 'מנוחה';
-    return el('div', {
+    // לחיצה על עיגול מראה בשורה מתחת מה באותו יום; לחיצה שנייה (או על היום) חוזרת להיום
+    return el('button', {
+      type: 'button',
       class: `wk-day${d.isToday ? ' is-today' : ''}`,
-      role: 'img',
+      'aria-pressed': 'false',
       'aria-label': `${d.isToday ? 'היום, ' : ''}יום ${d.short}' ${fmtDay(d.key)}: ${d.name || 'מנוחה'} — ${status}`,
+      onclick: () => selectDay(selectedDay === d.i || d.isToday ? null : d.i),
     },
       el('span', { class: 'wk-letter' }, d.short),
       el('span', { class: `wk-dot ${state}` }, icon, badge),
@@ -500,7 +503,49 @@ export async function renderHomeWeek(workouts) {
     );
   }));
 
-  if (!line) return;
+  let selectedDay = null;
+  const selectDay = (i) => {
+    selectedDay = i;
+    host.querySelectorAll('.wk-day').forEach((b, j) => {
+      b.classList.toggle('is-selected', j === i);
+      b.setAttribute('aria-pressed', String(j === i));
+    });
+    if (line) i === null ? renderTodayLine(line, days, todayIdx) : renderDayLine(line, days[i]);
+  };
+  selectDay(null);
+}
+
+/** השורה מתחת לעיגולים כשנבחר יום מסוים: "שישי 25/9: כתפיים ובטן + ריצה" */
+function renderDayLine(line, d) {
+  const strengthLog = d.logged.find((w) => (w.kind ?? 'strength') === 'strength');
+  const cardioLog = d.logged.find((w) => w.kind === 'cardio');
+  const name = d.name || (strengthLog ? (strengthLog.routineName || 'אימון חופשי') : cardioLog ? (cardioLog.name || 'אירובי') : 'מנוחה');
+
+  const parts = [];
+  if (strengthLog) {
+    parts.push([strengthLog.totalSets ? heCount(strengthLog.totalSets, 'סט', 'סטים') : null,
+      strengthLog.durationSec ? formatDurationHe(strengthLog.durationSec) : null].filter(Boolean).join(' · ') + ' ✓');
+  } else if (d.routine) {
+    const n = d.routine.exercises?.length ?? 0;
+    parts.push(`${n ? heCount(n, 'תרגיל', 'תרגילים') : d.routine.name}${d.isPast || d.done ? ' — לא סומן' : ''}`);
+  }
+  if (cardioLog) {
+    parts.push(`${Math.round((cardioLog.durationSec ?? 0) / 60)} דק׳ ${cardioLog.name || 'אירובי'} ✓`);
+  } else if (d.cardio) {
+    parts.push(`${d.cardio.minutes || 30} דק׳ ${d.cardio.name}${d.isPast || d.done ? ' — עוד לא' : ''}`);
+  }
+
+  const dayName = DAY_NAMES[d.i];
+  line.replaceChildren(
+    el('div', { class: 'wk-line-title' },
+      el('b', {}, `${dayName} ${fmtDay(d.key)}:`), ` ${name}`,
+      d.complete ? el('span', { class: 'wk-ok' }, ' ✓ בוצע') : null),
+    el('div', { class: 'wk-line-sub' }, parts.length ? parts.join(' · ') : 'יום מנוחה 😌'),
+  );
+}
+
+/** השורה מתחת לעיגולים כברירת מחדל — מה היום ומה בא אחריו */
+function renderTodayLine(line, days, todayIdx) {
   const today = days[todayIdx];
   const upcoming = days.filter((d) => d.i > todayIdx && d.planned);
   const next = upcoming[0];

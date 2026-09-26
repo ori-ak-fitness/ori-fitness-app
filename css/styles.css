@@ -840,7 +840,15 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
   display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px;
   margin-top: 2px;
 }
-.wk-day { display: flex; flex-direction: column; align-items: center; gap: 5px; min-width: 0; }
+.wk-day {
+  display: flex; flex-direction: column; align-items: center; gap: 5px; min-width: 0;
+  background: none; border: none; padding: 0; margin: 0; font-family: inherit;
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.wk-day:active .wk-dot { transform: scale(.94); }
+.wk-dot { transition: transform .12s ease; }
+/* היום שנבחר בלחיצה — טבעת דקה מסביב, בצבע הסימון (טורקיז ביום, קרם בלילה) */
+.wk-day.is-selected .wk-dot { outline: 2px solid var(--mark); outline-offset: 3px; }
 .wk-letter { font-size: .95rem; font-weight: 600; color: var(--text-dim); line-height: 1; }
 .wk-date { font-size: .8rem; color: var(--text-faint); font-variant-numeric: tabular-nums; line-height: 1; }
 .wk-day.is-today .wk-letter,
