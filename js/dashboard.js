@@ -10,7 +10,7 @@ import {
 import { getAllWorkouts } from './workouts.js';
 import { totalsForDate, goalForDate } from './nutrition.js';
 import { weeklyCardioSummary, getCardioSchedule, getCardioTemplates } from './cardio.js';
-import { renderWeekStrip, getRoutines, getSchedule } from './routines.js';
+import { getRoutines, getSchedule, DAY_SHORT } from './routines.js';
 
 const QUOTES = [
   // הציטוטים שאורי בחר
@@ -368,11 +368,7 @@ export async function renderStats() {
     )));
     $('#hsCardioCard').classList.toggle('hidden', cardioSummary.length === 0);
 
-    // אותו לוח שבוע (עם וי על ימים שבוצעו) שיש במסך האימון, גם כאן בבית
-    const [hsRoutines, hsSchedule, hsCardioSchedule, hsCardioTemplates] = await Promise.all([
-      getRoutines(), getSchedule(), getCardioSchedule(), getCardioTemplates(),
-    ]);
-    await renderWeekStrip(hsRoutines, hsSchedule, new Date().getDay(), 'hsWeekStrip', hsCardioSchedule, hsCardioTemplates);
+    await renderHomeWeek(workouts);
   }
 
   if (showNutrition) {
@@ -386,6 +382,146 @@ export async function renderStats() {
     $('#hsFat').textContent = fmtNum(Math.round(todayTotals.fat));
     $('#hsFatGoal').textContent = fmtNum(todayGoal.fat);
   }
+}
+
+/* ---------- השבוע בבית: עיגולים + שורה אחת ----------
+ *
+ * במסך הבית רק מבט של שנייה: עיגול לכל יום שאומר מה המצב, בלי שמות
+ * בתוך העיגולים (שם נחתכו ל"כתפיים וב…" באריחים הקודמים). השמות יושבים
+ * בשורה אחת מתחת. במסך האימון נשארו האריחים — שם בוחרים מה לעשות.
+ *
+ * "בוצע" כאן נדיב בכוונה: כל אימון כוח באותו יום נחשב, גם אם עשית
+ * אימון חופשי במקום התוכנית, וגם יום מנוחה שהתאמנת בו נצבע ירוק.
+ */
+
+const SVG_NS = 'http://www.w3.org/2000/svg';
+
+function svgIcon(build) {
+  const svg = document.createElementNS(SVG_NS, 'svg');
+  svg.setAttribute('viewBox', '0 0 24 24');
+  svg.setAttribute('class', 'wk-ico');
+  svg.setAttribute('aria-hidden', 'true');
+  for (const [tag, attrs] of build) {
+    const node = document.createElementNS(SVG_NS, tag);
+    for (const [k, v] of Object.entries(attrs)) node.setAttribute(k, v);
+    svg.appendChild(node);
+  }
+  return svg;
+}
+
+// צבע מ-currentColor, כך שאותו אייקון יוצא טורקיז, לבן או אפור לפי המצב
+const ICONS = {
+  strength: () => svgIcon([
+    ['line', { x1: 7, y1: 12, x2: 17, y2: 12 }],
+    ['rect', { x: 4.5, y: 7, width: 3, height: 10, rx: 1 }],
+    ['rect', { x: 16.5, y: 7, width: 3, height: 10, rx: 1 }],
+    ['line', { x1: 2, y1: 12, x2: 4.5, y2: 12 }],
+    ['line', { x1: 19.5, y1: 12, x2: 22, y2: 12 }],
+  ]),
+  cardio: () => svgIcon([['polyline', { points: '2,12 7,12 10,5 14,19 17,12 22,12' }]]),
+  check: () => svgIcon([['polyline', { points: '5,12.5 10,17.5 19,7' }]]),
+};
+
+const fmtDay = (key) => { const [, m, d] = key.split('-').map(Number); return `${d}/${m}`; };
+
+export async function renderHomeWeek(workouts) {
+  const host = $('#hsWeekStrip');
+  const line = $('#hsWeekLine');
+  if (!host) return;
+
+  const [routines, schedule, cardioSchedule, cardioTemplates] = await Promise.all([
+    getRoutines(), getSchedule(), getCardioSchedule(), getCardioTemplates(),
+  ]);
+  const todayIdx = new Date().getDay();
+  const todayKey = dateKey();
+  const sunday = shiftDateKey(todayKey, -todayIdx);
+
+  const days = DAY_SHORT.map((short, i) => {
+    const key = shiftDateKey(sunday, i);
+    const routine = schedule[i] ? routines.find((r) => r.id === schedule[i]) : null;
+    const cardio = cardioSchedule[i] ? cardioTemplates.find((c) => c.id === cardioSchedule[i]) : null;
+    const logged = workouts.filter((w) => w.date === key);
+    const strengthDone = logged.some((w) => (w.kind ?? 'strength') === 'strength');
+    const cardioDone = logged.some((w) => w.kind === 'cardio');
+    return {
+      i, short, key, routine, cardio, strengthDone, cardioDone,
+      name: [routine?.name, cardio?.name].filter(Boolean).join(' + '),
+      planned: !!(routine || cardio),
+      done: strengthDone || cardioDone,
+      // הכל מה שתוכנן בוצע (יום בלי תוכנית: עצם האימון)
+      complete: (!routine || strengthDone) && (!cardio || cardioDone) && (strengthDone || cardioDone),
+      isToday: i === todayIdx,
+      isPast: key < todayKey,
+    };
+  });
+
+  host.replaceChildren(...days.map((d) => {
+    let state;
+    if (d.done) state = 'is-done';
+    else if (!d.planned) state = d.isToday ? 'is-rest is-today-rest' : 'is-rest';
+    else if (d.isToday) state = 'is-now';
+    else if (d.isPast) state = 'is-missed';
+    else state = 'is-planned';
+
+    // האייקון הראשי: וי כשבוצע כוח, דופק כשבוצע רק אירובי, אחרת לפי התוכנית
+    let icon;
+    if (d.done) icon = d.strengthDone || !d.cardioDone ? ICONS.check() : ICONS.cardio();
+    else if (d.routine) icon = ICONS.strength();
+    else if (d.cardio) icon = ICONS.cardio();
+    else icon = el('span', { class: 'wk-dash' }, '–');
+
+    // תג פינה: יום עם כוח וגם אירובי. מלא = בוצע/מתוכנן, חלול = עוד חסר
+    let badge = null;
+    if (d.routine && d.cardio && !(d.done && !d.strengthDone)) {
+      badge = el('span', { class: `wk-badge${d.done && !d.cardioDone ? ' is-hollow' : ''}` }, ICONS.cardio());
+    } else if (d.done && d.cardioDone && !d.strengthDone && d.routine) {
+      badge = el('span', { class: 'wk-badge is-hollow' }, ICONS.strength());
+    }
+
+    const status = d.done ? (d.complete ? 'בוצע' : 'בוצע חלקית') : d.planned ? (d.isPast ? 'לא סומן' : 'מתוכנן') : 'מנוחה';
+    return el('div', {
+      class: `wk-day${d.isToday ? ' is-today' : ''}`,
+      role: 'img',
+      'aria-label': `${d.isToday ? 'היום, ' : ''}יום ${d.short}' ${fmtDay(d.key)}: ${d.name || 'מנוחה'} — ${status}`,
+    },
+      el('span', { class: 'wk-letter' }, d.short),
+      el('span', { class: `wk-dot ${state}` }, icon, badge),
+      el('span', { class: 'wk-date' }, String(Number(d.key.slice(8)))),
+    );
+  }));
+
+  if (!line) return;
+  const today = days[todayIdx];
+  const upcoming = days.filter((d) => d.i > todayIdx && d.planned);
+  const next = upcoming[0];
+  const nextText = next
+    ? `הבא: ${next.i === todayIdx + 1 ? 'מחר, ' : ''}${next.short}' ${fmtDay(next.key)} — ${next.name}`
+    : 'זה היה האחרון לשבוע הזה 💪';
+  const plannedDays = days.filter((d) => d.planned);
+
+  let title, sub;
+  if (!plannedDays.length) {
+    title = [el('b', {}, 'אין עדיין תוכנית שבועית')];
+    sub = 'שבץ אימונים לימים בהגדרות ⚙️ — והעיגולים יתמלאו';
+  } else if (plannedDays.every((d) => d.complete)) {
+    title = [el('b', {}, 'כל האימונים של השבוע בוצעו'), ' 🎉'];
+    sub = 'במוצ״ש מחכה לך הסיכום השבועי';
+  } else if (!today.planned) {
+    title = [el('b', {}, 'היום:'), ' מנוחה 😌'];
+    sub = next ? nextText : 'ובמוצ״ש מחכה לך הסיכום השבועי';
+  } else if (today.complete) {
+    title = [el('b', {}, 'היום:'), ` ${today.name} `, el('span', { class: 'wk-ok' }, '✓ בוצע')];
+    sub = nextText;
+  } else {
+    title = [el('b', {}, 'היום:'), ` ${today.name}`];
+    sub = upcoming.length
+      ? `אחר כך: ${upcoming.slice(0, 3).map((d) => `${d.short}' ${d.name}`).join(' · ')}`
+      : 'האחרון לשבוע הזה — יאללה 💪';
+  }
+  line.replaceChildren(
+    el('div', { class: 'wk-line-title' }, ...title),
+    el('div', { class: 'wk-line-sub' }, sub),
+  );
 }
 
 /* ---------- אתחול ---------- */

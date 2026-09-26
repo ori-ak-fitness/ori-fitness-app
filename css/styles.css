@@ -788,10 +788,64 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
  */
 /* הרצועה יושבת ישר מתחת לכותרת המקטע, ולכן צריך כאן מרווח משלה —
    קודם היא באה אחרי כרטיס שכבר סיפק אותו */
-#hsWeekStrip { gap: 2px; margin-inline: -6px; margin-top: 2px; }
 #hsCardioCard { margin-top: 10px; }
-#hsWeekStrip .day-letter { font-size: 1.8rem; }
-#hsWeekStrip .day-plan { font-size: .72rem; }
+
+/* ---------- השבוע במסך הבית: עיגולים + שורה (dashboard.js) ----------
+   בלי שמות בתוך העיגולים — הצבע והאייקון אומרים מה המצב, והשם
+   המלא יושב בשורה מתחת. ירוק = בוצע, טורקיז = היום/מתוכנן, אפור =
+   מנוחה. יום שעבר בלי אימון: קו מקווקו, אף פעם לא אדום. */
+.wk-strip {
+  display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px;
+  margin-top: 2px;
+}
+.wk-day { display: flex; flex-direction: column; align-items: center; gap: 5px; min-width: 0; }
+.wk-letter { font-size: .95rem; font-weight: 600; color: var(--text-dim); line-height: 1; }
+.wk-date { font-size: .8rem; color: var(--text-faint); font-variant-numeric: tabular-nums; line-height: 1; }
+.wk-day.is-today .wk-letter,
+.wk-day.is-today .wk-date { color: var(--gold-text); font-weight: 700; }
+
+.wk-dot {
+  position: relative; box-sizing: border-box;
+  width: 48px; height: 48px; max-width: 100%; border-radius: 50%;
+  display: grid; place-items: center;
+  background: var(--bg-elev); border: 2px solid var(--line-neutral); color: var(--text-faint);
+}
+.wk-ico {
+  width: 24px; height: 24px; fill: none; stroke: currentColor;
+  stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round;
+}
+.wk-dash { font-size: 1.1rem; line-height: 1; }
+.wk-dot.is-planned { border-color: var(--gold); color: var(--gold-text); }
+.wk-dot.is-now { background: var(--gold); border-color: var(--gold); color: var(--gold-ink); }
+.wk-dot.is-done { background: var(--ok); border-color: var(--ok); color: #fff; }
+.wk-dot.is-done .wk-ico { stroke-width: 2.8; }
+.wk-dot.is-missed { border-style: dashed; color: var(--text-faint); opacity: .75; }
+.wk-dot.is-today-rest { border-color: var(--gold); color: var(--gold-text); }
+/* היום שכבר בוצע: הירוק נשאר, וטבעת טורקיז מסביב אומרת "זה היום" */
+.wk-day.is-today .wk-dot.is-done { box-shadow: 0 0 0 3px var(--bg), 0 0 0 5px var(--gold); }
+
+/* יום עם כוח וגם אירובי — תג קטן בפינה. חלול = החלק הזה עוד לא בוצע */
+.wk-badge {
+  position: absolute; inset-block-end: -4px; inset-inline-start: -4px;
+  width: 20px; height: 20px; border-radius: 50%;
+  display: grid; place-items: center;
+  background: var(--protein); color: #fff; border: 2px solid var(--bg);
+}
+.wk-badge .wk-ico { width: 12px; height: 12px; stroke-width: 2.6; }
+.wk-badge.is-hollow { background: var(--bg-elev); color: var(--protein); border-color: var(--protein); }
+
+.wk-line {
+  margin-top: 14px; padding: 11px 14px;
+  background: var(--bg-elev); border: 1px solid var(--line); border-radius: var(--r-md);
+  box-shadow: 0 1px 2px var(--shadow-soft), 0 8px 20px -12px var(--shadow-soft);
+}
+.wk-line:empty { display: none; }
+.wk-line-title { font-size: .95rem; }
+.wk-line-title b { font-weight: 700; }
+.wk-line-sub { font-size: .82rem; color: var(--text-dim); margin-top: 3px; }
+/* ירוק הוואטסאפ עצמו חלש מדי כטקסט על קרם — מערבבים אותו עם צבע הטקסט,
+   כך שבבהיר הוא מתכהה ובלילה מתבהר, בלי כלל נפרד לכל ערכה */
+.wk-ok { color: color-mix(in srgb, var(--ok) 55%, var(--text)); font-weight: 700; font-size: .85rem; }
 .day-chip {
   position: relative; aspect-ratio: 1;
   /*
