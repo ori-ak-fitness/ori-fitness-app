@@ -366,6 +366,17 @@ async function refreshFromCloud() {
   await closeWizardIfDone();
 }
 
+/*
+ * "האימון של היום בוצע" = כל אימון כוח שנשמר באותו יום. פעם זה דרש את
+ * התוכנית המשובצת בדיוק, ואז אימון חופשי, תוכנית אחרת או יום בלי שיבוץ
+ * לא סומנו בכלל — אורי התאמן ולא ראה שום "בוצע". מחזיר את האימון עצמו
+ * (האחרון באותו יום), כדי שהכרטיס יוכל להראות מה נעשה, או null.
+ */
+async function strengthWorkoutOn(date) {
+  const workouts = await getAllWorkouts();   // ממוין מהחדש לישן
+  return workouts.find((w) => w.date === date && (w.kind ?? 'strength') === 'strength') ?? null;
+}
+
 /* ---------- אתחול ---------- */
 
 async function main() {
@@ -430,15 +441,8 @@ async function main() {
       if (!hasActiveWorkout()) await startWorkout(routine);
     },
     onUpdate: () => { if (currentScreen === 'home') renderStats(); },
-    isDoneToday: async (routineId) => {
-      const workouts = await getAllWorkouts();
-      const today = dateKey();
-      return workouts.some((w) => w.date === today && w.routineId === routineId);
-    },
-    isDoneOnDate: async (routineId, date) => {
-      const workouts = await getAllWorkouts();
-      return workouts.some((w) => w.date === date && w.routineId === routineId);
-    },
+    isDoneToday: () => strengthWorkoutOn(dateKey()),
+    isDoneOnDate: (_routineId, date) => strengthWorkoutOn(date),
   });
   initCardio({ onUpdate: () => { renderStats(); renderHistory(); } });
   await renderCardio();
@@ -455,11 +459,7 @@ async function main() {
     getWeightEntries,
     getRoutines,
     getSchedule,
-    isDoneToday: async (routineId) => {
-      const workouts = await getAllWorkouts();
-      const today = dateKey();
-      return workouts.some((w) => w.date === today && w.routineId === routineId);
-    },
+    isDoneToday: () => strengthWorkoutOn(dateKey()),
     startWorkout: async (routine) => {
       showScreen('workout');
       if (!hasActiveWorkout()) await startWorkout(routine);

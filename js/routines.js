@@ -6,6 +6,7 @@
 import * as db from './db.js';
 import {
   $, el, toast, openSheet, closeSheet, confirmSheet, heCount, guard, keepScroll, dateKey, shiftDateKey,
+  formatDurationHe,
 } from './ui.js';
 import { getCardioSchedule, getCardioTemplates } from './cardio.js';
 
@@ -116,13 +117,42 @@ export async function renderPlan() {
   renderRoutineList(routines, schedule);
 }
 
+/** "בוצע!" + מה נעשה בפועל: "חזה וכתפיים · 52 דק' · 18 סטים" */
+function doneBlock(workout, { withName = true } = {}) {
+  const parts = [
+    withName ? (workout.routineName || 'אימון חופשי') : null,
+    workout.durationSec ? formatDurationHe(workout.durationSec) : null,
+    workout.totalSets ? heCount(workout.totalSets, 'סט', 'סטים') : null,
+  ].filter(Boolean);
+  return [
+    el('div', { class: 'today-done-badge' }, 'האימון של היום בוצע!', checkIcon('today-done-icon')),
+    el('div', { class: 'today-done-sub' }, parts.join(' · ')),
+  ];
+}
+
 async function renderTodayCard(routine, today, allRoutines = []) {
   const host = $('#todayCard');
+  // כל אימון כוח שנשמר היום נחשב — גם חופשי, גם תוכנית אחרת (ראה app.js)
+  const doneWorkout = await onCheckDoneToday?.() ?? null;
+
+  // יום בלי שיבוץ שכבר התאמנת בו — לא מציעים שוב "איזה אימון היום?"
+  if (!routine && doneWorkout) {
+    host.replaceChildren(
+      el('div', { class: 'today-day' }, `היום · יום ${DAY_NAMES[today]}`),
+      el('h2', { class: 'today-name' }, doneWorkout.routineName || 'אימון חופשי'),
+      ...doneBlock(doneWorkout, { withName: false }),
+      el('button', {
+        class: 'btn btn-ghost btn-block', style: 'margin-top:9px',
+        onclick: () => onStart?.(null),
+      }, 'עוד אימון'),
+    );
+    return;
+  }
 
   // יום עם אימון משובץ — כפתור אחד גדול, והתרגילים גלויים מראש.
   // אם כבר בוצע היום בפועל — לא דוחפים להתחיל אותו שוב, מציגים "בוצע"
   if (routine) {
-    const done = await onCheckDoneToday?.(routine.id);
+    const done = doneWorkout;
     host.replaceChildren(
       el('div', { class: 'today-day' }, `היום · יום ${DAY_NAMES[today]}`),
       el('h2', { class: 'today-name' }, routine.name),
@@ -133,16 +163,16 @@ async function renderTodayCard(routine, today, allRoutines = []) {
               el('span', { class: 'te-target' }, `${e.sets}×${e.reps || '—'}`))))
         : el('div', { class: 'today-sub' }, 'התוכנית ריקה — אפשר להוסיף תרגילים תוך כדי'),
       // בוצע כבר היום — לא נותנים אפשרות להתחיל את אותו אימון שוב, רק תגית סטטוס
-      done
-        ? el('div', { class: 'today-done-badge' }, 'בוצע!', checkIcon('today-done-icon'))
-        : el('button', {
+      ...(done
+        ? doneBlock(done)
+        : [el('button', {
             class: 'btn btn-primary btn-xl',
             onclick: () => onStart?.(routine),
-          }, `התחל ${routine.name}`),
+          }, `התחל ${routine.name}`)]),
       el('button', {
         class: 'btn btn-ghost btn-block', style: 'margin-top:9px',
         onclick: () => onStart?.(null),
-      }, 'אימון חופשי במקום'),
+      }, done ? 'עוד אימון' : 'אימון חופשי במקום'),
     );
     return;
   }
@@ -193,8 +223,10 @@ export async function renderWeekStrip(routines, schedule, today, hostId = 'weekS
     const routine = schedule[i] ? routines.find((r) => r.id === schedule[i]) : null;
     const cardio = cardioSchedule?.[i] ? cardioTemplates?.find((c) => c.id === cardioSchedule[i]) : null;
     const dayKey = shiftDateKey(weekStart, i);
-    const done = routine && dayKey <= todayKey ? !!(await onCheckDoneOnDate?.(routine.id, dayKey)) : false;
-    return { short, i, routine, cardio, done };
+    // גם יום בלי שיבוץ שהתאמנת בו נצבע "בוצע", עם שם מה שעשית במקום "מנוחה"
+    const doneWorkout = dayKey <= todayKey ? (await onCheckDoneOnDate?.(routine?.id, dayKey) ?? null) : null;
+    const extra = !routine && doneWorkout ? { name: doneWorkout.routineName || 'אימון' } : null;
+    return { short, i, routine: routine ?? extra, cardio, done: !!doneWorkout };
   }));
 
   /*

@@ -289,7 +289,9 @@ async function processUser(userDoc, now, addSent) {
     const schedule = Array.isArray(bySettingKey.weekSchedule) ? bySettingKey.weekSchedule : [];
     const routineId = schedule[now.weekday];
     if (routineId) {
-      const doneToday = workouts.some((w) => w?.date === now.dateKey && w?.routineId === routineId);
+      // כל אימון כוח היום נחשב, כמו באפליקציה — גם חופשי או תוכנית אחרת.
+      // אחרת מי שעשה אימון חופשי קיבל "עוד לא התאמנת" אחרי שכבר התאמן
+      const doneToday = workouts.some((w) => w?.date === now.dateKey && (w?.kind ?? 'strength') === 'strength');
       if (!doneToday) {
         const ok = await send(uid, subscriptions, {
           title: 'האימון של היום', body: `יום ${DAY_NAMES[now.weekday]} — עוד לא סימנת שהתאמנת היום.`, url: APP_URL,

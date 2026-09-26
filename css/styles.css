@@ -736,6 +736,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
   font-weight: 800; font-size: 1.08rem;
 }
 .today-done-icon { width: 20px; height: 20px; flex: none; }
+.today-done-sub { text-align: center; font-size: .85rem; color: var(--text-dim); margin-top: 8px; }
 .today-done-icon polyline {
   fill: none; stroke: #fff; stroke-width: 3.4;
   stroke-linecap: round; stroke-linejoin: round;
