@@ -20,6 +20,7 @@ import { initProgress, renderProgress } from './progress.js';
 import { initBodyWeight, renderBodyWeight, invalidateWeightCache, getWeightEntries } from './bodyweight.js';
 import { initReminders, renderReminders, maybeShowPushIntro } from './reminders.js';
 import { syncPushSubscription } from './push.js';
+import { initWeeklyRecap, renderWeeklyRecapCard } from './weekly.js';
 import { renderChallengeWidget, invalidateChallengeCache } from './challenge.js';
 import { initRoutines, renderPlan, invalidateRoutinesCache, getRoutines, getSchedule } from './routines.js';
 import { initMealPlan, invalidatePlanCache } from './mealplan.js';
@@ -66,7 +67,7 @@ function showScreen(name, fromHistory = false, slideFrom = null) {
   window.scrollTo({ top: 0 });
 
   // רענון תוכן שתלוי בנתונים ממסכים אחרים
-  if (name === 'home') { renderStats(); renderGreeting(); renderChallengeWidget(); }
+  if (name === 'home') { renderStats(); renderGreeting(); renderChallengeWidget(); renderWeeklyRecapCard(); }
   if (name === 'workout' && !hasActiveWorkout()) { renderPlan(); renderCardio(); }
   if (name === 'nutrition') { renderNutrition(); }
   if (name === 'progress') { renderProgress(); renderBodyWeight(); }
@@ -184,6 +185,7 @@ async function checkDayRollover() {
   if (currentScreen === 'nutrition') await renderNutrition();
   if (currentScreen === 'progress') { await renderProgress(); await renderBodyWeight(); }
   await renderReminders();
+  await renderWeeklyRecapCard();
 }
 
 function initDayWatcher() {
@@ -359,6 +361,7 @@ async function refreshFromCloud() {
   await renderBodyWeight();
   await renderProgress();
   await renderReminders(); // סנכרון ממכשיר אחר יכול לסגור תזכורת (למשל שקילה) - לא לחכות למחר
+  await renderWeeklyRecapCard();
   if (currentScreen === 'settings') await renderSettings();
   await closeWizardIfDone();
 }
@@ -493,10 +496,16 @@ async function main() {
     },
   });
 
+  // נקרא לפני initNav, שמחליף את ה-hash ל-#home
+  const openedFromRecapLink = location.hash === '#recap';
+
   initNav();
   initDayWatcher();
 
-  if (await shouldRunWizard()) openWizard();
+  const wizardRuns = await shouldRunWizard();
+  if (wizardRuns) openWizard();
+  initWeeklyRecap({ openedFromLink: openedFromRecapLink && !wizardRuns });
+  await renderWeeklyRecapCard();
 
   /*
    * הסנכרון עולה אחרון ובלי await לפניו: הוא תלוי ברשת, ואסור שהוא

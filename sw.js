@@ -3,7 +3,7 @@
    העלה את CACHE_VERSION בכל שחרור גרסה כדי לרענן קבצים.
    =================================================================== */
 
-const CACHE_VERSION = 'ori-fitness-v107';
+const CACHE_VERSION = 'ori-fitness-v108';
 
 const APP_SHELL = [
   './',
@@ -37,6 +37,7 @@ const APP_SHELL = [
   './js/snacks.js',
   './js/reminders.js',
   './js/push.js',
+  './js/weekly.js',
   './privacy.html',
   './terms.html',
   './icons/logo.svg',
@@ -201,7 +202,12 @@ self.addEventListener('notificationclick', (event) => {
     for (const client of clientsList) {
       // האפליקציה רצה ב-.../index.html#home, ולכן השוואה מדויקת לא תפסה אף פעם
       const norm = (u) => u.split('#')[0].replace(/index\.html$/, '');
-      if (norm(client.url) === norm(targetUrl) && 'focus' in client) return client.focus();
+      if (norm(client.url) === norm(targetUrl) && 'focus' in client) {
+        // חלון פתוח רק מקבל פוקוס ולא נטען מחדש — אז את הסיכום השבועי
+        // פותחים בהודעה אליו, לא דרך הכתובת
+        if (target.hash === '#recap') client.postMessage({ type: 'open-recap' });
+        return client.focus();
+      }
     }
     if (self.clients.openWindow) return self.clients.openWindow(targetUrl);
   })());

@@ -1562,6 +1562,66 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
   font-size: 1rem; cursor: pointer; padding: 4px 2px; line-height: 1;
 }
 
+/* ---------- הסיכום השבועי (weekly.js) ---------- */
+
+/* כרטיס בראש הבית, רק ממוצ"ש עד שלישי. גוון טורקיז עדין ולא מילוי מלא:
+   הכפתור הראשי של המסך ("התחל אימון") כבר טורקיז, ושניים צועקים יחד */
+.wr-card {
+  position: relative; margin-bottom: 12px;
+  background:
+    radial-gradient(120% 140% at 100% 0%, rgba(47, 146, 152, .16), transparent 60%),
+    var(--bg-elev);
+  border: 1px solid rgba(47, 146, 152, .35);
+  border-radius: var(--r-lg);
+  box-shadow: 0 1px 2px var(--shadow-soft), 0 8px 20px -12px var(--shadow-soft);
+}
+.wr-card-main {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 3px;
+  width: 100%; padding: 14px 16px 13px; padding-inline-end: 44px;
+  background: none; border: none; color: var(--text); text-align: start;
+  font-family: inherit; cursor: pointer; transition: transform .12s ease;
+}
+.wr-card-main:active { transform: scale(.98); }
+.wr-card-kicker { font-size: .74rem; font-weight: 700; color: var(--gold-text); }
+.wr-card-title { font-size: 1.2rem; font-weight: 700; letter-spacing: -.01em; }
+.wr-card-hint { font-size: .82rem; color: var(--text-dim); }
+.wr-card-cta { margin-top: 6px; font-size: .84rem; font-weight: 700; color: var(--gold-text); }
+.wr-card-x { position: absolute; inset-block-start: 10px; inset-inline-end: 10px; padding: 6px; }
+
+/* הגיליון עצמו */
+.wr-hero { text-align: center; padding: 4px 0 18px; }
+.wr-range { font-size: .8rem; font-weight: 600; color: var(--text-dim); }
+.wr-big {
+  font-size: 3.6rem; font-weight: 700; line-height: 1.05; letter-spacing: -.02em;
+  color: var(--gold-text); font-variant-numeric: tabular-nums; margin-top: 6px;
+}
+.wr-big-label { font-size: 1rem; font-weight: 600; }
+.wr-split { font-size: .8rem; color: var(--text-dim); margin-top: 3px; }
+.wr-tier { font-size: 1rem; font-weight: 700; margin-top: 12px; text-wrap: balance; }
+
+.wr-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 18px; }
+.wr-stat {
+  min-width: 0; text-align: center;
+  background: var(--bg-elev-2); border-radius: var(--r-md); padding: 12px 8px;
+}
+.wr-stat b {
+  display: block; font-size: 1.2rem; font-weight: 700; font-variant-numeric: tabular-nums;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.wr-stat span { font-size: .74rem; color: var(--text-dim); }
+
+.wr-moments { margin-bottom: 18px; }
+.wr-moment {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 11px 2px; border-bottom: 1px solid var(--line);
+}
+.wr-moment:last-child { border-bottom: none; }
+.wr-moment-ico { font-size: 1.3rem; line-height: 1.2; flex: none; width: 1.5em; text-align: center; }
+.wr-moment-main { min-width: 0; }
+.wr-moment-text { font-size: .93rem; font-weight: 600; }
+.wr-moment-sub { font-size: .8rem; color: var(--text-dim); margin-top: 2px; overflow-wrap: anywhere; }
+.wr-note { font-size: .72rem; color: var(--text-faint); text-align: center; margin: 10px 0 0; }
+
 /* ---------- נשנושים ---------- */
 
 /* גובה קבוע ולא רשימה שנמתחת: הגיליון נשאר באותו גודל בזמן שמסננים

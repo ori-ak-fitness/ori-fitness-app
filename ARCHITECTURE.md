@@ -47,7 +47,7 @@
 
 | מסך | קובץ ראשי | קבצי עזר |
 |---|---|---|
-| בית | `dashboard.js` | `challenge.js`, `badges.js` |
+| בית | `dashboard.js` | `challenge.js`, `badges.js`, `weekly.js` (סיכום שבועי, מוצ"ש–שלישי) |
 | אימון | `workouts.js` | `routines.js`, `cardio.js`, `records.js` |
 | תזונה | `nutrition.js` | `mealplan.js` |
 | התקדמות | `progress.js` | `bodyweight.js`, `charts.js` |

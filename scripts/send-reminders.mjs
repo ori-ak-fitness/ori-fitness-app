@@ -35,6 +35,7 @@ const IS_MANUAL_TEST = process.env.GITHUB_EVENT_NAME === 'workflow_dispatch';
 
 const DEFAULT_WEIGH_IN_HOUR = 5;
 const DEFAULT_WORKOUT_HOUR = 18;
+const WEEKLY_RECAP_HOUR = 20;
 
 webpush.setVapidDetails(`mailto:${process.env.VAPID_CONTACT_EMAIL || 'noreply@example.com'}`, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
 
@@ -63,6 +64,12 @@ function sundayOf(dateKey) {
   const [y, m, d] = dateKey.split('-').map(Number);
   const date = new Date(Date.UTC(y, m - 1, d));
   date.setUTCDate(date.getUTCDate() - date.getUTCDay());
+  return date.toISOString().slice(0, 10);
+}
+
+function shiftKey(dateKey, days) {
+  const [y, m, d] = dateKey.split('-').map(Number);
+  const date = new Date(Date.UTC(y, m - 1, d + days));
   return date.toISOString().slice(0, 10);
 }
 
@@ -253,6 +260,26 @@ async function processUser(userDoc, now, addSent) {
         title: 'שקילה שבועית', body: 'יום שלישי — עוד לא נשקלת השבוע.', url: APP_URL,
       });
       if (ok) { await markSent(uid, 'weighIn', now.dateKey); addSent(1); }
+    }
+  }
+
+  // ---- הסיכום השבועי: מוצאי שבת, 20:00 — אותה שעה שבה הכרטיס מופיע
+  // באפליקציה (RECAP_HOUR ב-weekly.js). מי שלא התאמן כבר חודש לא מקבל
+  // "השבוע היה שקט" כל שבוע — זה היה הופך לנדנוד ----
+  if (now.weekday === 6 && now.hour === WEEKLY_RECAP_HOUR && pushLog.weekly !== now.dateKey) {
+    const sunday = sundayOf(now.dateKey);
+    const count = workouts.filter((w) => w?.date >= sunday && w?.date <= now.dateKey).length;
+    const monthAgo = shiftKey(now.dateKey, -28);
+    const activeLately = count > 0 || workouts.some((w) => w?.date >= monthAgo);
+    if (activeLately) {
+      const ok = await send(uid, subscriptions, {
+        title: 'הסיכום השבועי שלך 📊',
+        body: count === 0 ? 'שבוע של מנוחה — הסיכום וההצצה לשבוע הבא מחכים לך.'
+          : count === 1 ? 'אימון אחד השבוע. בוא תראה איך היה השבוע.'
+          : `${count} אימונים השבוע 💪 בוא תראה איך היה השבוע.`,
+        url: APP_URL + '#recap',
+      });
+      if (ok) { await markSent(uid, 'weekly', now.dateKey); addSent(1); }
     }
   }
 
