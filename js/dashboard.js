@@ -347,8 +347,18 @@ export async function renderStats() {
   $('#homeWorkoutsSection').classList.toggle('hidden', !showWorkouts);
   $('#homeNutritionSection').classList.toggle('hidden', !showNutrition);
 
+  const workouts = await getAllWorkouts();
+
+  /* אחרי שהתאמנת היום הכפתור הגדול כבר לא קורא "התחל אימון" — הוא
+     אומר שזה בוצע, בשקט (בלי המילוי הזוהר של כפתור ראשי). לחיצה עדיין
+     מובילה למסך האימון, למי שרוצה עוד אימון. */
+  const trainedToday = workouts.some((w) => w.date === dateKey() && (w.kind ?? 'strength') === 'strength');
+  const homeBtn = $('#homeWorkoutBtn');
+  homeBtn.classList.toggle('btn-primary', !trainedToday);
+  homeBtn.classList.toggle('is-done-today', trainedToday);
+  homeBtn.textContent = trainedToday ? '✓ האימון של היום בוצע' : 'התחל אימון';
+
   if (showWorkouts) {
-    const workouts = await getAllWorkouts();
 
     // 7 הימים האחרונים כולל היום
     const from = shiftDateKey(dateKey(), -6);

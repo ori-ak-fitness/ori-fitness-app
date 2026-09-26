@@ -67,6 +67,8 @@
   --mark:      var(--gold);
   --mark-text: var(--gold-deep);
   --mark-ink:  var(--gold-ink);
+  --btn-glow-1: rgba(29, 107, 111, .45);
+  --btn-glow-2: rgba(29, 107, 111, .3);
 
   /* מסנן לפי הערכה - שדות טופס, תפריטים נפתחים וגלילה נצבעים כמו הערכה */
   color-scheme: light;
@@ -129,10 +131,21 @@
   --mark:      var(--accent);
   --mark-text: var(--accent);
   --mark-ink:  var(--accent-ink);
+  /* בלילה אין טורקיז בכלל — כל מה שטורקיז ביום הופך לקרם של האפליקציה
+     (בקשת אורי). --gold נדרס כאן ולא בכל כלל בנפרד, כך שגם גרפים,
+     תגיות ופסי התקדמות עוברים יחד */
+  --gold:      var(--accent);
+  --gold-deep: #d6c6a3;
+  --gold-ink:  var(--accent-ink);
+  --btn-glow-1: rgba(0, 0, 0, .38);
+  --btn-glow-2: rgba(0, 0, 0, .28);
   color-scheme: dark;
 
-  --ok:            #25d366;
-  --ok-soft:       rgba(37, 211, 102, .22);
+  /* ירוק הוואטסאפ המלא מסנוור על רקע כהה — גוון שקט יותר, בלילה בלבד */
+
+  --ok:            #22a45a;
+
+  --ok-soft:       rgba(34, 164, 90, .2);
   --warn:          #ffc247;
   --danger:        #ff4d5e;
 
@@ -180,10 +193,21 @@
     --mark:      var(--accent);
     --mark-text: var(--accent);
     --mark-ink:  var(--accent-ink);
+    /* בלילה אין טורקיז בכלל — כל מה שטורקיז ביום הופך לקרם של האפליקציה
+       (בקשת אורי). --gold נדרס כאן ולא בכל כלל בנפרד, כך שגם גרפים,
+       תגיות ופסי התקדמות עוברים יחד */
+    --gold:      var(--accent);
+    --gold-deep: #d6c6a3;
+    --gold-ink:  var(--accent-ink);
+    --btn-glow-1: rgba(0, 0, 0, .38);
+    --btn-glow-2: rgba(0, 0, 0, .28);
     color-scheme: dark;
 
-    --ok:            #25d366;
-    --ok-soft:       rgba(37, 211, 102, .22);
+    /* ירוק הוואטסאפ המלא מסנוור על רקע כהה — גוון שקט יותר, בלילה בלבד */
+
+    --ok:            #22a45a;
+
+    --ok-soft:       rgba(34, 164, 90, .2);
     --warn:          #ffc247;
     --danger:        #ff4d5e;
 
@@ -427,7 +451,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .btn-primary {
   background: linear-gradient(155deg, rgba(255,255,255,.3), rgba(0,0,0,.08)), linear-gradient(150deg, var(--btn-fill-a), var(--btn-fill-b));
   color: var(--btn-ink);
-  box-shadow: 0 8px 18px -6px rgba(29, 107, 111, .45), 0 2px 4px rgba(29, 107, 111, .3);
+  box-shadow: 0 8px 18px -6px var(--btn-glow-1), 0 2px 4px var(--btn-glow-2);
   letter-spacing: .01em;
 }
 .btn-secondary { background: var(--bg-elev-2); border: 1px solid var(--line); }
@@ -439,6 +463,11 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .btn-sm { padding: 8px 13px; font-size: .85rem; border-radius: var(--r-sm); }
 .btn-xl { width: 100%; padding: 17px; font-size: 1.08rem; border-radius: var(--r-lg); margin-top: 4px; }
 .btn-block { width: 100%; }
+/* "התחל אימון" בבית אחרי שכבר התאמנת היום — סטטוס, לא קריאה לפעולה */
+.btn.is-done-today {
+  background: var(--ok-soft); color: color-mix(in srgb, var(--ok) 55%, var(--text));
+  border: 1px solid color-mix(in srgb, var(--ok) 45%, transparent); box-shadow: none;
+}
 .icon-btn {
   background: transparent; border: none; color: var(--text-dim);
   font-size: 1.25rem; width: 38px; height: 38px; border-radius: 50%;
@@ -487,7 +516,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 /* ברירת מחדל כשאין עדיין תמונות: רקע גיאומטרי בצבעי האפליקציה */
 .quote-card:not(.has-photo) .quote-photo {
   background:
-    radial-gradient(120% 90% at 85% 0%, rgba(47, 146, 152, .3), transparent 62%),
+    radial-gradient(120% 90% at 85% 0%, color-mix(in srgb, var(--gold) 30%, transparent), transparent 62%),
     repeating-linear-gradient(115deg, rgba(255,255,255,.04) 0 2px, transparent 2px 16px),
     linear-gradient(160deg, #2f2a22, #1a1712);
 }
@@ -588,7 +617,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .goal-num {
   flex: none; width: 30px; height: 30px; border-radius: 10px;
   background: linear-gradient(155deg, rgba(255,255,255,.35), rgba(0,0,0,.06)), linear-gradient(150deg, var(--btn-fill-a), var(--btn-fill-b));
-  color: var(--btn-ink); box-shadow: 0 2px 6px rgba(29, 107, 111, .35);
+  color: var(--btn-ink); box-shadow: 0 2px 6px var(--btn-glow-2);
   display: grid; place-items: center; font-size: .82rem; font-weight: 800;
 }
 .goal-text { font-size: .94rem; font-weight: 600; }
@@ -1574,7 +1603,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 }
 .li-tag {
   display: inline-block; margin-inline-start: 7px; vertical-align: 1px;
-  background: rgba(29, 107, 111, .1); border: 1px solid rgba(29, 107, 111, .35); color: var(--gold-text);
+  background: color-mix(in srgb, var(--gold-deep) 10%, transparent); border: 1px solid color-mix(in srgb, var(--gold-deep) 35%, transparent); color: var(--gold-text);
   border-radius: 999px; padding: 1px 8px;
   font-size: .68rem; font-weight: 700; white-space: nowrap;
 }
