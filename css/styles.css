@@ -880,6 +880,14 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .wk-badge .wk-ico { width: 12px; height: 12px; stroke-width: 2.6; }
 .wk-badge.is-hollow { background: var(--bg-elev); color: var(--protein); border-color: var(--protein); }
 
+/* האימוג'י של סוג האירובי — בעיגול עצמו ובתג הפינה */
+.wk-emoji { font-size: 1.45rem; line-height: 1; }
+/* בתג: רקע בהיר ניטרלי ולא כחול, שהאימוג'י הצבעוני ייראה */
+.wk-badge:has(.wk-emoji) { width: 22px; height: 22px; background: var(--bg-elev); border-color: var(--bg); box-shadow: 0 0 0 1px var(--line-neutral); }
+.wk-badge .wk-emoji { font-size: .78rem; }
+/* עוד לא בוצע באותו יום (הכוח כן) — אפור ושקוף, כמו "חלול" */
+.wk-badge.is-hollow .wk-emoji { filter: grayscale(1); opacity: .5; }
+
 .wk-line {
   margin-top: 14px; padding: 11px 14px;
   background: var(--bg-elev); border: 1px solid var(--line); border-radius: var(--r-md);

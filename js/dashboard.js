@@ -475,17 +475,22 @@ export async function renderHomeWeek(workouts) {
     else if (d.isPast) state = 'is-missed';
     else state = 'is-planned';
 
-    // האייקון הראשי: וי כשבוצע כוח, דופק כשבוצע רק אירובי, אחרת לפי התוכנית
+    // אירובי מקבל את האימוג'י של הסוג שלו (🏃 ריצה, 🚴 אופניים, 🏊 שחייה...)
+    // ולא אייקון כללי — כך רואים בעיגול איזה אימון זה, לא רק "אירובי"
+    const cardioEmoji = d.cardio?.icon || d.logged.find((w) => w.kind === 'cardio')?.icon || '🏃';
+    const emoji = () => el('span', { class: 'wk-emoji', 'aria-hidden': 'true' }, cardioEmoji);
+
+    // האייקון הראשי: וי כשבוצע כוח, האימוג'י כשבוצע רק אירובי, אחרת לפי התוכנית
     let icon;
-    if (d.done) icon = d.strengthDone || !d.cardioDone ? ICONS.check() : ICONS.cardio();
+    if (d.done) icon = d.strengthDone || !d.cardioDone ? ICONS.check() : emoji();
     else if (d.routine) icon = ICONS.strength();
-    else if (d.cardio) icon = ICONS.cardio();
+    else if (d.cardio) icon = emoji();
     else icon = el('span', { class: 'wk-dash' }, '–');
 
-    // תג פינה: יום עם כוח וגם אירובי. מלא = בוצע/מתוכנן, חלול = עוד חסר
+    // תג פינה: יום עם כוח וגם אירובי. מלא = בוצע/מתוכנן, אפור = עוד חסר
     let badge = null;
     if (d.routine && d.cardio && !(d.done && !d.strengthDone)) {
-      badge = el('span', { class: `wk-badge${d.done && !d.cardioDone ? ' is-hollow' : ''}` }, ICONS.cardio());
+      badge = el('span', { class: `wk-badge${d.done && !d.cardioDone ? ' is-hollow' : ''}` }, emoji());
     } else if (d.done && d.cardioDone && !d.strengthDone && d.routine) {
       badge = el('span', { class: 'wk-badge is-hollow' }, ICONS.strength());
     }
