@@ -143,7 +143,7 @@
 
   --ok:            #25d366;
 
-  --ok-soft:       rgba(37, 211, 102, .22);
+  --ok-soft:       rgba(37, 211, 102, .18);
   --warn:          #ffc247;
   --danger:        #ff4d5e;
 
@@ -203,7 +203,7 @@
 
     --ok:            #25d366;
 
-    --ok-soft:       rgba(37, 211, 102, .22);
+    --ok-soft:       rgba(37, 211, 102, .18);
     --warn:          #ffc247;
     --danger:        #ff4d5e;
 
@@ -461,8 +461,8 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .btn-block { width: 100%; }
 /* "התחל אימון" בבית אחרי שכבר התאמנת היום — סטטוס, לא קריאה לפעולה */
 .btn.is-done-today {
-  background: var(--ok-soft); color: color-mix(in srgb, var(--ok) 55%, var(--text));
-  border: 1px solid color-mix(in srgb, var(--ok) 45%, transparent); box-shadow: none;
+  background: var(--ok); color: #fff;
+  border: 1px solid var(--ok); box-shadow: none;
 }
 .icon-btn {
   background: transparent; border: none; color: var(--text-dim);
@@ -889,9 +889,8 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .wk-line-title { font-size: .95rem; }
 .wk-line-title b { font-weight: 700; }
 .wk-line-sub { font-size: .82rem; color: var(--text-dim); margin-top: 3px; }
-/* ירוק הוואטסאפ עצמו חלש מדי כטקסט על קרם — מערבבים אותו עם צבע הטקסט,
-   כך שבבהיר הוא מתכהה ובלילה מתבהר, בלי כלל נפרד לכל ערכה */
-.wk-ok { color: color-mix(in srgb, var(--ok) 55%, var(--text)); font-weight: 700; font-size: .85rem; }
+/* אותו ירוק בדיוק ביום ובלילה — בקשה מפורשת של אורי, לא לגוון לפי ערכה */
+.wk-ok { color: var(--ok); font-weight: 700; font-size: .85rem; }
 .day-chip {
   position: relative; aspect-ratio: 1;
   /*
@@ -1167,7 +1166,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
   display: grid; place-items: center; font-size: 1.05rem; font-weight: 700;
 }
 .cardio-count {
-  flex: none; background: var(--ok); color: var(--accent-ink);
+  flex: none; background: var(--ok); color: #fff;
   border-radius: 999px; padding: 4px 11px;
   font-weight: 800; font-size: .85rem; font-variant-numeric: tabular-nums;
 }
