@@ -14,7 +14,7 @@ import { getCardioTemplates, openCardioEditor, openCardioScheduleSheet, getCardi
 import { getPlan, openPlanEditor } from './mealplan.js';
 import { goalForDate, openGoalSheet, openCalorieCalculatorSheet, ACTIVITY_LEVELS } from './nutrition.js';
 import {
-  renderGreeting, getWeeklyWorkoutGoal, setWeeklyWorkoutGoal, renderStats,
+  renderGreeting, getWeeklyWorkoutGoal, setWeeklyWorkoutGoal, getWeeklyPlan, renderStats,
   getBuiltinQuotes, getGoals, openGoalsEditor, getPhotos, addPhotos, openLightbox,
   getShowQuoteCard, setShowQuoteCard, renderQuote, renderGoals,
   getShowGoalsCard, setShowGoalsCard, getShowNutritionCard, setShowNutritionCard,
@@ -277,6 +277,33 @@ async function openCloudSheet() {
 /* ---------- יעד אימונים שבועי ---------- */
 
 async function openWeeklyGoalSheet() {
+  // עם שיבוץ — היעד הוא השיבוץ עצמו, ואין מספר נפרד לערוך (אחרת שוב שני
+  // מספרים שלא מסכימים). משנים אותו דרך הימים.
+  const plan = await getWeeklyPlan();
+  if (plan.fromSchedule) {
+    const parts = [
+      plan.strengthDays ? `${plan.strengthDays} כוח` : null,
+      plan.cardioDays ? `${plan.cardioDays} אירובי` : null,
+    ].filter(Boolean).join(' + ');
+    openSheet('יעד אימונים שבועי', el('div', {},
+      el('div', { class: 'wg-auto' },
+        el('b', {}, `${plan.goal} אימונים בשבוע`),
+        el('span', {}, `לפי מה ששיבצת לימים: ${parts}`),
+      ),
+      el('p', { class: 'muted', style: 'margin:14px 0' },
+        'היעד מתעדכן לבד כשמשנים את השיבוץ — כך הבית, הסיכום השבועי וכל השאר תמיד מראים אותו מספר.'),
+      el('button', {
+        class: 'btn btn-secondary btn-block',
+        onclick: () => { closeSheet(); openScheduleSheet(); },
+      }, '📅 שיבוץ אימוני כוח'),
+      el('button', {
+        class: 'btn btn-secondary btn-block', style: 'margin-top:9px',
+        onclick: () => { closeSheet(); openCardioScheduleSheet({ onDone: renderSettings }); },
+      }, '🏃 שיבוץ אירובי'),
+    ));
+    return;
+  }
+
   const current = await getWeeklyWorkoutGoal();
 
   const input = el('input', {
@@ -294,7 +321,8 @@ async function openWeeklyGoalSheet() {
 
   const body = el('div', {},
     el('p', { class: 'muted', style: 'margin-bottom:14px' },
-      'כמה אימונים בשבוע אתה שואף אליהם — מוצג בבית כ"X מתוך Y".'),
+      'כמה אימונים בשבוע אתה שואף אליהם — מוצג בבית כ"X מתוך Y". ' +
+      'ברגע שתשבץ אימונים לימים, היעד יחושב לבד לפי השיבוץ.'),
     el('div', { class: 'field' }, el('label', {}, 'אימונים בשבוע'), input),
     el('button', { class: 'btn btn-primary btn-block', onclick: save }, 'שמור'),
   );
@@ -449,7 +477,10 @@ export async function renderSettings() {
   $('#setPushSub').textContent = !push.isPushSupported()
     ? 'לא נתמך בדפדפן הזה'
     : (await push.hasPushSubscription() ? 'פעילות' : 'כבויות — לחץ להפעיל');
-  $('#setWeeklyGoalSub').textContent = `${weeklyGoal} אימונים בשבוע`;
+  const weekPlan = await getWeeklyPlan();
+  $('#setWeeklyGoalSub').textContent = weekPlan.fromSchedule
+    ? `${weekPlan.goal} אימונים בשבוע · לפי השיבוץ`
+    : `${weeklyGoal} אימונים בשבוע`;
 
   $('#setGoalsSub').textContent = personalGoals.length
     ? heCount(personalGoals.length, 'מטרה', 'מטרות', true)
@@ -480,11 +511,15 @@ export async function renderSettings() {
     ? `${assigned === 1 ? 'יום אחד משובץ' : `${assigned} ימים משובצים`} · ${days}`
     : 'לא שיבצת אימונים לימים';
 
+  // "ריצה (א, ג) · הליכון (ה)" — אותם ימים שבשיבוץ ובעיגולים בבית
+  const cardioSchedule = await getCardioSchedule();
   $('#setCardioSub').textContent = cardio.length
-    ? cardio.map((c) => c.name).join(' · ')
+    ? cardio.map((c) => {
+        const d = cardioSchedule.map((id, i) => (id === c.id ? DAY_SHORT[i] : null)).filter(Boolean);
+        return d.length ? `${c.name} (${d.join(', ')})` : c.name;
+      }).join(' · ')
     : 'לא הגדרת סוגי אירובי';
 
-  const cardioSchedule = await getCardioSchedule();
   const cardioAssigned = cardioSchedule.filter(Boolean).length;
   $('#setCardioScheduleSub').textContent = cardioAssigned
     ? `${cardioAssigned === 1 ? 'יום אחד משובץ' : `${cardioAssigned} ימים משובצים`}`
@@ -596,7 +631,7 @@ export function initSettingsScreen({ onRerun, onCloudRefresh } = {}) {
   $('#setRoutinesBtn').addEventListener('click', guard(openRoutinesListSheet));
   $('#setWeeklyGoalBtn').addEventListener('click', guard(openWeeklyGoalSheet));
   $('#setScheduleBtn').addEventListener('click', guard(openScheduleSheet));
-  $('#setCardioBtn').addEventListener('click', guard(openCardioEditor));
+  $('#setCardioBtn').addEventListener('click', guard(() => openCardioEditor({ onDone: renderSettings })));
   $('#setCardioScheduleBtn').addEventListener('click', guard(() => openCardioScheduleSheet({ onDone: renderSettings })));
   $('#setMealPlanBtn').addEventListener('click', guard(openPlanEditor));
   $('#setGoalBtn').addEventListener('click', guard(openGoalSheet));

@@ -1196,6 +1196,18 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
   position: absolute; inset-block-start: -6px; inset-inline-end: -4px;
   font-size: .72rem; line-height: 1;
 }
+/* בעורך "סוגי אירובי" — אותן אותיות, קצת יותר קטנות כי הן בתוך כרטיס */
+.cs-days-editor { gap: 4px; margin-top: 8px; }
+.cs-days-editor .cs-day { height: 40px; font-size: .92rem; }
+.cs-editor-sub { font-size: .78rem; color: var(--text-dim); margin-top: 6px; }
+
+/* יעד שבועי שנקבע לפי השיבוץ — מספר, ומה הוא מורכב ממנו */
+.wg-auto {
+  display: flex; flex-direction: column; gap: 3px; text-align: center;
+  background: var(--bg-elev-2); border-radius: var(--r-md); padding: 14px;
+}
+.wg-auto b { font-size: 1.25rem; font-weight: 700; }
+.wg-auto span { font-size: .85rem; color: var(--text-dim); }
 .cardio-plus {
   flex: none; width: 30px; height: 30px; border-radius: 50%;
   border: 1px dashed var(--line); color: var(--text-faint);

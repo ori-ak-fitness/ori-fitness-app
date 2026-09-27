@@ -440,7 +440,11 @@ async function main() {
       showScreen('workout');
       if (!hasActiveWorkout()) await startWorkout(routine);
     },
-    onUpdate: () => { if (currentScreen === 'home') renderStats(); },
+    // שינוי שיבוץ משנה גם את היעד השבועי שמוצג בהגדרות — לא רק את הבית
+    onUpdate: () => {
+      if (currentScreen === 'home') renderStats();
+      if (currentScreen === 'settings') renderSettings();
+    },
     isDoneToday: () => strengthWorkoutOn(dateKey()),
     isDoneOnDate: (_routineId, date) => strengthWorkoutOn(date),
   });

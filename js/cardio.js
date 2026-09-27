@@ -56,9 +56,33 @@ export async function getCardioSchedule() {
   return cardioScheduleCache;
 }
 
+/*
+ * "כמה פעמים בשבוע" של כל סוג אירובי = כמה ימים הוא משובץ. פעם אלה היו
+ * שני מספרים נפרדים (יעד 2 בהגדרות, 3 ימים בשיבוץ) והאפליקציה הראתה כל
+ * אחד במקום אחר — אורי ביקש שיהיה מתואם בכל מקום. לכן כל שינוי בשיבוץ
+ * מעדכן גם את weeklyGoal של הסוגים שהשתנו. סוג בלי שום יום משובץ שומר
+ * יעד ישן אם היה לו (אימון "2 בשבוע, מתי שבא") — עד שמשבצים לו ימים.
+ */
 async function setCardioSchedule(schedule) {
+  const before = await getCardioSchedule();
   cardioScheduleCache = schedule;
   await db.setSetting(CARDIO_SCHEDULE_KEY, schedule);
+
+  const count = (arr, id) => arr.filter((x) => x === id).length;
+  for (const t of await getCardioTemplates()) {
+    const days = count(schedule, t.id);
+    // משובץ → היעד תמיד = הימים (גם אם לא השתנה עכשיו, מיישר נתונים ישנים).
+    // הוסרו כל הימים עכשיו → גם היעד יורד ל-0.
+    if ((days > 0 || days !== count(before, t.id)) && num(t.weeklyGoal, 0) !== days) {
+      await saveTemplate({ ...t, weeklyGoal: days });
+    }
+  }
+}
+
+/** היעד השבועי של סוג אירובי — מספר הימים המשובצים, ובלי שיבוץ: היעד שהוגדר */
+export function cardioGoal(t, schedule) {
+  const days = schedule.filter((id) => id === t.id).length;
+  return Math.min(14, days || num(t.weeklyGoal, 0));
 }
 
 /** התבנית המשובצת ליום נתון (ברירת מחדל: היום), או null */
@@ -166,14 +190,14 @@ async function cardioThisWeek() {
  * @returns {Promise<{name:string, icon:string, count:number, goal:number}[]>}
  */
 export async function weeklyCardioSummary() {
-  const [templates, week] = await Promise.all([getCardioTemplates(), cardioThisWeek()]);
+  const [templates, week, schedule] = await Promise.all([getCardioTemplates(), cardioThisWeek(), getCardioSchedule()]);
   return templates
-    .filter((t) => num(t.weeklyGoal, 0) > 0)
+    .filter((t) => cardioGoal(t, schedule) > 0)
     .map((t) => ({
       name: t.name,
       icon: t.icon || '🏃',
       count: week.filter((c) => c.templateId === t.id).length,
-      goal: num(t.weeklyGoal, 0),
+      goal: cardioGoal(t, schedule),
     }));
 }
 
@@ -224,21 +248,21 @@ async function logCardio(template, minutes) {
   onLogged?.();
 
   // רגע חגיגי בדיוק כשמגיעים ליעד השבועי — לא לפני ולא אחרי
-  const goal = Math.min(14, num(template.weeklyGoal, 0));
+  const goal = cardioGoal(template, await getCardioSchedule());
   if (goal > 0) {
     const weekCount = (await cardioThisWeek()).filter((c) => c.templateId === template.id).length;
-    if (weekCount === goal) celebrateWeeklyGoal(template);
+    if (weekCount === goal) celebrateWeeklyGoal(template, goal);
   }
 }
 
-function celebrateWeeklyGoal(template) {
+function celebrateWeeklyGoal(template, goal) {
   const layer = el('div', { class: 'goal-burst' },
     el('div', { class: 'goal-burst-confetti' }),
     el('div', { class: 'goal-burst-card' },
       el('div', { class: 'goal-burst-emoji' }, '🏆'),
       el('div', { class: 'goal-burst-title' }, 'כל הכבוד!'),
       el('div', { class: 'goal-burst-sub' },
-        `השלמת את היעד השבועי ל${template.icon || '🏃'} ${template.name} — ${template.weeklyGoal} מתוך ${template.weeklyGoal}`),
+        `השלמת את היעד השבועי ל${template.icon || '🏃'} ${template.name} — ${goal} מתוך ${goal}`),
     ),
   );
   document.body.append(layer);
@@ -283,7 +307,7 @@ export async function renderCardio() {
   }, '📅');
 
   host.replaceChildren(...templates.map((t) => {
-    const goal = Math.min(14, num(t.weeklyGoal, 0));
+    const goal = cardioGoal(t, schedule);
 
     if (goal > 0) {
       // גם רשומה שכבר נשמרה (או הגיעה מהענן) עם ערך ענק לא תקרוס את מסך הבית
@@ -357,8 +381,11 @@ export async function renderCardio() {
 
 /* ---------- עורך סוגי אירובי ---------- */
 
-export async function openCardioEditor() {
+export async function openCardioEditor({ onDone } = {}) {
   const items = (await getCardioTemplates()).map((t) => ({ ...t }));
+  // טיוטת שיבוץ — נשמרת רק ב"שמור", יחד עם הסוגים. יום אחד = סוג אחד
+  const draftSchedule = [...await getCardioSchedule()];
+  const DAY_LETTERS = ['א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ש'];
 
   const listHost = el('div', { class: 'plan-ex-list' });
 
@@ -383,20 +410,32 @@ export async function openCardioEditor() {
           }),
           el('span', {}, 'דקות כברירת מחדל'),
         ),
-        el('div', { class: 'plan-ex-targets' },
-          el('input', {
-            type: 'number', inputmode: 'numeric', min: '0', max: '14', value: t.weeklyGoal || '',
-            placeholder: '0', 'aria-label': 'יעד שבועי',
-            // תקרה 14, כמו ה-max של השדה: max לא נאכף מהקלדה, וערך ענק היה
-            // קורס את Array.from({length}) בציור, מסנכרן לענן ותוקע את כל המכשירים
-            oninput: (e) => { t.weeklyGoal = Math.min(14, Math.max(0, parseInt(e.target.value, 10) || 0)); },
-          }),
-          el('span', {}, 'פעמים בשבוע (0 = בלי יעד)'),
-        ),
+        // באיזה ימים — ומספר הימים הוא גם "כמה פעמים בשבוע". אין שדה מספר
+        // נפרד: שני מספרים שלא מסכימים זה בדיוק הבלאגן שאורי ביקש לסגור
+        el('div', { class: 'cs-days cs-days-editor' }, ...DAY_LETTERS.map((letter, d) => {
+          const on = draftSchedule[d] === t.id;
+          const other = !on && draftSchedule[d] ? items.find((x) => x.id === draftSchedule[d]) : null;
+          return el('button', {
+            type: 'button',
+            class: `cs-day${on ? ' is-on' : ''}`,
+            'aria-pressed': String(on),
+            'aria-label': `${t.name || 'אירובי'} ביום ${DAY_NAMES[d]}${other ? ` (עכשיו: ${other.name})` : ''}`,
+            onclick: () => { draftSchedule[d] = on ? null : t.id; renderList(); },
+          }, letter, other ? el('span', { class: 'cs-other', 'aria-hidden': 'true' }, other.icon || '🏃') : null);
+        })),
+        el('div', { class: 'cs-editor-sub' }, (() => {
+          const days = draftSchedule.filter((id) => id === t.id).length;
+          if (days) return days === 1 ? 'פעם אחת בשבוע' : `${days} פעמים בשבוע`;
+          return num(t.weeklyGoal, 0) ? `${t.weeklyGoal} פעמים בשבוע, בלי ימים קבועים` : 'בחר ימים (לא חובה)';
+        })()),
       ),
       el('div', { class: 'plan-ex-actions' },
         el('button', {
-          class: 'icon-btn', 'aria-label': 'מחק', onclick: () => { items.splice(i, 1); renderList(); },
+          class: 'icon-btn', 'aria-label': 'מחק',
+          onclick: () => {
+            for (let d = 0; d < 7; d++) if (draftSchedule[d] === t.id) draftSchedule[d] = null;
+            items.splice(i, 1); renderList();
+          },
         }, '✕'),
       ),
     )));
@@ -437,12 +476,19 @@ export async function openCardioEditor() {
           if (!items.some((t) => t.id === old.id)) await deleteTemplate(old.id);
         }
         let order = 0;
+        const kept = new Set();
         for (const t of items) {
           if (!t.name.trim()) continue;
+          kept.add(t.id);
           await saveTemplate({ ...t, kind: 'cardio', name: t.name.trim(), order: order++ });
         }
+        // סוג בלי שם לא נשמר — גם הימים שלו לא. אחר כך השיבוץ, שמיישר
+        // לבד את "כמה פעמים בשבוע" לפי מספר הימים (setCardioSchedule)
+        await setCardioSchedule(draftSchedule.map((id) => (id && kept.has(id) ? id : null)));
         closeSheet();
         await renderCardio();
+        onLogged?.();       // עיגולי השבוע בבית
+        onDone?.();         // ההגדרות (שורת "סוגי אירובי" והיעד השבועי)
         toast('נשמר', 'ok');
       }),
     }, 'שמור'),

@@ -8,7 +8,7 @@ import { el, openSheet, dateKey, parseDateKey } from './ui.js';
 import { getAllWorkouts } from './workouts.js';
 import { prSetsByWorkout } from './records.js';
 import { getWeightEntries } from './bodyweight.js';
-import { getWeeklyWorkoutGoal } from './dashboard.js';
+import { getEffectiveWeeklyGoal } from './dashboard.js';
 import { getCompletedCount } from './challenge.js';
 
 /** מפתח יום ראשון של השבוע הקלנדרי שמכיל את התאריך הנתון */
@@ -35,7 +35,7 @@ const BADGES = [
 
 async function buildContext() {
   const [workouts, weightEntries, weeklyGoal, completedChallenges] = await Promise.all([
-    getAllWorkouts(), getWeightEntries(), getWeeklyWorkoutGoal(), getCompletedCount(),
+    getAllWorkouts(), getWeightEntries(), getEffectiveWeeklyGoal(), getCompletedCount(),
   ]);
 
   let prCount = 0;

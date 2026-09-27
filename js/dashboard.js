@@ -342,6 +342,27 @@ export async function setWeeklyWorkoutGoal(n) {
   await db.setSetting(WEEKLY_GOAL_KEY, Math.max(1, Math.round(n) || DEFAULT_WEEKLY_GOAL));
 }
 
+/*
+ * היעד השבועי שמוצג בכל האפליקציה ("X מתוך Y" בבית, הסיכום השבועי,
+ * מדליות, הגדרות). כששיבצת ימים — הוא פשוט מה ששיבצת: ימי כוח + ימי
+ * אירובי, בדיוק מה שהעיגולים בבית מראים. רק בלי שום שיבוץ נופלים למספר
+ * שהוגדר ידנית. כך אי אפשר שיהיה "3 ימים בשיבוץ" ו"2" במקום אחר.
+ * שיבוץ שמצביע על תוכנית שנמחקה לא נספר (העיגול שלו גם לא מוצג).
+ */
+export async function getWeeklyPlan() {
+  const [manual, routines, schedule, cardioSchedule, templates] = await Promise.all([
+    getWeeklyWorkoutGoal(), getRoutines(), getSchedule(), getCardioSchedule(), getCardioTemplates(),
+  ]);
+  const strengthDays = schedule.filter((id) => id && routines.some((r) => r.id === id)).length;
+  const cardioDays = cardioSchedule.filter((id) => id && templates.some((t) => t.id === id)).length;
+  const planned = strengthDays + cardioDays;
+  return { goal: planned || manual, fromSchedule: planned > 0, strengthDays, cardioDays, manual };
+}
+
+export async function getEffectiveWeeklyGoal() {
+  return (await getWeeklyPlan()).goal;
+}
+
 export async function renderStats() {
   const [showWorkouts, showNutrition] = await Promise.all([getShowWorkoutsCard(), getShowNutritionCard()]);
   $('#homeWorkoutsSection').classList.toggle('hidden', !showWorkouts);
@@ -365,7 +386,7 @@ export async function renderStats() {
     // ראשון הכותרת אמרה "4 מתוך 4" מעל שבעה עיגולים ריקים.
     const from = shiftDateKey(dateKey(), -new Date().getDay());
     const week = workouts.filter((w) => w.date >= from && w.date <= dateKey());
-    const weeklyGoal = await getWeeklyWorkoutGoal();
+    const weeklyGoal = await getEffectiveWeeklyGoal();
 
     $('#hsWorkoutsCount').textContent = String(week.length);
     $('#hsWorkoutsGoal').textContent = String(weeklyGoal);

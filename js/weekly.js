@@ -22,9 +22,8 @@ import { getAllWorkouts } from './workouts.js';
 import { prSetsByWorkout, isSetDone } from './records.js';
 import { totalsForDate, goalForDate } from './nutrition.js';
 import { getWeightEntries } from './bodyweight.js';
-import { getWeeklyWorkoutGoal } from './dashboard.js';
+import { getEffectiveWeeklyGoal, getWeeklyPlan } from './dashboard.js';
 import { getRoutines, getSchedule } from './routines.js';
-import { getCardioSchedule } from './cardio.js';
 
 const SEEN_KEY = 'weeklyRecapSeen';
 // מוצאי שבת: שבת נגמרת בין 17:30 בחורף לקצת אחרי 20:00 בסוף יוני —
@@ -96,7 +95,7 @@ function burnedKcal(workouts, weightKg) {
 
 async function buildRecap(sunday) {
   const [all, goal, weights] = await Promise.all([
-    getAllWorkouts(), getWeeklyWorkoutGoal(), getWeightEntries(),
+    getAllWorkouts(), getEffectiveWeeklyGoal(), getWeightEntries(),
   ]);
   const week = all.filter(inWeek(sunday));
   const prevWeek = all.filter(inWeek(shiftDateKey(sunday, -7)));
@@ -197,9 +196,10 @@ function fmtKg(n) {
 
 /** מה מתוכנן לשבוע הבא — הצצה קדימה, כדי שהסיכום ייגמר בכיוון ולא בנקודה */
 async function nextWeekLine(isSaturdayNight) {
-  const [routines, schedule, cardioSchedule] = await Promise.all([getRoutines(), getSchedule(), getCardioSchedule()]);
-  const planned = schedule.filter(Boolean).length + cardioSchedule.filter(Boolean).length;
-  if (!planned) return null;
+  // אותו מקור כמו היעד בבית (getWeeklyPlan) — שהמספר כאן לא יסתור אותו
+  const [routines, schedule, plan] = await Promise.all([getRoutines(), getSchedule(), getWeeklyPlan()]);
+  if (!plan.fromSchedule) return null;
+  const planned = plan.goal;
   const firstDay = schedule.findIndex(Boolean);
   const first = firstDay >= 0 ? routines.find((r) => r.id === schedule[firstDay]) : null;
   const when = isSaturdayNight ? 'בשבוע הבא' : 'השבוע';
