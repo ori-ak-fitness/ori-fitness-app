@@ -489,30 +489,39 @@ export async function renderHomeWeek(workouts) {
   });
 
   host.replaceChildren(...days.map((d) => {
-    let state;
-    if (d.done) state = 'is-done';
-    else if (!d.planned) state = d.isToday ? 'is-rest is-today-rest' : 'is-rest';
-    else if (d.isToday) state = 'is-now';
-    else if (d.isPast) state = 'is-missed';
-    else state = 'is-planned';
-
     // אירובי מקבל את האימוג'י של הסוג שלו (🏃 ריצה, 🚴 אופניים, 🏊 שחייה...)
     // ולא אייקון כללי — כך רואים בעיגול איזה אימון זה, לא רק "אירובי"
     const cardioEmoji = d.cardio?.icon || d.logged.find((w) => w.kind === 'cardio')?.icon || '🏃';
     const emoji = () => el('span', { class: 'wk-emoji', 'aria-hidden': 'true' }, cardioEmoji);
 
+    /*
+     * יום עם כוח וגם אירובי (אורי בחר "את שניהם"): מילוי העיגול הגדול =
+     * האימון, והאירובי שסומן מסומן פעמיים — העיגול הקטן של האימוג'י נצבע
+     * ירוק כולו, וטבעת ירוקה מקיפה את העיגול הגדול. כך הליכה לבד לא צובעת
+     * את היום כאילו גם האימון בוצע, ועדיין רואים אותה מרחוק.
+     */
+    const combo = !!(d.routine && d.cardio);
+    const filledDone = combo ? d.strengthDone : d.done;
+
+    let state;
+    if (filledDone) state = 'is-done';
+    else if (!d.planned) state = d.isToday ? 'is-rest is-today-rest' : 'is-rest';
+    else if (d.isToday) state = 'is-now';
+    else if (d.isPast) state = 'is-missed';
+    else state = 'is-planned';
+    if (combo && d.cardioDone) state += ' is-cardio-done';
+
     // האייקון הראשי: וי כשבוצע כוח, האימוג'י כשבוצע רק אירובי, אחרת לפי התוכנית
     let icon;
-    if (d.done) icon = d.strengthDone || !d.cardioDone ? ICONS.check() : emoji();
+    if (filledDone) icon = d.strengthDone || !d.cardioDone ? ICONS.check() : emoji();
     else if (d.routine) icon = ICONS.strength();
     else if (d.cardio) icon = emoji();
     else icon = el('span', { class: 'wk-dash' }, '–');
 
-    // תג פינה: יום עם כוח וגם אירובי. מלא = בוצע/מתוכנן, אפור = עוד חסר
+    // תג פינה: ירוק כולו כשהאירובי סומן, אפור כשהאימון כבר בוצע והאירובי עוד לא
     let badge = null;
-    if (d.routine && d.cardio && !(d.done && !d.strengthDone)) {
-      // אירובי שסומן → טבעת ירוקה סביב האימוג'י (כמו הוי של הכוח)
-      const badgeState = d.cardioDone ? ' is-done' : d.done ? ' is-hollow' : '';
+    if (combo) {
+      const badgeState = d.cardioDone ? ' is-done' : d.strengthDone ? ' is-hollow' : '';
       badge = el('span', { class: `wk-badge${badgeState}` }, emoji());
     } else if (d.done && d.cardioDone && !d.strengthDone && d.routine) {
       badge = el('span', { class: 'wk-badge is-hollow' }, ICONS.strength());

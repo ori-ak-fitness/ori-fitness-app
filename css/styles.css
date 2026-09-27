@@ -887,8 +887,12 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .wk-badge .wk-emoji { font-size: .78rem; }
 /* עוד לא בוצע באותו יום (הכוח כן) — אפור ושקוף, כמו "חלול" */
 .wk-badge.is-hollow .wk-emoji { filter: grayscale(1); opacity: .5; }
-/* האירובי של היום הזה סומן — טבעת ירוקה סביב האימוג'י, אותו ירוק של "בוצע" */
-.wk-badge.is-done:has(.wk-emoji) { box-shadow: 0 0 0 2px var(--ok); }
+/* האירובי של היום הזה סומן — כל העיגול הקטן ירוק, אותו ירוק של "בוצע" */
+.wk-badge.is-done:has(.wk-emoji) { background: var(--ok); box-shadow: 0 0 0 1px var(--ok); }
+/* ...וגם טבעת ירוקה סביב העיגול הגדול. גוברת על טבעת "היום" (הקרם/טורקיז) —
+   את היום עדיין רואים לפי האות והתאריך המודגשים */
+.wk-dot.is-cardio-done,
+.wk-day.is-today .wk-dot.is-cardio-done { box-shadow: 0 0 0 3px var(--bg), 0 0 0 5.5px var(--ok); }
 
 .wk-line {
   margin-top: 14px; padding: 11px 14px;
