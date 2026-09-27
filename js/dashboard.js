@@ -511,7 +511,9 @@ export async function renderHomeWeek(workouts) {
     // תג פינה: יום עם כוח וגם אירובי. מלא = בוצע/מתוכנן, אפור = עוד חסר
     let badge = null;
     if (d.routine && d.cardio && !(d.done && !d.strengthDone)) {
-      badge = el('span', { class: `wk-badge${d.done && !d.cardioDone ? ' is-hollow' : ''}` }, emoji());
+      // אירובי שסומן → טבעת ירוקה סביב האימוג'י (כמו הוי של הכוח)
+      const badgeState = d.cardioDone ? ' is-done' : d.done ? ' is-hollow' : '';
+      badge = el('span', { class: `wk-badge${badgeState}` }, emoji());
     } else if (d.done && d.cardioDone && !d.strengthDone && d.routine) {
       badge = el('span', { class: 'wk-badge is-hollow' }, ICONS.strength());
     }
