@@ -597,7 +597,7 @@ export function initSettingsScreen({ onRerun, onCloudRefresh } = {}) {
   $('#setWeeklyGoalBtn').addEventListener('click', guard(openWeeklyGoalSheet));
   $('#setScheduleBtn').addEventListener('click', guard(openScheduleSheet));
   $('#setCardioBtn').addEventListener('click', guard(openCardioEditor));
-  $('#setCardioScheduleBtn').addEventListener('click', guard(openCardioScheduleSheet));
+  $('#setCardioScheduleBtn').addEventListener('click', guard(() => openCardioScheduleSheet({ onDone: renderSettings })));
   $('#setMealPlanBtn').addEventListener('click', guard(openPlanEditor));
   $('#setGoalBtn').addEventListener('click', guard(openGoalSheet));
   $('#setCalcBtn').addEventListener('click', guard(openCalorieCalculatorSheet));

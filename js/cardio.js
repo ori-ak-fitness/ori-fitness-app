@@ -68,9 +68,17 @@ export async function cardioTemplateForDay(dayIndex = new Date().getDay()) {
   return id ? (templates.find((t) => t.id === id) || null) : null;
 }
 
-/** שיבוץ אירובי לימי השבוע — נפתח מההגדרות בלבד, אותו דפוס כמו שיבוץ אימוני כוח */
-export async function openCardioScheduleSheet() {
-  const [templates, schedule] = await Promise.all([getCardioTemplates(), getCardioSchedule()]);
+/*
+ * שיבוץ אירובי לימים — כל סוג בשורה משלו, ושבע אותיות מתחתיו. לחיצה על
+ * אות מדליקה/מכבה את היום. קודם זה היה תפריט של יום-אחרי-יום (נכנסים
+ * ליום, בוחרים, חוזרים), וזמין רק מההגדרות — אורי לא מצא איך "לשבץ
+ * מתי שבא לי", רק איך לסמן. עכשיו נפתח גם מכפתור 📅 במסך האימון.
+ *
+ * יום אחד = סוג אירובי אחד (כך בנוי השיבוץ). הדלקת יום שתפוס ע"י סוג
+ * אחר מעבירה אותו לסוג הזה — והאות אצל הסוג השני נכבית מיד מול העיניים.
+ */
+export async function openCardioScheduleSheet({ onDone } = {}) {
+  const templates = await getCardioTemplates();
 
   if (!templates.length) {
     openSheet('שיבוץ אירובי', el('div', {},
@@ -83,68 +91,58 @@ export async function openCardioScheduleSheet() {
     return;
   }
 
-  const body = el('div', {},
-    el('p', { class: 'muted', style: 'margin-bottom:14px' },
-      'אפשר לשבץ סוג אירובי קבוע לימים מסוימים, בנוסף לאימוני הכוח — זה רק ברירת מחדל לצפייה, אפשר תמיד לסמן וי לסוג אחר.'),
-    el('div', { class: 'list' }, ...DAY_NAMES.map((name, i) => {
-      const t = schedule[i] ? templates.find((x) => x.id === schedule[i]) : null;
-      return el('div', {
-        class: 'list-item',
-        onclick: () => { closeSheet(); openCardioDayPicker(i); },
-      },
-        el('div', { class: 'li-main' },
-          el('div', { class: 'li-title' }, `יום ${name}`),
-          el('div', { class: 'li-sub' }, t ? `${t.icon || '🏃'} ${t.name}` : 'לא משובץ'),
+  const DAY_LETTERS = ['א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ש'];
+  const rowsHost = el('div', { class: 'cs-rows' });
+  let changed = false;
+
+  const render = async () => {
+    const schedule = await getCardioSchedule();
+    rowsHost.replaceChildren(...templates.map((t) => {
+      const days = schedule.map((id, i) => (id === t.id ? i : -1)).filter((i) => i >= 0);
+      return el('div', { class: 'cs-row' },
+        el('div', { class: 'cs-head' },
+          el('span', { class: 'cs-ico', 'aria-hidden': 'true' }, t.icon || '🏃'),
+          el('b', {}, t.name),
+          el('span', { class: 'cs-count' }, days.length
+            ? (days.length === 1 ? 'יום אחד בשבוע' : `${days.length} ימים בשבוע`)
+            : 'לא משובץ'),
         ),
-        el('div', { class: 'si-arrow' }, '‹'),
+        el('div', { class: 'cs-days' }, ...DAY_LETTERS.map((letter, i) => {
+          const on = schedule[i] === t.id;
+          const other = !on && schedule[i] ? templates.find((x) => x.id === schedule[i]) : null;
+          return el('button', {
+            type: 'button',
+            class: `cs-day${on ? ' is-on' : ''}`,
+            'aria-pressed': String(on),
+            'aria-label': `${t.name} ביום ${DAY_NAMES[i]}${other ? ` (עכשיו: ${other.name})` : ''}`,
+            onclick: guard(async () => {
+              const next = [...await getCardioSchedule()];
+              next[i] = on ? null : t.id;
+              await setCardioSchedule(next);
+              changed = true;
+              await render();
+            }),
+          }, letter, other ? el('span', { class: 'cs-other', 'aria-hidden': 'true' }, other.icon || '🏃') : null);
+        })),
       );
-    })),
-  );
-
-  openSheet('שיבוץ אירובי', body);
-}
-
-async function openCardioDayPicker(dayIndex) {
-  const templates = await getCardioTemplates();
-  const schedule = await getCardioSchedule();
-  const current = schedule[dayIndex];
-
-  let picked = false;
-  const pick = async (id) => {
-    if (picked) return;
-    picked = true;
-    schedule[dayIndex] = id;
-    await setCardioSchedule([...schedule]);
-    closeSheet();
-    toast(id ? 'שובץ' : 'הוסר השיבוץ', 'ok');
-    openCardioScheduleSheet();   // חוזרים לרשימת הימים, כדי לשבץ עוד
+    }));
   };
 
-  const body = el('div', {},
-    el('p', { class: 'muted', style: 'margin-bottom:14px' }, 'איזה אירובי מתוכנן ליום הזה?'),
-    el('div', { class: 'list' },
-      ...templates.map((t) => el('div', {
-        class: `list-item${current === t.id ? ' is-selected' : ''}`,
-        onclick: () => pick(t.id),
-      },
-        el('div', { class: 'li-main' },
-          el('div', { class: 'li-title' }, `${t.icon || '🏃'} ${t.name}`),
-        ),
-        current === t.id ? el('div', { class: 'li-side' }, '✓') : null,
-      )),
-      el('div', {
-        class: `list-item${!current ? ' is-selected' : ''}`,
-        onclick: () => pick(null),
-      },
-        el('div', { class: 'li-main' }, el('div', { class: 'li-title' }, 'בלי אירובי מתוכנן')),
-        !current ? el('div', { class: 'li-side' }, '✓') : null,
-      ),
-    ),
-  );
-
-  openSheet(`יום ${DAY_NAMES[dayIndex]}`, body);
+  await render();
+  openSheet('באיזה ימים אירובי?', el('div', {},
+    el('p', { class: 'muted', style: 'margin-bottom:14px' },
+      'לחיצה על יום מוסיפה או מורידה אותו. אימוג׳י קטן על יום = שם כבר משובץ אירובי אחר, ולחיצה תחליף אותו.'),
+    rowsHost,
+    el('button', { class: 'btn btn-primary btn-block', style: 'margin-top:16px', onclick: () => closeSheet() }, 'סיום'),
+  ), {
+    onClose: () => {
+      if (!changed) return;
+      renderCardio();
+      onLogged?.();       // הבית (עיגולי השבוע) מתעדכן מיד
+      onDone?.();
+    },
+  });
 }
-
 /* ---------- שבוע (ראשון–שבת, כמו לוח השבוע במסך האימונים) ---------- */
 
 /** שבעת התאריכים של השבוע שמכיל את date, מתחילים ביום ראשון */
@@ -273,6 +271,17 @@ export async function renderCardio() {
   // בלי יעד שבועי: עיגול בודד (לחיצה = סימון היום, לחיצה נוספת = ביטול).
   // עם יעד שבועי: עיגול לכל מפגש (לחיצה על ריק = הוספה, על מלא = הסרה).
   // מספר המפגשים ליעד (goal) נקבע רק דרך ההגדרות, לא כאן.
+  const schedule = await getCardioSchedule();
+  // "ימים: א, ג, ה" מתחת לשם, וכפתור 📅 שפותח את השיבוץ ישר מכאן — לא רק מההגדרות
+  const daysText = (t) => {
+    const letters = schedule.map((id, i) => (id === t.id ? ['א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ש'][i] : null)).filter(Boolean);
+    return letters.length ? `ימים: ${letters.join(', ')} · ` : '';
+  };
+  const daysBtn = () => el('button', {
+    type: 'button', class: 'icon-btn cs-btn', 'aria-label': 'באיזה ימים',
+    onclick: (e) => { e.stopPropagation(); openCardioScheduleSheet(); },
+  }, '📅');
+
   host.replaceChildren(...templates.map((t) => {
     const goal = Math.min(14, num(t.weeklyGoal, 0));
 
@@ -307,8 +316,9 @@ export async function renderCardio() {
         el('div', { class: 'li-main' },
           el('div', { class: 'li-title' }, t.name,
             scheduledToday?.id === t.id ? el('span', { class: 'li-tag' }, '📅 מתוכנן היום') : null),
-          el('div', { class: 'li-sub' }, `${count}/${goal} השבוע · לחיצה על עיגול = הוספה/הסרה`),
+          el('div', { class: 'li-sub' }, `${daysText(t)}${count}/${goal} השבוע`),
         ),
+        daysBtn(),
         el('div', { class: 'wg-dots' }, ...dots),
       );
     }
@@ -335,8 +345,9 @@ export async function renderCardio() {
       el('div', { class: 'li-main' },
         el('div', { class: 'li-title' }, t.name,
           scheduledToday?.id === t.id ? el('span', { class: 'li-tag' }, '📅 מתוכנן היום') : null),
-        el('div', { class: 'li-sub' }, `${t.minutes} דק' · לחיצה = סימון, לחיצה נוספת = ביטול`),
+        el('div', { class: 'li-sub' }, `${daysText(t)}${t.minutes} דק' · לחיצה = סימון`),
       ),
+      daysBtn(),
       done
         ? el('div', { class: 'cardio-count' }, '✓')
         : el('div', { class: 'cardio-plus' }, '+'),

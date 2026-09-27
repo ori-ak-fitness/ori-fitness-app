@@ -1168,6 +1168,34 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .cardio-row:active { background: var(--bg-elev-2); }
 .cardio-row.is-done { border-color: var(--ok); }
 .cardio-icon { font-size: 1.5rem; flex: none; width: 34px; text-align: center; }
+.cardio-row .li-main { flex: 1; min-width: 0; }
+/* 📅 בשורת אירובי — פותח את השיבוץ לימים ישר ממסך האימון */
+.cs-btn { flex: none; font-size: 1.1rem; }
+
+/* ---------- גיליון שיבוץ אירובי: שורה לכל סוג, שבע אותיות מתחת ---------- */
+.cs-rows { display: flex; flex-direction: column; gap: 10px; }
+.cs-row {
+  background: var(--bg-elev); border: 1px solid var(--line);
+  border-radius: var(--r-md); padding: 12px;
+}
+.cs-head { display: flex; align-items: center; gap: 8px; }
+.cs-ico { font-size: 1.3rem; line-height: 1; }
+.cs-head b { font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cs-count { margin-inline-start: auto; font-size: .78rem; color: var(--text-dim); flex: none; }
+.cs-days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 5px; margin-top: 10px; }
+.cs-day {
+  position: relative; height: 44px; border-radius: 12px;
+  background: var(--bg-elev); border: 1.5px solid var(--line-neutral); color: var(--text-dim);
+  font-family: inherit; font-size: 1rem; font-weight: 600; cursor: pointer;
+  transition: transform .12s ease, background .15s ease, border-color .15s ease;
+}
+.cs-day:active { transform: scale(.94); }
+.cs-day.is-on { background: var(--mark); border-color: var(--mark); color: var(--mark-ink); }
+/* יום שתפוס ע"י אירובי אחר — האימוג'י שלו קטן בפינה */
+.cs-other {
+  position: absolute; inset-block-start: -6px; inset-inline-end: -4px;
+  font-size: .72rem; line-height: 1;
+}
 .cardio-plus {
   flex: none; width: 30px; height: 30px; border-radius: 50%;
   border: 1px dashed var(--line); color: var(--text-faint);
