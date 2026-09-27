@@ -360,9 +360,11 @@ export async function renderStats() {
 
   if (showWorkouts) {
 
-    // 7 הימים האחרונים כולל היום
-    const from = shiftDateKey(dateKey(), -6);
-    const week = workouts.filter((w) => w.date >= from);
+    // השבוע מראשון עד היום — אותו שבוע שהעיגולים מתחת מציגים (ושהסיכום
+    // השבועי והאירובי סופרים). פעם זה היה "7 הימים האחרונים", ואז ביום
+    // ראשון הכותרת אמרה "4 מתוך 4" מעל שבעה עיגולים ריקים.
+    const from = shiftDateKey(dateKey(), -new Date().getDay());
+    const week = workouts.filter((w) => w.date >= from && w.date <= dateKey());
     const weeklyGoal = await getWeeklyWorkoutGoal();
 
     $('#hsWorkoutsCount').textContent = String(week.length);
@@ -561,9 +563,26 @@ function renderTodayLine(line, days, todayIdx) {
   } else if (plannedDays.every((d) => d.complete)) {
     title = [el('b', {}, 'כל האימונים של השבוע בוצעו'), ' 🎉'];
     sub = 'במוצ״ש מחכה לך הסיכום השבועי';
+  } else if (!today.planned && today.done) {
+    // יום מנוחה שבכל זאת התאמנת בו — לא "מנוחה 😌" מעל עיגול ירוק
+    const log = today.logged.find((w) => (w.kind ?? 'strength') === 'strength') ?? today.logged[0];
+    title = [el('b', {}, 'היום:'), ` ${log.routineName || log.name || 'אימון חופשי'} `, el('span', { class: 'wk-ok' }, '✓ בוצע')];
+    sub = next ? nextText : 'בונוס ביום מנוחה 💪';
   } else if (!today.planned) {
     title = [el('b', {}, 'היום:'), ' מנוחה 😌'];
     sub = next ? nextText : 'ובמוצ״ש מחכה לך הסיכום השבועי';
+  } else if (today.done && !today.complete) {
+    // בוצע חלק: למשל האימון כן, ההליכה עוד לא — אומרים בדיוק מה נשאר
+    // אירובי שלא תוכנן (הליכה ביום כוח) — אין תבנית, לוקחים את השם מהרישום
+    const cardioLog = today.logged.find((w) => w.kind === 'cardio');
+    const doneName = today.strengthDone
+      ? (today.routine?.name || 'אימון')
+      : (today.cardio?.name || cardioLog?.name || 'אירובי');
+    const left = today.strengthDone
+      ? `${today.cardio.name} ${today.cardio.minutes || 30} דק׳ — עוד לא`
+      : `${today.routine.name} — עוד לא`;
+    title = [el('b', {}, 'היום:'), ` ${doneName} `, el('span', { class: 'wk-ok' }, '✓ בוצע')];
+    sub = left;
   } else if (today.complete) {
     title = [el('b', {}, 'היום:'), ` ${today.name} `, el('span', { class: 'wk-ok' }, '✓ בוצע')];
     sub = nextText;
