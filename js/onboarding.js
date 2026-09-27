@@ -478,11 +478,20 @@ async function persist() {
   await db.setSetting('weekSchedule', schedule);
 
   let cOrder = 0;
+  const cardioIds = new Set();
   for (const c of draft.cardio) {
+    const id = c.id || db.uid();
+    cardioIds.add(id);
     await db.put(db.STORES.routines, {
-      id: c.id || db.uid(), kind: 'cardio', name: c.name, minutes: c.minutes, icon: c.icon,
+      id, kind: 'cardio', name: c.name, minutes: c.minutes, icon: c.icon,
       weeklyGoal: c.weeklyGoal ?? 0, order: cOrder++,
     });
+  }
+  // סוג אירובי שבוטל בהרצה חוזרת נמחק מהמאגר, אבל השיבוץ שלו נשאר: ימים
+  // "משובצים" ליתום, שנספרים בהגדרות ובכרטיסים. מנקים אותם כאן
+  const cardioSchedule = await db.getSetting('cardioWeekSchedule', null);
+  if (Array.isArray(cardioSchedule)) {
+    await db.setSetting('cardioWeekSchedule', cardioSchedule.map((id) => (id && cardioIds.has(id) ? id : null)));
   }
 
   let mOrder = 0;
@@ -560,6 +569,11 @@ async function next() {
     }
     step++;
     render();
+  } catch (err) {
+    // בלי זה כישלון בשמירה (מסד נתונים חסום, אחסון מלא) פשוט לא עשה כלום —
+    // הכפתור נראה תקוע והמשתמש לא ידע למה
+    console.warn('[Ori Fitness] שמירת האשף נכשלה:', err);
+    toast('לא הצלחתי לשמור. נסה שוב.', 'err', 4200);
   } finally {
     advancing = false;
   }

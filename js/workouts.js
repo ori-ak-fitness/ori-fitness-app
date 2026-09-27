@@ -23,6 +23,7 @@ let saveTimer = null;     // debounce לשמירה
 let onWorkoutSaved = null; // callback לרענון מסכים אחרים
 let prBest = new Map();   // שם תרגיל -> השיא במשקל לפני הסט הבא (ראה checkPR)
 let repBest = new Map();  // שם תרגיל -> השיא בחזרות לפני הסט הבא
+let firstTimers = new Set(); // תרגילים שאין להם היסטוריה בכלל: האימון הזה רק קובע להם רף, בלי 🏆
 let prCheckTimers = new Map(); // setId -> debounce לבדיקת שיא תוך כדי הקלדה, אחד לכל סט
                                 // (לא טיימר משותף אחד — עריכת סט אחר לא תבטל בדיקה ממתינה של סט קודם)
 let onGetReminder = null; // מספק את הציטוט/הבטחה הנוכחיים (dashboard.js, דרך callback כדי לא ליצור תלות מעגלית)
@@ -94,7 +95,15 @@ function elapsedSec(workout) {
 
 /* ---------- שמירה ---------- */
 
+/*
+ * הרגע האחרון שבו נגעו באימון (סט, תרגיל, ✓). בלי זה אימון ששכחו לסיים
+ * נמשך "לנצח": התחלת ביום שני, סיימת ביום חמישי — ויצא אימון של 72
+ * שעות, שמנפח את זמן האימון בסיכום השבועי וברשימה. ראה finishWorkout.
+ */
+function touch() { if (active) active.lastActivityAt = Date.now(); }
+
 function scheduleSave() {
+  touch();
   clearTimeout(saveTimer);
   saveTimer = setTimeout(() => {
     if (active) db.setSetting(ACTIVE_KEY, active).catch(() => toast('שגיאה בשמירה', 'err'));
@@ -102,9 +111,14 @@ function scheduleSave() {
 }
 
 async function saveNow() {
+  touch();
   clearTimeout(saveTimer);
   if (active) await db.setSetting(ACTIVE_KEY, active);
 }
+
+// יותר משעה בלי שום פעולה ולפני הסיום = שכחו לסיים; סופרים עד הפעולה האחרונה
+const IDLE_CAP_MS = 60 * 60 * 1000;
+const IDLE_TAIL_MS = 5 * 60 * 1000;
 
 /* ---------- טיימר ---------- */
 
@@ -149,8 +163,11 @@ async function refreshPRBaseline() {
   const history = await getStrengthWorkouts();
   prBest = bestWeightByExercise(history);
   repBest = bestRepsByExercise(history);
+  firstTimers = new Set();
   if (!active) return;
   for (const ex of active.exercises) {
+    // תרגיל בלי שום היסטוריה שכבר יש בו סטים: פעם ראשונה בחיים (גם אחרי טעינה מחדש)
+    if (!prBest.has(ex.name) && !repBest.has(ex.name) && ex.sets.some(isSetDone)) firstTimers.add(ex.name);
     for (const s of ex.sets) {
       const weight = liftedWeight(s);
       if (weight > (prBest.get(ex.name) ?? 0)) prBest.set(ex.name, weight);
@@ -175,11 +192,14 @@ function checkPR(ex, set) {
     const prevW = prBest.get(ex.name);
     if (prevW === undefined) {
       prBest.set(ex.name, weight);
+      firstTimers.add(ex.name);      // הסט הראשון בחיים קובע רף; הבאים באותו אימון לא "שוברים" אותו
     } else if (weight > prevW) {
       prBest.set(ex.name, weight);
-      set.isPR = true;
-      announcePR({ name: ex.name, kind: 'weight', value: weight, prev: prevW });
-      broke = true;
+      if (!firstTimers.has(ex.name)) {
+        set.isPR = true;
+        announcePR({ name: ex.name, kind: 'weight', value: weight, prev: prevW });
+        broke = true;
+      }
     }
   }
 
@@ -190,11 +210,14 @@ function checkPR(ex, set) {
     const prevR = repBest.get(ex.name);
     if (prevR === undefined) {
       repBest.set(ex.name, reps);
+      firstTimers.add(ex.name);
     } else if (reps > prevR) {
       repBest.set(ex.name, reps);
-      set.isPR = true;
-      announcePR({ name: ex.name, kind: 'reps', value: reps, prev: prevR });
-      broke = true;
+      if (!firstTimers.has(ex.name)) {
+        set.isPR = true;
+        announcePR({ name: ex.name, kind: 'reps', value: reps, prev: prevR });
+        broke = true;
+      }
     }
   }
 
@@ -598,15 +621,22 @@ async function finishWorkout() {
     return;
   }
 
+  const nowMs = Date.now();
+  const lastTouch = active.lastActivityAt ?? active.startedAt;
+  const forgotten = nowMs - lastTouch > IDLE_CAP_MS;
+  const endedAt = forgotten ? Math.min(nowMs, Math.max(active.startedAt, lastTouch) + IDLE_TAIL_MS) : nowMs;
+  if (forgotten) toast('שכחת לסיים — משך האימון חושב עד הסט האחרון', '', 4200);
+
   const finished = {
     ...active,
-    endedAt: Date.now(),
+    endedAt,
     // שומרים רק סטים שבוצעו בפועל. סט שסומן ✓ נשמר גם אם המשקל בו 0
     // (מתח, מקבילים, תרגילי משקל גוף), וסט שלא סומן לא נכנס להיסטוריה.
     exercises: active.exercises
       .map((ex) => ({ ...ex, sets: ex.sets.filter(isSetDone) }))
       .filter((ex) => ex.sets.length > 0),
   };
+  delete finished.lastActivityAt;   // שדה עבודה של האימון הפעיל, לא חלק מהרשומה השמורה
   finished.durationSec = Math.floor((finished.endedAt - finished.startedAt) / 1000);
   finished.totalVolume = calcVolume(finished);
   finished.totalSets = countSets(finished);
@@ -702,6 +732,13 @@ function summarizeSets(sets) {
   return sets.map((s) => `${s.weight}×${s.reps}`).join(' · ');
 }
 
+/*
+ * כמה אימונים מוצגים ברשימה. קודם זה היה קבוע 25 — מי שהתאמן מאה פעמים לא
+ * יכול היה לראות או למחוק שום דבר ישן יותר. עכשיו "הצג עוד" מוסיף 25.
+ */
+const HISTORY_PAGE = 25;
+let historyLimit = HISTORY_PAGE;
+
 async function renderHistory() {
   const host = $('#workoutHistory');
   const all = await getAllWorkouts();
@@ -717,7 +754,7 @@ async function renderHistory() {
   // כך מחיקת אימון או ייבוא גיבוי מזיזים את הסימונים לאימון הנכון.
   const prMap = prSetsByWorkout(all);
 
-  host.replaceChildren(...all.slice(0, 25).map((w) => {
+  const rows = all.slice(0, historyLimit).map((w) => {
     // אירובי מוצג אחרת — אין לו נפח או סטים
     if (w.kind === 'cardio') {
       return el('div', { class: 'list-item', onclick: () => showCardioDetails(w) },
@@ -749,7 +786,15 @@ async function renderHistory() {
         el('small', {}, 'סטים'),
       ),
     );
-  }));
+  });
+
+  if (all.length > historyLimit) {
+    rows.push(el('button', {
+      class: 'btn btn-ghost btn-block', style: 'margin-top:8px',
+      onclick: guard(async () => { historyLimit += HISTORY_PAGE; await renderHistory(); }),
+    }, `הצג עוד (${all.length - historyLimit} נוספים)`));
+  }
+  host.replaceChildren(...rows);
 }
 
 function showCardioDetails(w) {

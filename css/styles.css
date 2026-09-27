@@ -846,7 +846,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 /* היום שנבחר בלחיצה — טבעת דקה מסביב, בצבע הסימון (טורקיז ביום, קרם בלילה) */
 .wk-day.is-selected .wk-dot { outline: 2px solid var(--mark); outline-offset: 3px; }
 .wk-letter { font-size: .95rem; font-weight: 600; color: var(--text-dim); line-height: 1; }
-.wk-date { font-size: .8rem; color: var(--text-faint); font-variant-numeric: tabular-nums; line-height: 1; }
+.wk-date { font-size: .8rem; color: var(--text-dim); font-variant-numeric: tabular-nums; line-height: 1; }
 .wk-day.is-today .wk-letter,
 .wk-day.is-today .wk-date { color: var(--mark-text); font-weight: 700; }
 
@@ -1133,7 +1133,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
    לא כרטיס נפרד מעליה — כפתור אחד לכל סוג אירובי, לא שניים) ---------- */
 .wg-dots { display: flex; gap: 6px; flex: none; }
 .wg-dot {
-  width: 22px; height: 22px; border-radius: 50%;
+  position: relative; width: 24px; height: 24px; border-radius: 50%;
   border: 1px solid var(--line); flex: none; padding: 0;
   background: var(--bg-elev-2); cursor: pointer;
   transition: background .2s ease, border-color .2s ease;
@@ -1234,7 +1234,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .settings-supergroup { margin-top: 40px; padding-top: 22px; border-top: 1px solid var(--line); }
 .settings-supergroup:first-of-type { margin-top: 4px; padding-top: 0; border-top: none; }
 .settings-supergroup-label {
-  font-size: .8rem; font-weight: 800; color: var(--text-faint); letter-spacing: .01em;
+  font-size: .8rem; font-weight: 800; color: var(--text-dim); letter-spacing: .01em;
 }
 /* המקטע הראשון בתוך הקבוצה יושב צמוד לתווית שלה, לא ברווח הרגיל של 34px */
 .settings-supergroup-label + .section-head { margin-top: 10px; }
@@ -1326,8 +1326,8 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 }
 .danger-zone-link {
   background: none; border: none; font-family: inherit;
-  color: var(--text-faint); font-size: .74rem;
-  padding: 8px 12px; cursor: pointer;
+  color: var(--text-dim); font-size: .74rem;
+  padding: 12px 14px; cursor: pointer;
 }
 .danger-zone-link:active { color: var(--danger); }
 
@@ -1711,9 +1711,14 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .reminder-title { font-weight: 700; font-size: .95rem; }
 .reminder-text { font-size: .8rem; color: var(--text-dim); margin-top: 2px; }
 .reminder-x {
-  flex: none; background: transparent; border: none; color: var(--text-faint);
+  flex: none; background: transparent; border: none; color: var(--text-dim);
   font-size: 1rem; cursor: pointer; padding: 4px 2px; line-height: 1;
+  position: relative;
 }
+/* שטח נגיעה: ה-✕ מצויר קטן (17x24), ונקודות היעד השבועי 24x24 — שכבה שקופה
+   מרחיבה אותם בלי לשנות את המראה. בנקודות רק בציר האנכי בעיקר: ביניהן 6px */
+.reminder-x::after { content: ""; position: absolute; inset: -10px -13px; }
+.wg-dot::after { content: ""; position: absolute; inset: -9px -3px; }
 
 /* ---------- הסיכום השבועי (weekly.js) ---------- */
 
@@ -1773,6 +1778,8 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .wr-moment-main { min-width: 0; }
 .wr-moment-text { font-size: .93rem; font-weight: 600; }
 .wr-moment-sub { font-size: .8rem; color: var(--text-dim); margin-top: 2px; overflow-wrap: anywhere; }
+.delta-up { color: var(--ok); }
+.delta-down { color: var(--danger); }
 .wr-note { font-size: .72rem; color: var(--text-faint); text-align: center; margin: 10px 0 0; }
 
 /* ---------- נשנושים ---------- */

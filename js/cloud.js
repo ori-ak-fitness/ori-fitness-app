@@ -180,10 +180,29 @@ const QUEUE_KEY = '__syncQueue';
 
 let inflight = null;   // מה שנשלח עכשיו ועוד לא אושר - חלק מהתור עד שהוא מצליח
 
-function persistQueue() {
+/*
+ * נכתב בדיחוי ולא בכל שינוי. הרשימה נשמרת שלמה, ולכן כתיבה לכל שינוי
+ * היא O(n) לכל פעולה — ופעולה גדולה (איפוס נתונים, מחיקת מאגר) שמדווחת
+ * אלפי מחיקות ברצף נהייתה O(n²): נמדד 1.8 שניות ל-3,000 רשומות ו-12
+ * שניות בערך ל-7,500 (בטלפון פי כמה), והמסך קפא. עכשיו כתיבה אחת אחרי
+ * שהרעש נרגע, ובכל מקרה מיד לפני שהאפליקציה נסגרת (flushNow).
+ */
+let persistTimer = null;
+let queueDirty = false;   // יש שינוי בתור שעוד לא נכתב לדיסק
+
+function persistQueueNow() {
+  clearTimeout(persistTimer);
+  persistTimer = null;
+  queueDirty = false;
   const list = [...(inflight ? inflight.values() : []), ...queue.values()]
     .map(({ store, key }) => ({ store, key }));
   db.putQuiet(db.STORES.settings, { key: QUEUE_KEY, value: list }).catch(() => {});
+}
+
+function persistQueue() {
+  queueDirty = true;
+  if (persistTimer) return;
+  persistTimer = setTimeout(persistQueueNow, 400);
 }
 
 async function restoreQueue() {
@@ -280,10 +299,14 @@ async function pullImpl() {
 
   let applied = 0;
   let newest = meta.lastPull;
+  // שעון שגוי במכשיר כלשהו (תאריך בעתיד) כתב רשומה עם updatedAt של שנים קדימה.
+  // אילו זה הפך ל-lastPull, כל משיכה הבאה הייתה מבקשת "מה שהשתנה אחרי שנת 2030"
+  // ולא מקבלת כלום — המכשיר הזה היה מפסיק להתעדכן לגמרי, בלי שום שגיאה
+  const ceiling = Date.now() + CLOCK_SLACK_MS;
 
   for (const rec of records) {
     if (typeof rec.updatedAt !== 'number') continue;
-    if (rec.updatedAt > newest) newest = rec.updatedAt;
+    if (rec.updatedAt > newest && rec.updatedAt <= ceiling) newest = rec.updatedAt;
     if (!rec.store || !rec.key || !isSyncable(rec.store, rec.key)) continue;
 
     // שווה בדיוק אינו "חדש יותר" — אחרת כל טעינה הייתה כותבת מחדש לחינם
@@ -506,5 +529,7 @@ export async function cloudReport() {
 /** דחיפה מיידית של מה שממתין — לפני שהאפליקציה נסגרת */
 export async function flushNow() {
   clearTimeout(flushTimer);
+  if (queueDirty) persistQueueNow();   // קודם הרשימה, כי הדף עלול להיסגר באמצע השליחה
   await flush().catch(() => {});
+  if (queueDirty) persistQueueNow();
 }

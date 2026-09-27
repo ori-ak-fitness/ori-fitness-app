@@ -163,7 +163,10 @@ export async function renderProgress() {
       el('div', { class: 'cl' }, el('b', {}, fmtNum(pr, 1)), el('span', {}, 'שיא אישי (ק"ג)')),
       el('div', { class: 'cl' }, el('b', {}, String(data.length)), el('span', {}, 'אימונים עם התרגיל')),
       el('div', { class: 'cl' },
-        el('b', { style: `color:${delta >= 0 ? '#35d07f' : '#ff4d5e'}` },
+        // הצבע על החץ ולא על המספר: ירוק על קרם נתן ניגודיות 2:1 (לא קריא), והירוק
+        // כאן גם היה גוון אחר (#35d07f) מהירוק של שאר האפליקציה
+        el('b', {},
+          el('span', { class: delta >= 0 ? 'delta-up' : 'delta-down', 'aria-hidden': 'true' }, delta >= 0 ? '▲ ' : '▼ '),
           `${delta >= 0 ? '+' : ''}${fmtNum(delta, 1)}`),
         el('span', {}, 'שינוי מהפעם הראשונה')),
     );

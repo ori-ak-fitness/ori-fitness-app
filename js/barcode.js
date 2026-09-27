@@ -409,9 +409,19 @@ function openTeachSheet(code) {
   const kcal = f('0'), prot = f('0'), carb = f('0'), fat = f('0');
   const pack = f('לא חובה');
   const unit = el('select', {}, el('option', { value: 'גרם' }, 'גרם'), el('option', { value: 'מ"ל' }, 'מ"ל'));
+  // הכיתוב "ל-100 גרם" נבנה פעם אחת ונשאר "גרם" גם אחרי שבחרת מ"ל
+  const per100Hint = el('p', { class: 'muted', style: 'font-size:.85rem;margin:4px 0 10px' });
+  const syncHint = () => { per100Hint.textContent = `הערכים הבאים הם ל-100 ${unit.value} — בדיוק כמו שרשום על האריזה:`; };
+  unit.addEventListener('change', syncHint);
+  syncHint();
 
   const save = guard(async () => {
     if (!name.value.trim()) { toast('צריך שם למוצר', 'err'); return; }
+    // ל-100 גרם לא יכול להיות מעל ~900 קק"ל (שומן טהור), ומינוס אינו קיים
+    const per = [kcal, prot, carb, fat].map((i) => num(i.value, 0));
+    if (per.some((v) => v < 0) || per[0] > 900 || per.slice(1).some((v) => v > 100)) {
+      toast('בדוק את הערכים: קלוריות עד 900 ל-100, ומאקרו עד 100 גרם', 'err'); return;
+    }
     // שדה ריק נשמר כ-0 קלוריות (num נופל ל-0), והמוצר נשמר לצמיתות ומסתנכרן:
     // כל סריקה עתידית הייתה רושמת ארוחה של 0 קק"ל בלי שום אזהרה
     if (kcal.value.trim() === '') { toast('חסרות קלוריות ל-100 (הקלד 0 אם באמת אין)', 'err'); return; }
@@ -446,8 +456,7 @@ function openTeachSheet(code) {
       'זה חד־פעמי, ומהפעם הבאה הוא ייסרק מיד.'),
     cell('שם המוצר', name),
     el('div', { class: 'field' }, el('label', {}, 'יחידה'), unit),
-    el('p', { class: 'muted', style: 'font-size:.85rem;margin:4px 0 10px' },
-      `הערכים הבאים הם ל-100 ${unit.value} — בדיוק כמו שרשום על האריזה:`),
+    per100Hint,
     cell('קלוריות ל-100', kcal),
     cell('חלבון ל-100', prot),
     cell('פחמימות ל-100', carb),
@@ -597,7 +606,10 @@ function runScanLoop(video, frameEl, decode, onCode) {
   stopLoop = () => { alive = false; clearTimeout(timer); };
 
   const tick = async () => {
-    if (!alive) return;
+    // הסורק נסגר (closeCamera מסיר את הווידאו מהדף) לפני שהלולאה התחילה או
+    // תוך כדי: בלי הבדיקה הזו, סגירה במהלך טעינת הספרייה (בשניות בטלפון) השאירה
+    // לולאה שרצה כל 120ms לנצח ברקע, ואוכלת סוללה
+    if (!alive || !video.isConnected) { alive = false; return; }
     try {
       if (grabFrame(video, frameEl, canvas, VARIANTS[i++ % VARIANTS.length])) {
         const code = await decode(canvas);

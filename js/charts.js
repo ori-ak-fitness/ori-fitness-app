@@ -110,7 +110,7 @@ export function lineChart(host, points, opts = {}) {
     }));
     const label = svgEl('text', {
       x: padStart + plotW + 6, y: yy + 4,
-      fill: C.label, 'font-size': 10, 'text-anchor': 'start', direction: 'ltr',
+      fill: C.label, 'font-size': 11, 'text-anchor': 'start', direction: 'ltr',
     });
     label.textContent = String(t);
     svg.append(label);
@@ -154,7 +154,7 @@ export function lineChart(host, points, opts = {}) {
     : [0, Math.floor((points.length - 1) / 2), points.length - 1];
   for (const i of idxs) {
     const t = svgEl('text', {
-      x: x(i), y: H - 8, fill: C.label, 'font-size': 10,
+      x: x(i), y: H - 8, fill: C.label, 'font-size': 11,
       'text-anchor': i === 0 ? 'start' : i === points.length - 1 ? 'end' : 'middle',
     });
     t.textContent = points[i].label;
@@ -198,7 +198,7 @@ export function barChart(host, points, opts = {}) {
   for (const t of ticks) {
     const yy = padTop + plotH - (t / yMax) * plotH;
     svg.append(svgEl('line', { x1: padStart, y1: yy, x2: padStart + plotW, y2: yy, stroke: C.grid, 'stroke-width': 1 }));
-    const label = svgEl('text', { x: padStart + plotW + 6, y: yy + 4, fill: C.label, 'font-size': 10, direction: 'ltr' });
+    const label = svgEl('text', { x: padStart + plotW + 6, y: yy + 4, fill: C.label, 'font-size': 11, direction: 'ltr' });
     label.textContent = t >= 1000 ? (t / 1000) + 'k' : String(t);
     svg.append(label);
   }
@@ -225,7 +225,7 @@ export function barChart(host, points, opts = {}) {
   for (const i of idxs) {
     const t = svgEl('text', {
       x: padStart + slot * i + slot / 2, y: H - 7,
-      fill: C.label, 'font-size': 10, 'text-anchor': 'middle',
+      fill: C.label, 'font-size': 11, 'text-anchor': 'middle',
     });
     t.textContent = points[i].label;
     svg.append(t);

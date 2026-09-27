@@ -164,7 +164,7 @@ export function openSnacksSheet() {
   const quickInput = el('input', { type: 'number', inputmode: 'numeric', min: '0', placeholder: 'קלוריות' });
   const quickAdd = guard(async () => {
     const calories = num(quickInput.value, 0);
-    if (calories <= 0) { toast('הזן קלוריות תקינות', 'err'); return; }
+    if (calories <= 0 || calories > 20000) { toast('הזן קלוריות תקינות (עד 20,000)', 'err'); return; }
     await db.put(db.STORES.meals, {
       id: db.uid(), date: getDate?.() || null, createdAt: Date.now(),
       name: 'תוספת מהירה', calories, protein: 0, carbs: 0, fat: 0,

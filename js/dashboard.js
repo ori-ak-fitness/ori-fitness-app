@@ -554,6 +554,12 @@ export async function renderHomeWeek(workouts) {
   selectDay(null);
 }
 
+/* "✓ בוצע": הוי בירוק והמילה בצבע הטקסט. ירוק על קרם נותן ניגודיות 2:1 — כטקסט הוא
+   לא קריא, כסימן ליד מילה קריאה הוא בדיוק מה שצריך */
+function doneMark() {
+  return [' ', el('span', { class: 'wk-ok', 'aria-hidden': 'true' }, '✓'), ' בוצע'];
+}
+
 /** השורה מתחת לעיגולים כשנבחר יום מסוים: "שישי 25/9: כתפיים ובטן + ריצה" */
 function renderDayLine(line, d) {
   const strengthLog = d.logged.find((w) => (w.kind ?? 'strength') === 'strength');
@@ -578,7 +584,7 @@ function renderDayLine(line, d) {
   line.replaceChildren(
     el('div', { class: 'wk-line-title' },
       el('b', {}, `${dayName} ${fmtDay(d.key)}:`), ` ${name}`,
-      d.complete ? el('span', { class: 'wk-ok' }, ' ✓ בוצע') : null),
+      ...(d.complete ? doneMark() : [])),
     el('div', { class: 'wk-line-sub' }, parts.length ? parts.join(' · ') : 'יום מנוחה 😌'),
   );
 }
@@ -603,7 +609,7 @@ function renderTodayLine(line, days, todayIdx) {
   } else if (!today.planned && today.done) {
     // יום מנוחה שבכל זאת התאמנת בו — לא "מנוחה 😌" מעל עיגול ירוק
     const log = today.logged.find((w) => (w.kind ?? 'strength') === 'strength') ?? today.logged[0];
-    title = [el('b', {}, 'היום:'), ` ${log.routineName || log.name || 'אימון חופשי'} `, el('span', { class: 'wk-ok' }, '✓ בוצע')];
+    title = [el('b', {}, 'היום:'), ` ${log.routineName || log.name || 'אימון חופשי'} `, ...doneMark()];
     sub = next ? nextText : 'בונוס ביום מנוחה 💪';
   } else if (!today.planned) {
     title = [el('b', {}, 'היום:'), ' מנוחה 😌'];
@@ -618,10 +624,10 @@ function renderTodayLine(line, days, todayIdx) {
     const left = today.strengthDone
       ? `${today.cardio.name} ${today.cardio.minutes || 30} דק׳ — עוד לא`
       : `${today.routine.name} — עוד לא`;
-    title = [el('b', {}, 'היום:'), ` ${doneName} `, el('span', { class: 'wk-ok' }, '✓ בוצע')];
+    title = [el('b', {}, 'היום:'), ` ${doneName} `, ...doneMark()];
     sub = left;
   } else if (today.complete) {
-    title = [el('b', {}, 'היום:'), ` ${today.name} `, el('span', { class: 'wk-ok' }, '✓ בוצע')];
+    title = [el('b', {}, 'היום:'), ` ${today.name} `, ...doneMark()];
     sub = nextText;
   } else {
     title = [el('b', {}, 'היום:'), ` ${today.name}`];

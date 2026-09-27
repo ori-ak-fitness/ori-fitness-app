@@ -79,12 +79,6 @@ function settingRecordId(key) {
   return `settings__${encodeURIComponent(key)}`;
 }
 
-/* רק המפתחות שהתזכורות באמת צריכות - לא כל ההגדרות */
-const NEEDED_SETTING_KEYS = [
-  'weighInReminderHour', 'workoutReminderHour',
-  'weekSchedule', 'cardioWeekSchedule',
-];
-
 /* מנויי Push: 'pushSub_<מזהה מכשיר>' לכל מכשיר, ועוד המפתח הישן
    'pushSubscription' (תאימות לאחור). שניהם מתחילים ב-'settings__pushSub',
    ולכן טווח מזהי מסמכים אחד תופס את כולם בלי לסרוק את שאר ההגדרות */
@@ -116,28 +110,45 @@ function isValidSubscription(s) {
 }
 
 /*
- * במקור זה קרא את כל הרשומות של המשתמש - כולל ארוחות, מטרות ותפריט,
- * שהתזכורות בכלל לא נוגעות בהן - בכל הרצה, כל שעה, 24 פעם ביום. אצל
- * משתמש פעיל עם שנה של נתונים זה לבד יכול לצרוך עשרות אלפי קריאות
- * ביום ולגמור את המכסה החינמית של פיירבייס עם רק כמה משתמשים פעילים.
- * עכשיו: שאילתה אחת ממוקדת לאימונים/שקילות/תוכניות, ובנוסף רק חמש
- * הגדרות ספציפיות לפי מזהה - לא כל ה-settings.
+ * מכסת הקריאות של Firebase החינמי היא 50,000 ליום, והסקריפט הזה רץ כל שעה
+ * לכל משתמש. בגרסה הקודמת כל ריצה שלפה את *כל* האימונים והשקילות של
+ * המשתמש - גם כשאין מה לשלוח - כלומר קריאות לפי גודל ההיסטוריה × 24:
+ * משתמש עם חודשיים של נתונים ~2,000 קריאות ביום, עם שנה ~10,000, עם שלוש
+ * שנים ~35,000. עם 5 משתמשים ותיקים המכסה נגמרת, ומהרגע הזה גם הסנכרון של
+ * האפליקציה עצמה מתחיל להיכשל אצל כולם עד חצות.
+ *
+ * עכשיו העלות אינה תלויה בגודל ההיסטוריה:
+ *   1. כל שעה, לכל משתמש: מסמך אחד בלבד - שעת התזכורת.
+ *   2. רק אם עכשיו באמת שעה של תזכורת: שאר ההחלטה (מנוי, יומן שליחה,
+ *      לוח שבועי) ושאילתה אחת על מה שנרשם מתחילת השבוע.
+ * השאילתה משתמשת בשדה בודד (value.date) - Firestore יוצר לו אינדקס לבד,
+ * בלי שום הגדרה בקונסולה.
  */
-async function loadRecords(uid) {
-  const recordsRef = db.collection('users').doc(uid).collection('records');
 
-  const [bulkSnap, settingDocs, subSnap] = await Promise.all([
-    recordsRef.where('store', 'in', ['workouts', 'bodyWeight', 'routines']).get(),
-    Promise.all(NEEDED_SETTING_KEYS.map((key) => recordsRef.doc(settingRecordId(key)).get())),
-    recordsRef
-      .where(FieldPath.documentId(), '>=', SUB_ID_PREFIX)
-      .where(FieldPath.documentId(), '<', SUB_ID_PREFIX + '')
-      .limit(20)   // משתמש לא אמור להחזיק יותר; מגן מהצפה של מסמכי מנוי
-      .get(),
-  ]);
+/** האם שאילתת התאריך עבדה בפעם האחרונה — לדיווח בהרצה ידנית (ראה run) */
+let dateQueryWorks = null;
 
-  // כל מכשיר של המשתמש, בלי כפילויות: אותו endpoint יכול להופיע גם במפתח
-  // הישן וגם במפתח החדש של אותו טלפון — ואז הוא היה מקבל כל הודעה פעמיים
+/** התו הגבוה ביותר - סוף טווח של "כל מה שמתחיל בקידומת". כתוב כקוד ולא כתו
+    בלתי נראה, כדי שעורך טקסט לא ימחק אותו בשקט */
+const PREFIX_END = '\uf8ff';
+
+/** ערך הגדרה בודדת לפי מזהה (קריאה אחת), או undefined אם אין/נמחקה */
+async function readSetting(recordsRef, key) {
+  const doc = await recordsRef.doc(settingRecordId(key)).get();
+  if (!doc.exists) return undefined;
+  const rec = doc.data();
+  return rec.deleted ? undefined : rec.value;
+}
+
+/** כל מכשיר של המשתמש, בלי כפילויות: אותו endpoint יכול להופיע גם במפתח
+    הישן וגם במפתח החדש של אותו טלפון — ואז הוא היה מקבל כל הודעה פעמיים */
+async function loadSubscriptions(recordsRef) {
+  const subSnap = await recordsRef
+    .where(FieldPath.documentId(), '>=', SUB_ID_PREFIX)
+    .where(FieldPath.documentId(), '<', SUB_ID_PREFIX + PREFIX_END)
+    .limit(20)   // משתמש לא אמור להחזיק יותר; מגן מהצפה של מסמכי מנוי
+    .get();
+
   const subscriptions = [];
   const seenEndpoints = new Set();
   for (const doc of subSnap.docs) {
@@ -148,28 +159,40 @@ async function loadRecords(uid) {
     subscriptions.push({ docId: doc.id, subscription: rec.value });
     if (subscriptions.length >= MAX_SUBSCRIPTIONS_PER_USER) break;
   }
+  return subscriptions;
+}
 
-  const bySettingKey = {};
+/** אימונים ושקילות מהתאריך הנתון והלאה (רשומות שנמחקו אין להן value, ולכן לא חוזרות) */
+async function loadRecordsSince(recordsRef, fromKey) {
+  let docs;
+  try {
+    docs = (await recordsRef.where('value.date', '>=', fromKey).get()).docs;
+    dateQueryWorks = true;
+  } catch (err) {
+    // רשת ביטחון: אם משום מה השאילתה החדשה נדחית (למשל אינדקס), חוזרים לשליפה
+    // המלאה הישנה - יקר יותר, אבל התזכורות ממשיכות לצאת. רק הקוד, בלי פרטים
+    console.warn('שאילתת התאריך נכשלה, חוזר לשליפה מלאה. קוד:', err.code ?? 'לא ידוע');
+    dateQueryWorks = false;
+    docs = (await recordsRef.where('store', 'in', ['workouts', 'bodyWeight']).get()).docs;
+  }
   const bodyWeight = [];
   const workouts = [];
-  const cardioTemplates = [];
-
-  for (const doc of bulkSnap.docs) {
+  for (const doc of docs) {
     const rec = doc.data();
     if (rec.deleted) continue;
     if (rec.store === 'bodyWeight') bodyWeight.push(rec.value);
     else if (rec.store === 'workouts') workouts.push(rec.value);
-    // תבניות אירובי חיות באותו מאגר routines כמו תוכניות כוח, מסומנות kind
-    else if (rec.store === 'routines' && rec.value?.kind === 'cardio') cardioTemplates.push(rec.value);
   }
-  for (const doc of settingDocs) {
-    if (!doc.exists) continue;
-    const rec = doc.data();
-    if (rec.deleted) continue;
-    bySettingKey[rec.key] = rec.value;
-  }
+  return { bodyWeight, workouts };
+}
 
-  return { bySettingKey, bodyWeight, workouts, cardioTemplates, subscriptions };
+/** תבנית אירובי בודדת לפי מזהה — מסמך אחד, לא כל התוכניות. המזהה באותו
+    פורמט של recordId ב-cloud.js */
+async function loadCardioTemplate(recordsRef, templateId) {
+  const doc = await recordsRef.doc(`routines__${encodeURIComponent(templateId)}`).get();
+  if (!doc.exists) return null;
+  const rec = doc.data();
+  return !rec.deleted && rec.value?.kind === 'cardio' ? rec.value : null;
 }
 
 async function markSent(uid, field, dateKey) {
@@ -231,15 +254,23 @@ async function run() {
 
   // הספירה רק בהרצה ידנית - בהרצות השעתיות היא הייתה חושפת בלוג ציבורי
   // כמה התראות יצאו בכל שעה (כלומר מתי המשתמשים פעילים)
-  if (IS_MANUAL_TEST) console.log(`נשלחו ${sent} התראות.`);
+  if (IS_MANUAL_TEST) {
+    console.log(`נשלחו ${sent} התראות.`);
+    console.log(dateQueryWorks === null ? 'שאילתת התאריך לא נבדקה (אין משתמשים מאושרים).'
+      : dateQueryWorks ? 'שאילתת התאריך: תקינה ✅' : 'שאילתת התאריך: נכשלה ⚠️ — נופל לשליפה המלאה הישנה');
+  }
 }
 
 async function processUser(userDoc, now, addSent) {
   const uid = userDoc.id;
-  const { bySettingKey, bodyWeight, workouts, cardioTemplates, subscriptions } = await loadRecords(uid);
-  if (!subscriptions.length) return;
+  const recordsRef = db.collection('users').doc(uid).collection('records');
 
   if (IS_MANUAL_TEST) {
+    // בהרצה ידנית בודקים גם את שאילתת התאריך (בלי לשלוח כלום ממנה), כדי
+    // שאפשר יהיה לראות בלוג של ה-Action שהיא עובדת מול Firestore האמיתי
+    await loadRecordsSince(recordsRef, sundayOf(now.dateKey));
+    const subscriptions = await loadSubscriptions(recordsRef);
+    if (!subscriptions.length) return;
     const ok = await send(uid, subscriptions, {
       title: 'בדיקה 🔔', body: 'אם זה הגיע — ההתראות עובדות.', url: APP_URL,
     });
@@ -247,13 +278,41 @@ async function processUser(userDoc, now, addSent) {
     return;
   }
 
+  /*
+   * הריצה הזו קורית כל שעה לכל משתמש, ורוב הפעמים אין מה לשלוח. לכן קודם
+   * קוראים רק את שעת התזכורת (מסמך אחד) ומחליטים אם בכלל משהו יכול לצאת
+   * עכשיו - ורק אז שולפים עוד. שעת השקילה נקראת רק בימי שלישי.
+   */
+  const workoutHour = Number((await readSetting(recordsRef, 'workoutReminderHour')) ?? DEFAULT_WORKOUT_HOUR);
+  const weighInHour = now.weekday === 2
+    ? Number((await readSetting(recordsRef, 'weighInReminderHour')) ?? DEFAULT_WEIGH_IN_HOUR)
+    : null;
+  const weighInDue = weighInHour !== null && now.hour === weighInHour;
+  const workoutDue = now.hour === workoutHour;               // גם אימון וגם אירובי - אותה שעה
+  const weeklyDue = now.weekday === 6 && now.hour === WEEKLY_RECAP_HOUR;
+  if (!weighInDue && !workoutDue && !weeklyDue) return;
+
   const pushLogSnap = await db.collection('pushLog').doc(uid).get();
   const pushLog = pushLogSnap.exists ? pushLogSnap.data() : {};
+  const weighInTodo = weighInDue && pushLog.weighIn !== now.dateKey;
+  const weeklyTodo = weeklyDue && pushLog.weekly !== now.dateKey;
+  const workoutTodo = workoutDue && pushLog.workout !== now.dateKey;
+  const cardioTodo = workoutDue && pushLog.cardio !== now.dateKey;
+  if (!weighInTodo && !weeklyTodo && !workoutTodo && !cardioTodo) return;
+
+  const subscriptions = await loadSubscriptions(recordsRef);
+  if (!subscriptions.length) return;
+
+  const sunday = sundayOf(now.dateKey);
+  const monthAgo = shiftKey(now.dateKey, -28);
+  // נשלף רק כשצריך, ופעם אחת: כל מה שנרשם מתחילת השבוע (או 28 ימים אחורה
+  // לסיכום השבועי, שצריך גם לדעת אם המשתמש פעיל בכלל)
+  let recordsCache = null;
+  const records = async () => (recordsCache ??= await loadRecordsSince(recordsRef, weeklyTodo ? monthAgo : sunday));
 
   // ---- תזכורת שקילה: יום שלישי, בשעה שנבחרה, אם לא נשקל השבוע ----
-  const weighInHour = Number(bySettingKey.weighInReminderHour ?? DEFAULT_WEIGH_IN_HOUR);
-  if (now.weekday === 2 && now.hour === weighInHour && pushLog.weighIn !== now.dateKey) {
-    const sunday = sundayOf(now.dateKey);
+  if (weighInTodo) {
+    const { bodyWeight } = await records();
     const weighedThisWeek = bodyWeight.some((e) => e?.date >= sunday && e?.date <= now.dateKey);
     if (!weighedThisWeek) {
       const ok = await send(uid, subscriptions, {
@@ -266,10 +325,9 @@ async function processUser(userDoc, now, addSent) {
   // ---- הסיכום השבועי: מוצאי שבת, 20:00 — אותה שעה שבה הכרטיס מופיע
   // באפליקציה (RECAP_HOUR ב-weekly.js). מי שלא התאמן כבר חודש לא מקבל
   // "השבוע היה שקט" כל שבוע — זה היה הופך לנדנוד ----
-  if (now.weekday === 6 && now.hour === WEEKLY_RECAP_HOUR && pushLog.weekly !== now.dateKey) {
-    const sunday = sundayOf(now.dateKey);
+  if (weeklyTodo) {
+    const { workouts } = await records();
     const count = workouts.filter((w) => w?.date >= sunday && w?.date <= now.dateKey).length;
-    const monthAgo = shiftKey(now.dateKey, -28);
     const activeLately = count > 0 || workouts.some((w) => w?.date >= monthAgo);
     if (activeLately) {
       const ok = await send(uid, subscriptions, {
@@ -284,13 +342,14 @@ async function processUser(userDoc, now, addSent) {
   }
 
   // ---- תזכורת אימון: בשעה שנבחרה, אם יש אימון מתוכנן להיום ולא בוצע ----
-  const workoutHour = Number(bySettingKey.workoutReminderHour ?? DEFAULT_WORKOUT_HOUR);
-  if (now.hour === workoutHour && pushLog.workout !== now.dateKey) {
-    const schedule = Array.isArray(bySettingKey.weekSchedule) ? bySettingKey.weekSchedule : [];
+  if (workoutTodo) {
+    const scheduleRaw = await readSetting(recordsRef, 'weekSchedule');
+    const schedule = Array.isArray(scheduleRaw) ? scheduleRaw : [];
     const routineId = schedule[now.weekday];
     if (routineId) {
       // כל אימון כוח היום נחשב, כמו באפליקציה — גם חופשי או תוכנית אחרת.
       // אחרת מי שעשה אימון חופשי קיבל "עוד לא התאמנת" אחרי שכבר התאמן
+      const { workouts } = await records();
       const doneToday = workouts.some((w) => w?.date === now.dateKey && (w?.kind ?? 'strength') === 'strength');
       if (!doneToday) {
         const ok = await send(uid, subscriptions, {
@@ -303,11 +362,13 @@ async function processUser(userDoc, now, addSent) {
 
   // ---- תזכורת אירובי: נפרדת מתזכורת האימון בכוונה — יום עם שניהם
   // צריך שתי תזכורות, לא אחת שמסתירה את השנייה (אותה שעה: workoutHour) ----
-  if (now.hour === workoutHour && pushLog.cardio !== now.dateKey) {
-    const cardioSchedule = Array.isArray(bySettingKey.cardioWeekSchedule) ? bySettingKey.cardioWeekSchedule : [];
+  if (cardioTodo) {
+    const cardioRaw = await readSetting(recordsRef, 'cardioWeekSchedule');
+    const cardioSchedule = Array.isArray(cardioRaw) ? cardioRaw : [];
     const templateId = cardioSchedule[now.weekday];
-    const template = templateId ? cardioTemplates.find((t) => t.id === templateId) : null;
+    const template = templateId ? await loadCardioTemplate(recordsRef, templateId) : null;
     if (template) {
+      const { workouts } = await records();
       const doneToday = workouts.some((w) => w?.kind === 'cardio' && w?.date === now.dateKey && w?.templateId === templateId);
       if (!doneToday) {
         const ok = await send(uid, subscriptions, {

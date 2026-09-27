@@ -96,6 +96,15 @@ export function openSheet(title, bodyNode, { onClose } = {}) {
   sheetOnClose = onClose || null;
 }
 
+/*
+ * מאזינים גלובליים לסגירת גיליון. בהגדרות כל גיליון משנה משהו שמופיע בתקציר
+ * מתחת לפריט (יעד, אתגר, מאגר מזון, מקטעי הבית...), ורק חלק מהם רענן את
+ * המסך — השאר הציגו את הערך הישן עד שיצאת וחזרת. כך מסך ההגדרות מתעדכן
+ * תמיד, בלי שכל גיליון יצטרך לזכור לעשות את זה.
+ */
+const sheetClosedListeners = [];
+export function onSheetClosed(fn) { sheetClosedListeners.push(fn); }
+
 export function closeSheet() {
   $('#sheet').classList.add('hidden');
   $('#sheetBackdrop').classList.add('hidden');
@@ -103,6 +112,7 @@ export function closeSheet() {
   const cb = sheetOnClose;
   sheetOnClose = null;
   if (cb) cb();
+  for (const fn of sheetClosedListeners) { try { fn(); } catch { /* מאזין תקול לא שובר סגירה */ } }
 }
 
 export function initSheet() {
@@ -214,6 +224,17 @@ export function num(value, fallback = 0) {
   return Number.isFinite(n) ? n : fallback;
 }
 
+/**
+ * קלט מספרי מהמשתמש, בתוך טווח סביר. `min="0"` ב-HTML לא נאכף בהקלדה:
+ * אפשר להקליד "-500" ולקבל ארוחה עם קלוריות שליליות, או "85000" בטעות.
+ * @returns {number} מספר בטווח [min, max], או fallback אם אין מספר
+ */
+export function clampNum(value, min, max, fallback = 0) {
+  const n = num(value, NaN);
+  if (!Number.isFinite(n)) return fallback;
+  return Math.min(max, Math.max(min, n));
+}
+
 export function fmtNum(n, digits = 0) {
   if (!Number.isFinite(n)) return '0';
   return n.toLocaleString('he-IL', { maximumFractionDigits: digits });
@@ -271,11 +292,23 @@ export function resizeImage(file, maxDim = 1280, quality = 0.82) {
 }
 
 const objectUrls = new Set();
+// כל רינדור של רשימה עם תמונות יוצר URL חדש לכל תמונה, ואיש לא שחרר אותם
+// אף פעם — בשימוש ארוך הם רק הצטברו. מעל התקרה משחררים את הישנים ביותר
+// (הם כבר לא על המסך; מגלריה של מאות תמונות בבת אחת אנחנו רחוקים מאוד)
+const MAX_OBJECT_URLS = 400;
 
 /** יוצר URL לתצוגת Blob ושומר אותו לשחרור מאוחר יותר */
 export function blobUrl(blob) {
   const url = URL.createObjectURL(blob);
   objectUrls.add(url);
+  if (objectUrls.size > MAX_OBJECT_URLS) {
+    let drop = objectUrls.size - MAX_OBJECT_URLS + 100;
+    for (const old of objectUrls) {
+      if (drop-- <= 0) break;
+      URL.revokeObjectURL(old);
+      objectUrls.delete(old);
+    }
+  }
   return url;
 }
 

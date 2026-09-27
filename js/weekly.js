@@ -63,7 +63,7 @@ const isCardio = (w) => w.kind === 'cardio';
 
 /* מספרים עם סימנים (20–26, ≈1,690, −0.6, 80×6) בתוך טקסט עברי: אלגוריתם
    הכיווניות הופך את הסדר שלהם. בידוד LTR שומר אותם בדיוק כמו שנכתבו */
-const ltr = (s) => `⁦${s}⁩`;
+const ltr = (s) => `\u2066${s}\u2069`;
 
 /* ---------- קלוריות שנשרפו (הערכה) ---------- */
 
@@ -160,7 +160,8 @@ async function buildRecap(sunday) {
     cardioCount: cardio.length,
     prevTotal: prevWeek.length,
     activeDays: new Set(week.map((w) => w.date)).size,
-    seconds: week.reduce((s, w) => s + num(w.durationSec, 0), 0),
+    // תקרה של 4 שעות לאימון: אימונים ישנים ששכחו לסיים נשמרו עם משך של ימים
+    seconds: week.reduce((s, w) => s + Math.min(num(w.durationSec, 0), 4 * 3600), 0),
     sets: strength.reduce((s, w) => s + num(w.totalSets, 0), 0),
     volume: strength.reduce((s, w) => s + num(w.totalVolume, 0), 0),
     kcal: burnedKcal(week, latestWeight),

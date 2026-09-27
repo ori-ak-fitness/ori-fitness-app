@@ -83,17 +83,22 @@ export function bestRepsByExercise(workouts) {
  * אילו סטים בהיסטוריה שברו שיא. מחושב מחדש בכל רינדור ולא נשמר,
  * כך שגם מחיקת אימון או ייבוא גיבוי מעדכנים את הסימונים מיד.
  *
- * הפעם הראשונה שעושים תרגיל אינה "שיא" — אין עדיין מה לשבור.
- * משם והלאה, כל סט שעובר את הכי כבד שהיה לפניו מסומן.
+ * הפעם הראשונה שעושים תרגיל אינה "שיא" — אין עדיין מה לשבור. זה נכון
+ * לאימון *כולו*, לא רק לסט הראשון: פעם סט שני כבד יותר באותו אימון
+ * ראשון סומן 🏆, וכל חימום עולה (60, 80, 100) נחגג כשיא. השיא נמדד מול
+ * מה שהיה לפני האימון הזה; אימון שבו התרגיל חדש רק קובע את הרף.
  *
  * @returns {Map<string, Set<string>>} מזהה אימון -> מזהי הסטים ששברו שיא
  */
 export function prSetsByWorkout(workouts) {
-  const bestWeight = new Map();
+  const bestWeight = new Map();   // שיא כל תרגיל לפני האימון הנוכחי
   const bestReps = new Map();
   const byWorkout = new Map();
 
   for (const w of strengthOnly(workouts).sort((a, b) => a.startedAt - b.startedAt)) {
+    const runWeight = new Map();  // השיא בתוך האימון הזה עד עכשיו
+    const runReps = new Map();
+
     for (const ex of w.exercises) {
       for (const s of ex.sets) {
         const weight = liftedWeight(s);
@@ -103,17 +108,19 @@ export function prSetsByWorkout(workouts) {
         let broke = false;
 
         if (weight) {
-          const prevW = bestWeight.get(ex.name);
-          if (prevW === undefined) bestWeight.set(ex.name, weight);
-          else if (weight > prevW) { bestWeight.set(ex.name, weight); broke = true; }
+          const prior = bestWeight.get(ex.name);       // undefined = פעם ראשונה בחיים
+          const soFar = runWeight.get(ex.name) ?? 0;
+          if (prior !== undefined && weight > Math.max(prior, soFar)) broke = true;
+          if (weight > soFar) runWeight.set(ex.name, weight);
         }
 
         // שיא חזרות נספר גם הוא — עקביות עם checkPR ב-workouts.js,
         // כדי שתגית 🏆 לא תיעלם כשחוזרים להיסטוריה אחרי שהופיעה בזמן אמת
         if (reps) {
-          const prevR = bestReps.get(ex.name);
-          if (prevR === undefined) bestReps.set(ex.name, reps);
-          else if (reps > prevR) { bestReps.set(ex.name, reps); broke = true; }
+          const prior = bestReps.get(ex.name);
+          const soFar = runReps.get(ex.name) ?? 0;
+          if (prior !== undefined && reps > Math.max(prior, soFar)) broke = true;
+          if (reps > soFar) runReps.set(ex.name, reps);
         }
 
         if (!broke) continue;
@@ -121,6 +128,10 @@ export function prSetsByWorkout(workouts) {
         byWorkout.get(w.id).add(s.id);
       }
     }
+
+    // רק עכשיו, אחרי שהאימון נגמר, הוא נכנס לרף של האימונים הבאים
+    for (const [name, v] of runWeight) bestWeight.set(name, Math.max(bestWeight.get(name) ?? 0, v));
+    for (const [name, v] of runReps) bestReps.set(name, Math.max(bestReps.get(name) ?? 0, v));
   }
   return byWorkout;
 }

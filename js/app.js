@@ -4,7 +4,7 @@
    =================================================================== */
 
 import * as db from './db.js';
-import { $, $$, toast, initSheet, setAutoAdvanceMs, AUTO_ADVANCE_DEFAULT_MS, dateKey } from './ui.js';
+import { $, $$, toast, initSheet, onSheetClosed, setAutoAdvanceMs, AUTO_ADVANCE_DEFAULT_MS, dateKey } from './ui.js';
 import { initCardio, renderCardio, invalidateCardioCache, cardioTemplateForDay, cardioForDate } from './cardio.js';
 import { initWorkouts, startWorkout, hasActiveWorkout, renderHistory, getAllWorkouts } from './workouts.js';
 import {
@@ -411,6 +411,13 @@ async function main() {
   db.requestPersistence().catch(() => {});
 
   initSheet();
+  // גיליון שנסגר בהגדרות שינה משהו שמופיע בתקציר מתחת לפריט — מרעננים (מדוחה)
+  let settingsRefreshTimer = null;
+  onSheetClosed(() => {
+    if (currentScreen !== 'settings') return;
+    clearTimeout(settingsRefreshTimer);
+    settingsRefreshTimer = setTimeout(() => { if (currentScreen === 'settings') renderSettings(); }, 250);
+  });
   await initThemeSetting();
   await initBehaviourSettings();
 

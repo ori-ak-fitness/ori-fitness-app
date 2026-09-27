@@ -285,15 +285,21 @@ function openMealSheet(existing = null) {
     const calories = num($('#mealKcal', body).value, 0);
     if (!name && !calories) { toast('הזן לפחות שם או קלוריות', 'err'); return; }
 
+    // min="0" ב-HTML לא נאכף בהקלדה: "-500" נשמר עד היום כקלוריות שליליות
+    // ומוריד את הסכום היומי, ו-"85000" בטעות מפוצץ את הטבעת והגרפים
+    const macros = ['#mealProtein', '#mealCarbs', '#mealFat'].map((sel) => num($(sel, body).value, 0));
+    if (calories < 0 || calories > 20000) { toast('קלוריות: מספר בין 0 ל-20,000', 'err'); return; }
+    if (macros.some((m) => m < 0 || m > 2000)) { toast('מאקרו: מספר בין 0 ל-2,000 גרם', 'err'); return; }
+
     const meal = {
       id: existing?.id ?? db.uid(),
       date: existing?.date ?? currentDate,
       createdAt: existing?.createdAt ?? Date.now(),
       name: name || 'ארוחה',
       calories,
-      protein: num($('#mealProtein', body).value, 0),
-      carbs:   num($('#mealCarbs', body).value, 0),
-      fat:     num($('#mealFat', body).value, 0),
+      protein: macros[0],
+      carbs:   macros[1],
+      fat:     macros[2],
       details: $('#mealDetails', body).value.trim(),
       photo: photoChanged ? photoBlob : (existing?.photo ?? null),
       thumb: photoChanged ? thumbBlob : (existing?.thumb ?? null),
@@ -445,12 +451,16 @@ export async function openGoalSheet() {
       class: 'btn btn-primary btn-block',
       onclick: guard(async () => {
         const effectiveFrom = $('#goalFrom', body).value || currentDate;
+        const kcal = num($('#goalKcal', body).value, 0);
+        const macros = ['#goalProtein', '#goalCarbs', '#goalFat'].map((sel) => num($(sel, body).value, 0));
+        if (kcal < 0 || kcal > 20000) { toast('קלוריות: מספר בין 0 ל-20,000', 'err'); return; }
+        if (macros.some((m) => m < 0 || m > 2000)) { toast('מאקרו: מספר בין 0 ל-2,000 גרם', 'err'); return; }
         await saveGoal({
           effectiveFrom,
-          calories: num($('#goalKcal', body).value, 0),
-          protein:  num($('#goalProtein', body).value, 0),
-          carbs:    num($('#goalCarbs', body).value, 0),
-          fat:      num($('#goalFat', body).value, 0),
+          calories: kcal,
+          protein:  macros[0],
+          carbs:    macros[1],
+          fat:      macros[2],
         });
         closeSheet();
         await renderNutrition();
@@ -508,7 +518,10 @@ export async function initNutrition({ onUpdate } = {}) {
   $('#nutDateLabel').addEventListener('click', () => {
     picker.value = currentDate;
     picker.max = dateKey();
-    picker.showPicker ? picker.showPicker() : picker.click();
+    // showPicker זורק בדפדפנים שדורשים מחווה מפורשת או לא תומכים בו לשדה הזה;
+    // click() הוא הגיבוי הוותיק, ועדיף על קליק שפשוט לא עושה כלום
+    try { picker.showPicker ? picker.showPicker() : picker.click(); }
+    catch { try { picker.click(); } catch { /* אין מה לעשות */ } }
   });
   picker.addEventListener('change', () => { if (picker.value) goToDate(picker.value); });
 

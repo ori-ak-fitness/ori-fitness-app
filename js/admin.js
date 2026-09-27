@@ -31,14 +31,21 @@ export function isAdminUser() {
  * להיעלם או לשבור את המסך רק בגלל שאין רגע רשת.
  * @returns {Promise<string>}
  */
+let summaryCache = { at: 0, text: '' };
+
 export async function usersSummary() {
+  // קריאה אחת לכל המשתמשים לכל רינדור של ההגדרות — ועכשיו ההגדרות מתרעננות
+  // בכל סגירת גיליון. דקה של מטמון חוסכת עשרות קריאות שלא משנות את התשובה
+  if (summaryCache.text && Date.now() - summaryCache.at < 60000) return summaryCache.text;
   try {
     const users = await fetchUsers();
     const pending = users.filter((u) => (u.status || 'pending') === 'pending').length;
     const approved = users.filter((u) => u.status === 'approved').length;
-    return pending
+    const text = pending
       ? `${pending} ממתינים לאישור · ${approved} מאושרים`
       : `${approved} מאושרים`;
+    summaryCache = { at: Date.now(), text };
+    return text;
   } catch {
     return 'לחץ כדי לנהל את המשתמשים';
   }
@@ -156,6 +163,7 @@ export async function openUsersSheet() {
         toast('הפעולה נכשלה - בדוק חיבור לאינטרנט ונסה שוב', 'err');
         throw err; // actionButton תופס את זה ומאפס את מצב הכפתור
       }
+      summaryCache = { at: 0, text: '' };   // הספירה בהגדרות השתנתה
       toast(status === 'approved'
         ? `${user.name || user.email} אושר/ה`
         : `הגישה של ${user.name || user.email} הוסרה`, 'ok');

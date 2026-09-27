@@ -12,7 +12,7 @@
 import * as db from './db.js';
 import {
   $, el, toast, openSheet, closeSheet, confirmSheet,
-  num, fmtNum, dateKey, guard, keepScroll, macroLine,
+  num, clampNum, fmtNum, dateKey, guard, keepScroll, macroLine,
 } from './ui.js';
 
 let libraryCache = null;
@@ -282,7 +282,8 @@ export function openFoodEditor(existing, date, onAdded) {
     el('input', {
       type: 'number', inputmode: 'numeric', min: '0', value: item[key] || '',
       placeholder: '0', ...extra,
-      oninput: (e) => { item[key] = num(e.target.value, 0); },
+      // בלי שליליים או ענקיים: min="0" לא נאכף בהקלדה
+      oninput: (e) => { item[key] = clampNum(e.target.value, 0, key === 'calories' ? 20000 : 2000, 0); },
     }),
   );
 
