@@ -30,6 +30,7 @@ const draft = {
   meals: [],                         // { name, calories, protein, carbs, fat }
   goal: { calories: 2200, protein: 150, carbs: 220, fat: 70 },
   bodyStats: null,                   // { weight, height, age, sex, activity, goal } — לחישוב BMI/קלוריות
+  keepGoal: false,                   // הרצה חוזרת עם יעד קיים: לא לדרוס אותו בחישוב אוטומטי
 };
 
 const CARDIO_OPTIONS = [
@@ -91,8 +92,13 @@ function stepRoutines() {
           type: 'text', value: r.exercises.map((x) => x.name).join(', '),
           placeholder: 'תרגילים, מופרדים בפסיק',
           oninput: (e) => {
+            // הרצה חוזרת: תרגיל שכבר קיים שומר את הסטים/חזרות/משקל/מזהה שלו.
+            // קודם כל עריכה של השדה איפסה את כל התרגילים ל-3×8-12. התאמה לפי שם
+            // מול הרשימה המקורית (נשמרת פעם אחת), כדי שגם הקלדה חלקית וחזרה
+            // לשם המקורי תחזיר את התרגיל כמו שהיה
+            r.originals ??= new Map(r.exercises.map((x) => [x.name, x]));
             r.exercises = e.target.value.split(',').map((s) => s.trim()).filter(Boolean)
-              .map((name) => ({ name, sets: 3, reps: '8-12' }));
+              .map((name) => r.originals.get(name) ?? { name, sets: 3, reps: '8-12' });
           },
         }),
       ),
@@ -296,13 +302,16 @@ function stepBodyStats() {
   const bs = draft.bodyStats;
   const resultBox = el('div', { class: 'summary-grid', style: 'margin:14px 0' });
 
-  const recalc = () => {
+  const recalc = (fromUser = false) => {
     const weightKg = num(bs.weight, 0), h = num(bs.height, 0), a = num(bs.age, 0);
     const bmi = calcBMI(weightKg, h);
     let kcal = null;
     if (weightKg > 0 && h > 0 && a > 0) {
       kcal = calcRecommendedCalories({ weightKg, heightCm: h, age: a, sex: bs.sex, activityKey: bs.activity, goalKey: bs.goal });
-      draft.goal.calories = kcal;
+      // בהרצה חוזרת היעד הקיים נשאר כמו שהוא עד שהמשתמש משנה בעצמו פרט גוף.
+      // קודם עצם פתיחת השלב דרסה יעד חיטוב של 2,200 ב"תחזוקה" של 2,800 — בלי
+      // ששינית כלום, ורק מי ששם לב בשלב הבא ראה את זה
+      if (fromUser || !draft.keepGoal) draft.goal.calories = kcal;
     }
     resultBox.replaceChildren(
       el('div', { class: 'sg' }, el('b', {}, bmi ? fmtNum(bmi, 1) : '—'), el('span', {}, bmi ? `BMI · ${bmiCategory(bmi)}` : 'BMI')),
@@ -314,17 +323,17 @@ function stepBodyStats() {
     el('label', {}, label),
     el('input', {
       type: 'number', inputmode: mode, min: '0', value: bs[key], placeholder,
-      oninput: (e) => { bs[key] = e.target.value; recalc(); },
+      oninput: (e) => { bs[key] = e.target.value; recalc(true); },
     }),
   );
 
-  const sexSelect = el('select', { onchange: (e) => { bs.sex = e.target.value; recalc(); } },
+  const sexSelect = el('select', { onchange: (e) => { bs.sex = e.target.value; recalc(true); } },
     el('option', { value: 'male', selected: bs.sex !== 'female' }, 'זכר'),
     el('option', { value: 'female', selected: bs.sex === 'female' }, 'נקבה'),
   );
-  const activitySelect = el('select', { onchange: (e) => { bs.activity = e.target.value; recalc(); } },
+  const activitySelect = el('select', { onchange: (e) => { bs.activity = e.target.value; recalc(true); } },
     ...ACTIVITY_LEVELS.map((a) => el('option', { value: a.key, selected: a.key === bs.activity }, a.label)));
-  const goalSelect = el('select', { onchange: (e) => { bs.goal = e.target.value; recalc(); } },
+  const goalSelect = el('select', { onchange: (e) => { bs.goal = e.target.value; recalc(true); } },
     ...GOAL_KINDS.map((g) => el('option', { value: g.key, selected: g.key === bs.goal }, g.label)));
 
   recalc();
@@ -419,7 +428,7 @@ function stepDone() {
   // אותו תנאי בדיוק כמו ב-persist(): שם מלא וגם לפחות ערך אחד שאינו אפס,
   // אחרת השורה לא באמת נשמרת ולא נכון לספור אותה כאן.
   const meals = draft.meals.filter((m) =>
-    m.name.trim() && (num(m.calories, 0) || num(m.protein, 0) || num(m.carbs, 0) || num(m.fat, 0))).length;
+    m.name.trim() && (m.id || num(m.calories, 0) || num(m.protein, 0) || num(m.carbs, 0) || num(m.fat, 0))).length;
 
   return {
     canSkip: false,
@@ -499,8 +508,10 @@ async function persist() {
     if (!m.name.trim()) continue;
     // השלב מציע מקומות ריקים לארוחות ולארוחות ביניים. אם דילגת בלי
     // למלא כלום, אין טעם לשמור אותם — הם היו מופיעים בתפריט עם 0 קלוריות.
+    // רק שורה חדשה וריקה נזרקת. פריט שכבר קיים במאגר (יש לו id) נשמר גם אם כל
+    // ערכיו אפס — "מים" או "קפה שחור" נמחקו בשקט בכל הרצה חוזרת של האשף
     const empty = !num(m.calories, 0) && !num(m.protein, 0) && !num(m.carbs, 0) && !num(m.fat, 0);
-    if (empty) continue;
+    if (empty && !m.id) continue;
     await db.put(db.STORES.mealPlan, {
       id: m.id || db.uid(), name: m.name.trim(), kind: m.kind === 'snack' ? 'snack' : 'meal',
       isDefault: m.isDefault ?? true, details: m.details ?? '',
@@ -525,8 +536,11 @@ async function persist() {
 
   const g = draft.goal;
   if (g.calories > 0) {
+    // יעד קיים לאותו יום מתעדכן במקום להיווצר כפול: שני יעדים עם אותו תאריך
+    // תחילה נותנים ל-goalForDate תוצאה שתלויה בסדר האקראי של המזהים
+    const sameDay = (await db.getAll(db.STORES.goals)).find((x) => x.effectiveFrom === dateKey());
     await db.put(db.STORES.goals, {
-      id: db.uid(),
+      id: sameDay?.id ?? db.uid(),
       // dateKey(), לא toISOString() — זה תאריך UTC, ולפני חצות בישראל
       // (UTC+2/3) הוא עדיין "אתמול", בניגוד לכל שאר האפליקציה
       effectiveFrom: dateKey(),
@@ -644,6 +658,7 @@ export async function rerunWizard() {
   const currentGoal = await goalForDate(dateKey());
   if (currentGoal?.calories > 0) {
     draft.goal = { calories: currentGoal.calories, protein: currentGoal.protein, carbs: currentGoal.carbs, fat: currentGoal.fat };
+    draft.keepGoal = !!currentGoal.effectiveFrom;   // ברירת המחדל (בלי יעד שנקבע) לא נחשבת יעד קיים
   }
   openWizard();
 }
