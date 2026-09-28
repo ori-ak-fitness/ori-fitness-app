@@ -828,44 +828,29 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
    קודם היא באה אחרי כרטיס שכבר סיפק אותו */
 #hsCardioCard { margin-top: 10px; }
 
-/* ---------- כרטיס "ווידג'ט" כהה סביב השבוע ----------
-   אורי הצביע על כרטיס הציטוט (כהה, פסים אלכסוניים עדינים) ואמר
-   שהמסגור השחור שם נותן "טאצ'" — כאן אותה מרקם בדיוק, סביב הריבוע
-   הכי "חי" בבית. כל שאר האלמנטים בפנים (wk-*, hs-card המקונן) כבר
-   צובעים את עצמם מהטוקנים הרגילים (--bg-elev, --text-dim, --mark…),
-   ולכן ברגע שהם נדרסים כאן לגרסה הכהה כל הפנים עוברות איתם לבד —
-   בלי לגעת בכלל אחד נוסף. ירוק (--ok) ולבן על ירוק לא מוגדרים כאן
-   ונשארים בדיוק כפי שהם בכל מקום אחר, כמו שאורי ביקש. */
+/* ---------- מסגרת שחורה סביב כרטיסי הבית ----------
+   אורי לא רצה כרטיס כהה מלא — רק "מסגרת שחורה", מסגור ברור במקום
+   הקו הבהיר הדק (--line) שכל כרטיס משתמש בו. --accent הוא כבר כהה-
+   קרוב-לשחור ביום והופך לקרם בלילה (בדיוק כמו כל שימוש אחר בו),
+   כך שהמסגרת נשארת רואים אותה בשתי הערכות ולא נעלמת בלילה. */
 .hs-hero-card {
-  --bg:           #1a1712;
-  --bg-elev:      rgba(255, 255, 255, .07);
-  --bg-elev-2:    rgba(255, 255, 255, .12);
-  --line:         rgba(255, 255, 255, .14);
-  --line-neutral: rgba(255, 255, 255, .24);
-  --text:         #f4f0e6;
-  --text-dim:     rgba(244, 240, 230, .68);
-  --text-faint:   rgba(244, 240, 230, .45);
-  --mark:         var(--gold);
-  --mark-text:    var(--gold);
-  --mark-ink:     #16302f;
-  --today-mark:   var(--gold);
-  --today-text:   var(--gold);
-  --protein:      #35c9ff;
-  --shadow-soft:  rgba(0, 0, 0, .3);
-  --shadow-strong: rgba(0, 0, 0, .4);
-
-  color: var(--text);
-  background:
-    radial-gradient(120% 90% at 85% 0%, color-mix(in srgb, var(--gold) 30%, transparent), transparent 62%),
-    repeating-linear-gradient(115deg, rgba(255,255,255,.04) 0 2px, transparent 2px 16px),
-    linear-gradient(160deg, #2f2a22, #1a1712);
-  border: 1px solid rgba(255, 255, 255, .1);
+  background: var(--bg-elev);
   border-radius: var(--r-lg);
   padding: 18px;
   box-shadow: 0 1px 2px var(--shadow-strong), 0 10px 22px -8px var(--shadow-strong);
 }
-.hs-hero-card .wk-letter,
-.hs-hero-card .wk-date { color: rgba(244, 240, 230, .7); }
+
+/* ---------- מסגרת שחורה על כרטיסים ורשימות בכל המסכים ----------
+   בלוק אחד, קל למחיקה כמכלול אם אורי לא יאהב — פשוט למחוק את הכלל
+   הזה וכל כרטיס חוזר לקו הבהיר הרגיל (var(--line)). אריחי השבוע
+   (day-chip) לא כלולים בכוונה — הוא ביקש להשאיר אותם כמו שהם. */
+.card, .timer-card, .kcal-card, .chart-card,
+.list-item, .exercise-card, .today-card, .settings-group,
+.cardio-row, .plan-meal, .full-menu-card, .cs-row, .wg-auto, .pick-card,
+.goal-row, .hs-hero-card,
+#homeNutritionSection .hs-card {
+  border: 1.5px solid var(--hard-black);
+}
 
 /* ---------- השבוע במסך הבית: עיגולים + שורה (dashboard.js) ----------
    בלי שמות בתוך העיגולים — הצבע והאייקון אומרים מה המצב, והשם
