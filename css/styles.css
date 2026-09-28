@@ -1473,6 +1473,10 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
   padding: 4px 11px; font-size: .76rem; font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
+/* בלי טקסט (עדיין אין שקילה/תפריט) הפס עדיין מצייר את הרקע והמסגרת
+   שלו — כדור-פס ריק בלי שום מידע. אורי הצביע עליו בדיוק ("עיגול...
+   פס מוזר") ליד "יומן שקילות" לפני שקילה ראשונה */
+.head-badge:empty { display: none; }
 .head-badge.is-complete {
   background: var(--accent-soft); border-color: var(--ok); color: var(--ok);
 }
