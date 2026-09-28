@@ -374,11 +374,17 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .screen { animation: fadeIn .22s ease; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 
-/* מעבר בהחלקת אצבע — קצר בכוונה: מעל זה זה מרגיש איטי, לא חלק */
-.screen.slide-left  { animation: slideFromLeft .19s ease-out; }
-.screen.slide-right { animation: slideFromRight .19s ease-out; }
-@keyframes slideFromLeft  { from { opacity: .4; transform: translateX(26px); } to { opacity: 1; transform: none; } }
-@keyframes slideFromRight { from { opacity: .4; transform: translateX(-26px); } to { opacity: 1; transform: none; } }
+/*
+ * הכניסה של המסך אחרי שהחלקת אצבע "שחררה" אותו (ראו initSwipeNav
+ * ב-app.js) — ממשיכה את התנועה שהאצבע כבר התחילה, ולכן מלאה (100%)
+ * ולא נדנוד קטן, כדי שלא ירגיש כמו שתי אנימציות נפרדות. קצרה בכוונה:
+ * מעל זה זה מרגיש איטי, לא חלק. לחיצה על לשונית לא מפעילה את זה בכלל
+ * (slideFrom ריק) — שם אין כיוון אמיתי, ואנימציה שרירותית רק מאטה.
+ */
+.screen.slide-left  { animation: slideFromLeft .18s cubic-bezier(.22,.61,.36,1); }
+.screen.slide-right { animation: slideFromRight .18s cubic-bezier(.22,.61,.36,1); }
+@keyframes slideFromLeft  { from { transform: translateX(100%); } to { transform: none; } }
+@keyframes slideFromRight { from { transform: translateX(-100%); } to { transform: none; } }
 
 /* יותר אוויר בין המקטעים — הרווח הוא מה שמפריד ביניהם עכשיו, במקום
    הקווים הכהים שהוסרו */
@@ -409,9 +415,9 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 
 /*
  * שורת פעולות התזונה (חיפוש/ברקוד/מהיר/חדש/מהמאגר) — עלתה למעלה,
- * מיד מתחת ל"נותרו", ועברה מכפתורי מילוי טורקיז לכרטיסי-אייקון
- * בהירים עם מסגרת — אותה שפה כמו שאר הכרטיסים באפליקציה, נראה
- * פחות "כפתור ווב" ויותר חלק ואיכותי.
+ * מיד מתחת ל"נותרו". אורי רצה את הטורקיז בחזרה, רק "בצורה יפה" —
+ * אותה מילוי-זכוכית ואותה זוהר (btn-glow) כמו הכפתור הראשי, לא
+ * מילוי שטוח בלי עומק כמו שהיה במקור.
  */
 .food-actions {
   display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px;
@@ -419,13 +425,14 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 }
 .food-action {
   display: flex; flex-direction: column; align-items: center; gap: 6px;
-  background: var(--bg-elev); border: 1.5px solid var(--text-dim);
-  color: var(--text); border-radius: var(--r-md); padding: 12px 2px 10px;
-  font-size: .68rem; font-weight: 700; min-width: 0;
-  box-shadow: 0 1px 2px var(--shadow-strong);
-  cursor: pointer; transition: transform .08s ease, background .15s ease;
+  background: linear-gradient(155deg, rgba(255,255,255,.32), rgba(0,0,0,.08)), linear-gradient(150deg, var(--btn-fill-a), var(--btn-fill-b));
+  color: var(--btn-ink); border: 1px solid transparent;
+  border-radius: var(--r-md); padding: 13px 2px 11px; min-width: 0;
+  font-size: .68rem; font-weight: 700;
+  box-shadow: 0 6px 14px -6px var(--btn-glow-1), 0 2px 4px var(--btn-glow-2);
+  cursor: pointer; transition: transform .08s ease, filter .15s ease;
 }
-.food-action:active { transform: scale(.96); background: var(--bg-elev-2); }
+.food-action:active { transform: scale(.96); filter: brightness(.96); }
 .food-action span { font-size: 1.35rem; line-height: 1; }
 .hs-value { margin-inline-start: auto; }
 

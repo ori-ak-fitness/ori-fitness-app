@@ -94,11 +94,15 @@ function showScreen(name, fromHistory = false, slideFrom = null) {
  */
 const SWIPE_ORDER = ['home', 'nutrition', 'workout', 'progress'];
 
-/* מרחק מינימלי, ויחס מול התנועה האנכית — בלי היחס הזה כל גלילה
-   אלכסונית של רשימה ארוכה הייתה מחליפה מסך בטעות */
-const SWIPE_MIN_PX = 60;
+/* מרחק מינימלי לפני שנועלים על כיוון אופקי, ויחס מול התנועה האנכית —
+   בלי היחס הזה כל גלילה אלכסונית של רשימה ארוכה הייתה ננעלת בטעות */
+const SWIPE_LOCK_PX = 10;
 const SWIPE_RATIO = 1.7;
-const SWIPE_MAX_MS = 700;
+/* מעל אחוז כזה מרוחב המסך — משלימים את המעבר גם בלי תזוזה מהירה */
+const SWIPE_COMMIT_FRACTION = 0.3;
+/* מהירות שגם מרחק קטן ממנה נחשב "טפיחה" ומשלים מעבר (פיקסלים/מ״ש) */
+const SWIPE_FLICK_PX_MS = 0.5;
+const SWIPE_FLICK_MIN_PX = 24;
 
 /** מקומות שבהם החלקה אופקית שייכת למשהו אחר ואסור לחטוף אותה */
 function swipeBlocked(target) {
@@ -107,38 +111,94 @@ function swipeBlocked(target) {
     '#sheet, .bc-scanner, .wizard, .gate, input, textarea, select, .lightbox, [data-no-swipe]');
 }
 
+/*
+ * החלקה אמיתית, לא רק זיהוי אחרי העובדה: המסך הנוכחי זז עם האצבע
+ * ברגע אמת (touchmove), בדיוק כמו "בחזרה" של iOS. בשחרור מחליטים
+ * להשלים או לחזור, לפי מרחק/מהירות, ואז ממשיכים לכניסה הקצרה
+ * הקיימת של המסך הבא (slide-left/right) כדי שזו תרגיש תנועה אחת.
+ *
+ * מכוונים רק את המסך היוצא, לא בונים "מסלול" משותף לשני המסכים —
+ * שמירה על הפריסה הרגילה (כל מסך עדיין display:none/hidden כרגיל
+ * חוץ מהיוצא באמצע גרירה), בלי position:fixed/absolute חדש שהיה
+ * צריך להתמודד עם safe-area וגלילה פנימית בנפרד.
+ */
 function initSwipeNav() {
-  let x0 = 0, y0 = 0, t0 = 0, tracking = false;
+  let x0 = 0, y0 = 0, t0 = 0, tracking = false, locked = false, draggingEl = null, dir = 0, i = -1;
+
+  const reset = () => {
+    tracking = false; locked = false; dir = 0;
+    if (draggingEl) { draggingEl.style.transition = ''; draggingEl.style.transform = ''; }
+    draggingEl = null;
+  };
 
   addEventListener('touchstart', (e) => {
     if (e.touches.length !== 1 || swipeBlocked(e.target)) { tracking = false; return; }
+    i = SWIPE_ORDER.indexOf(currentScreen);
+    if (i === -1) { tracking = false; return; }   // הגדרות או מסך שאינו במסלול
     const t = e.touches[0];
-    x0 = t.clientX; y0 = t.clientY; t0 = Date.now(); tracking = true;
+    x0 = t.clientX; y0 = t.clientY; t0 = Date.now();
+    tracking = true; locked = false;
   }, { passive: true });
+
+  addEventListener('touchmove', (e) => {
+    if (!tracking) return;
+    const t = e.touches[0];
+    const dx = t.clientX - x0;
+    const dy = t.clientY - y0;
+
+    if (!locked) {
+      if (Math.abs(dy) > SWIPE_LOCK_PX && Math.abs(dy) > Math.abs(dx) * SWIPE_RATIO) { tracking = false; return; }
+      if (Math.abs(dx) < SWIPE_LOCK_PX) return;
+      locked = true;
+      dir = dx < 0 ? 1 : -1;   // ראו הערה למטה: dx שלילי מתקדם ברשימה
+      draggingEl = $(`#screen-${currentScreen}`);
+      draggingEl.style.transition = 'none';
+    }
+
+    e.preventDefault();
+    const hasNext = !!SWIPE_ORDER[i + dir];
+    // אין לאן להמשיך (קצה המסלול) — נדנוד קטן במקום גרירה מלאה
+    const shown = hasNext ? dx : dx * 0.35;
+    draggingEl.style.transform = `translateX(${shown}px)`;
+  }, { passive: false });
 
   addEventListener('touchend', (e) => {
     if (!tracking) return;
     tracking = false;
+    if (!locked) return;
 
     const t = e.changedTouches[0];
     const dx = t.clientX - x0;
-    const dy = t.clientY - y0;
-    if (Date.now() - t0 > SWIPE_MAX_MS) return;
-    if (Math.abs(dx) < SWIPE_MIN_PX || Math.abs(dx) < Math.abs(dy) * SWIPE_RATIO) return;
-
-    const i = SWIPE_ORDER.indexOf(currentScreen);
-    if (i === -1) return;   // הגדרות או מסך שאינו במסלול
+    const dt = Math.max(1, Date.now() - t0);
+    const el = draggingEl;
+    const width = el.clientWidth || innerWidth;
 
     /*
      * הממשק בעברית, ולכן הלשונית הראשונה יושבת מימין. החלקה שמאלה
-     * מתקדמת ברשימה — כלומר לכיוון שאליו האצבע זזה, וזו ההתנהגות
+     * (dx שלילי) מתקדמת ברשימה — לכיוון שאליו האצבע זזה, וזו ההתנהגות
      * שמרגישה נכונה ולא הפוכה.
      */
-    const next = SWIPE_ORDER[dx < 0 ? i + 1 : i - 1];
-    if (!next) return;
+    const next = SWIPE_ORDER[i + dir];
+    const commit = next && (
+      Math.abs(dx) > width * SWIPE_COMMIT_FRACTION ||
+      (Math.abs(dx) > SWIPE_FLICK_MIN_PX && Math.abs(dx) / dt > SWIPE_FLICK_PX_MS)
+    ) && Math.sign(dx) === -dir;
 
-    showScreen(next, false, dx < 0 ? 'left' : 'right');
+    el.style.transition = 'transform .16s ease-out';
+    if (commit) {
+      el.style.transform = `translateX(${dir < 0 ? width : -width}px)`;
+      setTimeout(() => {
+        reset();
+        showScreen(next, false, dx < 0 ? 'left' : 'right');
+      }, 160);
+    } else {
+      el.style.transform = 'translateX(0)';
+      setTimeout(reset, 160);
+    }
   }, { passive: true });
+
+  // הפסקה חיצונית של המגע (שיחה נכנסת, למשל) — לא משאירים מסך תקוע באמצע גרירה
+  addEventListener('touchcancel', () => { if (tracking) reset(); }, { passive: true });
 }
 
 function initNav() {

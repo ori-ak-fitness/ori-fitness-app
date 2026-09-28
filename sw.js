@@ -3,7 +3,7 @@
    העלה את CACHE_VERSION בכל שחרור גרסה כדי לרענן קבצים.
    =================================================================== */
 
-const CACHE_VERSION = 'ori-fitness-v138';
+const CACHE_VERSION = 'ori-fitness-v139';
 
 const APP_SHELL = [
   './',
