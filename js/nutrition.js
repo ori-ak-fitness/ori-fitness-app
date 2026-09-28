@@ -27,15 +27,51 @@ let onChanged = null;
 // הערה קבועה אחת (לא לפי יום) — התוכנית הכללית שלך, למי ששוכח מה לאכול
 const FULL_MENU_KEY = 'fullMenuNote';
 
+// גודל טקסט לתצוגה/עריכה של התפריט המלא — העדפת תצוגה, לא נמחקת באיפוס
+// (כמו ערכת נושא), ולכן לא ב-RESET_SETTING_KEYS. שלושה שלבים, מסתובב חוזר.
+const FULL_MENU_SIZE_KEY = 'fullMenuTextSize';
+const FULL_MENU_SIZE_CLASSES = ['', 'is-lg', 'is-xl'];
+
+async function getFullMenuTextSize() {
+  const n = Number(await db.getSetting(FULL_MENU_SIZE_KEY, 0));
+  return FULL_MENU_SIZE_CLASSES[n] ? n : 0;
+}
+
+/*
+ * העתק-הדבק מוואטסאפ/פתקים מגיע הרבה פעמים עם שורות ריקות כפולות-
+ * משולשות בין כל פסקה, וזה מה שנראה "מרוח" באמת — לא הגודל. שורה
+ * ריקה אחת בין פסקאות נשארת (היא קריאה), שתיים ומעלה מתכנסות לאחת.
+ * רווחים בסוף שורה (שגם הם דבר שכיח בהעתק-הדבק) נחתכים.
+ */
+function tidyMenuText(text) {
+  return text
+    .replace(/[ \t]+$/gm, '')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
 async function renderFullMenu() {
   const text = (await db.getSetting(FULL_MENU_KEY, '')).trim();
   const card = $('#fullMenuCard');
+  const size = await getFullMenuTextSize();
+  card.classList.remove('is-lg', 'is-xl');
+  if (FULL_MENU_SIZE_CLASSES[size]) card.classList.add(FULL_MENU_SIZE_CLASSES[size]);
   card.classList.toggle('is-empty', !text);
   card.textContent = text || 'עוד לא כתבת את התפריט המלא שלך. לחץ "ערוך" ורשום מה אתה אמור לאכול, כדי שלא תשכח.';
 }
 
-function openFullMenuEditor() {
+async function cycleFullMenuTextSize() {
+  const current = await getFullMenuTextSize();
+  const next = (current + 1) % FULL_MENU_SIZE_CLASSES.length;
+  await db.setSetting(FULL_MENU_SIZE_KEY, next);
+  await renderFullMenu();
+  toast(next === 0 ? 'טקסט רגיל' : next === 1 ? 'טקסט גדול' : 'טקסט גדול מאוד', 'ok');
+}
+
+async function openFullMenuEditor() {
+  const size = await getFullMenuTextSize();
   const textInput = el('textarea', {
+    class: FULL_MENU_SIZE_CLASSES[size] || '',
     rows: 10, placeholder: 'לדוגמה:\nבוקר: 2 ביצים, לחם מלא, קוטג׳\nצהריים: חזה עוף, אורז, סלט\nערב: יוגורט, פרי',
   });
 
@@ -46,7 +82,7 @@ function openFullMenuEditor() {
     el('button', {
       class: 'btn btn-primary btn-block',
       onclick: guard(async () => {
-        await db.setSetting(FULL_MENU_KEY, textInput.value.trim());
+        await db.setSetting(FULL_MENU_KEY, tidyMenuText(textInput.value));
         await renderFullMenu();
         closeSheet();
         toast('נשמר', 'ok');
@@ -530,6 +566,7 @@ export async function initNutrition({ onUpdate } = {}) {
     openFoodPicker(currentDate, () => renderNutrition())));
 
   $('#editFullMenuBtn').addEventListener('click', guard(openFullMenuEditor));
+  $('#fullMenuSizeBtn').addEventListener('click', guard(cycleFullMenuTextSize));
   await renderFullMenu();
 
   await renderNutrition();
