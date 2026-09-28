@@ -86,7 +86,15 @@ function buildExerciseSeries(workouts) {
 export async function renderProgress() {
   const workouts = await getStrengthWorkouts();   // אירובי לא שייך לנפח ולתרגילים: הופיע כעמודה של 0 ק"ג
   const chronological = [...workouts].sort((a, b) => a.startedAt - b.startedAt);
-  const types = Array.from(new Set(chronological.map(workoutTypeLabel))).sort((a, b) => a.localeCompare(b, 'he'));
+
+  /*
+   * לא לפי א"ב (זה עירבב "A"/"B" לטיניים עם שמות עבריים כמו "רגליים"
+   * בסדר לא צפוי) - לפי סדר ההגדרה של התוכניות עצמן, אותו סדר שרואים
+   * ב"אימוני כוח". "אימון חופשי" (בלי תוכנית) נופל בסוף, לא ממוין.
+   */
+  const routineOrder = new Map((await getRoutines()).map((r) => [r.name, r.order ?? 0]));
+  const types = Array.from(new Set(chronological.map(workoutTypeLabel)))
+    .sort((a, b) => (routineOrder.get(a) ?? Infinity) - (routineOrder.get(b) ?? Infinity));
 
   // ---- בורר אימון — מצמצם את רשימת התרגילים ואת הנתונים לאימון ספציפי,
   // כדי שקל למצוא בזריזות "כמה עליתי בתרגיל הזה, באימון הזה" ----
