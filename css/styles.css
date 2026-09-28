@@ -408,31 +408,25 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .head-actions { display: flex; gap: 8px; margin-inline-start: auto; }
 
 /*
- * שורת פעולות התזונה (חיפוש/ברקוד/מהיר/חדש/מהמאגר) — היו חמישה
- * כפתורי טקסט בתוך שורת הכותרת, שנשברו בלי סדר ברוחב טלפון ואחד
- * מהם (הראשי) בלט בגודל שונה. עכשיו רשת אחידה מתחת לכותרת, בסגנון
- * אייקון-מעל-תווית כמו שורת הניווט התחתונה — כל התאים באותו גודל
- * בדיוק, כולל הפעולה הראשית, שמסומנת רק בצבע ולא בגודל.
+ * שורת פעולות התזונה (חיפוש/ברקוד/מהיר/חדש/מהמאגר) — עלתה למעלה,
+ * מיד מתחת ל"נותרו", ועברה מכפתורי מילוי טורקיז לכרטיסי-אייקון
+ * בהירים עם מסגרת — אותה שפה כמו שאר הכרטיסים באפליקציה, נראה
+ * פחות "כפתור ווב" ויותר חלק ואיכותי.
  */
 .food-actions {
-  display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px;
+  display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px;
   margin: 2px 0 16px;
 }
 .food-action {
-  display: flex; flex-direction: column; align-items: center; gap: 4px;
-  background: linear-gradient(155deg, rgba(255,255,255,.28), rgba(0,0,0,.08)), linear-gradient(150deg, var(--btn-fill-a), var(--btn-fill-b));
-  border: 1px solid transparent; color: var(--btn-ink);
-  border-radius: var(--r-md); padding: 10px 2px; font-size: .72rem; font-weight: 700;
-  cursor: pointer; transition: transform .08s ease, border-color .15s ease;
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  background: var(--bg-elev); border: 1.5px solid var(--text-dim);
+  color: var(--text); border-radius: var(--r-md); padding: 12px 2px 10px;
+  font-size: .68rem; font-weight: 700; min-width: 0;
+  box-shadow: 0 1px 2px var(--shadow-strong);
+  cursor: pointer; transition: transform .08s ease, background .15s ease;
 }
-.food-action:active { transform: scale(.96); }
-.food-action span { font-size: 1.2rem; line-height: 1; }
-/* חמישה תאים ברוחב טלפון צר במיוחד נדחסים מתחת לנוחות קריאה —
-   התווית יורדת שורה כדי שהריווח הפנימי לא יילחץ עוד יותר */
-@media (max-width: 350px) {
-  .food-action { font-size: 0; }
-  .food-action span { font-size: 1.3rem; }
-}
+.food-action:active { transform: scale(.96); background: var(--bg-elev-2); }
+.food-action span { font-size: 1.35rem; line-height: 1; }
 .hs-value { margin-inline-start: auto; }
 
 /* ---------- כפתורים ---------- */

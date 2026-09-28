@@ -225,13 +225,9 @@ export async function renderNutrition() {
   const extras = meals.filter((m) => !m.fromToggle);
 
   const host = $('#mealList');
-  if (!extras.length) {
-    host.replaceChildren(el('div', { class: 'empty-state' },
-      el('div', { class: 'empty-icon' }, '🍎'),
-      el('p', { html: 'לא הוספת עוד כלום היום.<br>"+ מהמאגר" לתוספת מהירה, או "חדש" למשהו אחר.' })));
-  } else {
-    host.replaceChildren(...extras.map(renderMealRow));
-  }
+  // בלי מצב-ריק — הכפתורים ממש מעל מסבירים את עצמם, אין צורך להזכיר
+  // שוב שעוד לא נוסף כלום
+  host.replaceChildren(...extras.map(renderMealRow));
 
   onChanged?.();
 }
