@@ -415,9 +415,17 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 
 /*
  * שורת פעולות התזונה (חיפוש/ברקוד/מהיר/חדש/מהמאגר) — עלתה למעלה,
- * מיד מתחת ל"נותרו". אורי רצה את הטורקיז בחזרה, רק "בצורה יפה" —
- * אותה מילוי-זכוכית ואותה זוהר (btn-glow) כמו הכפתור הראשי, לא
- * מילוי שטוח בלי עומק כמו שהיה במקור.
+ * מיד מתחת ל"נותרו", בטורקיז.
+ *
+ * במתכון "זכוכית" עם שתי שכבות גרדיאנט (לבן שקוף באלכסון + הגרדיאנט
+ * הצבעוני, כמו ב-btn-primary) — אורי צילם וראה פס/מדרגות צבע מכוער
+ * ליד הפינה העליונה של כל כפתור. זה קרה רק כאן ולא בכפתור הראשי,
+ * וההבדל היחיד הוא הגודל: כפתור מלא-רוחב פורש את המעבר לבן-לשקוף
+ * על פני הרבה יותר פיקסלים, וכאן (כ-65px) אותו מעבר נדחס למרחק קצר
+ * מאוד — בדיוק מה שגורם ל-banding נראה לעין ברינדור גרדיאנטים של
+ * ספארי/iOS (לא שוכפל כאן בכרום, אבל זה תואם בדיוק את התיאור).
+ * הפתרון: גרדיאנט צבע-לצבע יחיד, בלי שכבת שקיפות שנייה שדוחסת מעבר
+ * ניגודי לשטח קטן מדי.
  */
 .food-actions {
   display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px;
@@ -425,11 +433,12 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 }
 .food-action {
   display: flex; flex-direction: column; align-items: center; gap: 6px;
-  background: linear-gradient(155deg, rgba(255,255,255,.32), rgba(0,0,0,.08)), linear-gradient(150deg, var(--btn-fill-a), var(--btn-fill-b));
+  background: linear-gradient(160deg, var(--btn-fill-a), var(--btn-fill-b));
+  background-clip: padding-box;
   color: var(--btn-ink); border: 1px solid transparent;
   border-radius: var(--r-md); padding: 13px 2px 11px; min-width: 0;
   font-size: .68rem; font-weight: 700;
-  box-shadow: 0 6px 14px -6px var(--btn-glow-1), 0 2px 4px var(--btn-glow-2);
+  box-shadow: 0 4px 10px -6px var(--btn-glow-1);
   cursor: pointer; transition: transform .08s ease, filter .15s ease;
 }
 .food-action:active { transform: scale(.96); filter: brightness(.96); }

@@ -90,7 +90,8 @@ function showScreen(name, fromHistory = false, slideFrom = null) {
 /*
  * סדר ההחלקה הוא סדר הלשוניות על המסך, לא סדר המערך SCREENS.
  * ההגדרות אינן ברשימה בכוונה: הן נפתחות מגלגל השיניים ואינן חלק
- * מהמסלול שעוברים בו באצבע.
+ * מהמסלול שעוברים בו באצבע. המסלול מעגלי — אחרי progress חוזרים
+ * ל-home ולהפך (ראו i + dir למטה, עם מודולו).
  */
 const SWIPE_ORDER = ['home', 'nutrition', 'workout', 'progress'];
 
@@ -103,6 +104,8 @@ const SWIPE_COMMIT_FRACTION = 0.3;
 /* מהירות שגם מרחק קטן ממנה נחשב "טפיחה" ומשלים מעבר (פיקסלים/מ״ש) */
 const SWIPE_FLICK_PX_MS = 0.5;
 const SWIPE_FLICK_MIN_PX = 24;
+/* משך אנימציית הסיום (השלמה/חזרה) - קצר בכוונה, ראו הערה על 120Hz למטה */
+const SWIPE_SETTLE_MS = 130;
 
 /** מקומות שבהם החלקה אופקית שייכת למשהו אחר ואסור לחטוף אותה */
 function swipeBlocked(target) {
@@ -121,13 +124,26 @@ function swipeBlocked(target) {
  * שמירה על הפריסה הרגילה (כל מסך עדיין display:none/hidden כרגיל
  * חוץ מהיוצא באמצע גרירה), בלי position:fixed/absolute חדש שהיה
  * צריך להתמודד עם safe-area וגלילה פנימית בנפרד.
+ *
+ * ביצועים על מסך 120Hz: הכתיבה ל-transform בזמן גרירה עוברת דרך
+ * requestAnimationFrame כדי שלא ייכתב יותר מפעם אחת לפריים (בלי זה,
+ * מכשיר מהיר מקבל כמה אירועי touchmove בין ציור לציור וכותב שוב ושוב
+ * לשווא), ו-will-change מעלה את המסך לשכבת compositor משלו כך
+ * שהגרירה עצמה זזה בלי לצייר (repaint) מחדש בכל פריים.
  */
 function initSwipeNav() {
   let x0 = 0, y0 = 0, t0 = 0, tracking = false, locked = false, draggingEl = null, dir = 0, i = -1;
+  let pendingDx = 0, rafId = null;
+
+  const applyTransform = () => {
+    rafId = null;
+    if (draggingEl) draggingEl.style.transform = `translateX(${pendingDx}px)`;
+  };
 
   const reset = () => {
     tracking = false; locked = false; dir = 0;
-    if (draggingEl) { draggingEl.style.transition = ''; draggingEl.style.transform = ''; }
+    if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+    if (draggingEl) { draggingEl.style.transition = ''; draggingEl.style.transform = ''; draggingEl.style.willChange = ''; }
     draggingEl = null;
   };
 
@@ -153,13 +169,12 @@ function initSwipeNav() {
       dir = dx < 0 ? 1 : -1;   // ראו הערה למטה: dx שלילי מתקדם ברשימה
       draggingEl = $(`#screen-${currentScreen}`);
       draggingEl.style.transition = 'none';
+      draggingEl.style.willChange = 'transform';
     }
 
     e.preventDefault();
-    const hasNext = !!SWIPE_ORDER[i + dir];
-    // אין לאן להמשיך (קצה המסלול) — נדנוד קטן במקום גרירה מלאה
-    const shown = hasNext ? dx : dx * 0.35;
-    draggingEl.style.transform = `translateX(${shown}px)`;
+    pendingDx = dx;   // המסלול מעגלי — תמיד יש "הבא", בלי נדנוד קצה
+    if (rafId === null) rafId = requestAnimationFrame(applyTransform);
   }, { passive: false });
 
   addEventListener('touchend', (e) => {
@@ -172,28 +187,29 @@ function initSwipeNav() {
     const dt = Math.max(1, Date.now() - t0);
     const el = draggingEl;
     const width = el.clientWidth || innerWidth;
+    if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
 
     /*
      * הממשק בעברית, ולכן הלשונית הראשונה יושבת מימין. החלקה שמאלה
      * (dx שלילי) מתקדמת ברשימה — לכיוון שאליו האצבע זזה, וזו ההתנהגות
-     * שמרגישה נכונה ולא הפוכה.
+     * שמרגישה נכונה ולא הפוכה. מודולו כדי שהמסלול יהיה מעגלי.
      */
-    const next = SWIPE_ORDER[i + dir];
-    const commit = next && (
+    const next = SWIPE_ORDER[(i + dir + SWIPE_ORDER.length) % SWIPE_ORDER.length];
+    const commit = (
       Math.abs(dx) > width * SWIPE_COMMIT_FRACTION ||
       (Math.abs(dx) > SWIPE_FLICK_MIN_PX && Math.abs(dx) / dt > SWIPE_FLICK_PX_MS)
     ) && Math.sign(dx) === -dir;
 
-    el.style.transition = 'transform .16s ease-out';
+    el.style.transition = `transform ${SWIPE_SETTLE_MS}ms cubic-bezier(.22,.61,.36,1)`;
     if (commit) {
       el.style.transform = `translateX(${dir < 0 ? width : -width}px)`;
       setTimeout(() => {
         reset();
         showScreen(next, false, dx < 0 ? 'left' : 'right');
-      }, 160);
+      }, SWIPE_SETTLE_MS);
     } else {
       el.style.transform = 'translateX(0)';
-      setTimeout(reset, 160);
+      setTimeout(reset, SWIPE_SETTLE_MS);
     }
   }, { passive: true });
 
