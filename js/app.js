@@ -166,7 +166,7 @@ function initSwipeNav() {
       if (Math.abs(dy) > SWIPE_LOCK_PX && Math.abs(dy) > Math.abs(dx) * SWIPE_RATIO) { tracking = false; return; }
       if (Math.abs(dx) < SWIPE_LOCK_PX) return;
       locked = true;
-      dir = dx < 0 ? 1 : -1;   // ראו הערה למטה: dx שלילי מתקדם ברשימה
+      dir = dx < 0 ? -1 : 1;   // ראו הערה למטה: dx חיובי (ימינה) מתקדם ברשימה
       draggingEl = $(`#screen-${currentScreen}`);
       draggingEl.style.transition = 'none';
       draggingEl.style.willChange = 'transform';
@@ -190,19 +190,22 @@ function initSwipeNav() {
     if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
 
     /*
-     * הממשק בעברית, ולכן הלשונית הראשונה יושבת מימין. החלקה שמאלה
-     * (dx שלילי) מתקדמת ברשימה — לכיוון שאליו האצבע זזה, וזו ההתנהגות
-     * שמרגישה נכונה ולא הפוכה. מודולו כדי שהמסלול יהיה מעגלי.
+     * החלקה ימינה (dx חיובי, "משמאל לימין") מתקדמת ברשימה — בית ← תזונה
+     * ← אימון ← התקדמות ← (מעגלי) בית. החלקה שמאלה חוזרת אחורה. זו
+     * הבחירה של אורי, לא איזו אמנה כללית - נבדק ואושר מולו. מודולו
+     * כדי שהמסלול יהיה מעגלי.
      */
     const next = SWIPE_ORDER[(i + dir + SWIPE_ORDER.length) % SWIPE_ORDER.length];
+    // עקביות בין כיוון הנעילה לכיוון הסופי (dir כבר *הוא* הסימן של dx בנעילה)
     const commit = (
       Math.abs(dx) > width * SWIPE_COMMIT_FRACTION ||
       (Math.abs(dx) > SWIPE_FLICK_MIN_PX && Math.abs(dx) / dt > SWIPE_FLICK_PX_MS)
-    ) && Math.sign(dx) === -dir;
+    ) && Math.sign(dx) === dir;
 
     el.style.transition = `transform ${SWIPE_SETTLE_MS}ms cubic-bezier(.22,.61,.36,1)`;
     if (commit) {
-      el.style.transform = `translateX(${dir < 0 ? width : -width}px)`;
+      // dir כבר שווה לסימן הכיוון (1=ימינה/קדימה, 1-=שמאלה/אחורה) — ממשיכים לאותו כיוון עד הסוף
+      el.style.transform = `translateX(${dir * width}px)`;
       setTimeout(() => {
         reset();
         showScreen(next, false, dx < 0 ? 'left' : 'right');
