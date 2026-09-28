@@ -849,7 +849,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
 .cardio-row, .plan-meal, .full-menu-card, .cs-row, .wg-auto, .pick-card,
 .goal-row, .hs-hero-card,
 #homeNutritionSection .hs-card {
-  border: 1.5px solid var(--accent);
+  border: 1.5px solid var(--text-dim);
 }
 
 /* ---------- השבוע במסך הבית: עיגולים + שורה (dashboard.js) ----------
