@@ -833,21 +833,16 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
    הקו הבהיר הדק (--line) שכל כרטיס משתמש בו. --accent הוא כבר כהה-
    קרוב-לשחור ביום והופך לקרם בלילה (בדיוק כמו כל שימוש אחר בו),
    כך שהמסגרת נשארת רואים אותה בשתי הערכות ולא נעלמת בלילה. */
-.hs-hero-card {
-  background: var(--bg-elev);
-  border-radius: var(--r-lg);
-  padding: 18px;
-  box-shadow: 0 1px 2px var(--shadow-strong), 0 10px 22px -8px var(--shadow-strong);
-}
-
-/* ---------- מסגרת שחורה על כרטיסים ורשימות בכל המסכים ----------
+/* ---------- מסגרת אפורה על כרטיסים ורשימות בכל המסכים ----------
    בלוק אחד, קל למחיקה כמכלול אם אורי לא יאהב — פשוט למחוק את הכלל
    הזה וכל כרטיס חוזר לקו הבהיר הרגיל (var(--line)). אריחי השבוע
-   (day-chip) לא כלולים בכוונה — הוא ביקש להשאיר אותם כמו שהם. */
+   (day-chip) והעיגולים של "אימונים השבוע" בבית לא כלולים בכוונה —
+   על טלפון אמיתי (בניגוד לחלון הדפדפן במחשב) מסגרת סביב העיגולים
+   נראתה עמוסה, אז זה בוטל שם ונשאר רק על כרטיסים מלבניים רגילים. */
 .card, .timer-card, .kcal-card, .chart-card,
 .list-item, .exercise-card, .today-card, .settings-group,
 .cardio-row, .plan-meal, .full-menu-card, .cs-row, .wg-auto, .pick-card,
-.goal-row, .hs-hero-card,
+.goal-row,
 #homeNutritionSection .hs-card {
   border: 1.5px solid var(--text-dim);
 }
@@ -857,7 +852,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
    המלא יושב בשורה מתחת. ירוק = בוצע, טורקיז = היום/מתוכנן, אפור =
    מנוחה. יום שעבר בלי אימון: קו מקווקו, אף פעם לא אדום. */
 .wk-strip {
-  display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px;
+  display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px;
   margin-top: 2px;
 }
 .wk-day {
