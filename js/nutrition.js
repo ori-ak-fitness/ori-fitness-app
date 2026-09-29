@@ -50,10 +50,10 @@ function tidyMenuText(text) {
     .trim();
 }
 
-async function renderFullMenu() {
+async function renderFullMenu(knownSize) {
   const text = (await db.getSetting(FULL_MENU_KEY, '')).trim();
   const card = $('#fullMenuCard');
-  const size = await getFullMenuTextSize();
+  const size = knownSize ?? await getFullMenuTextSize();
   card.classList.remove('is-lg', 'is-xl');
   if (FULL_MENU_SIZE_CLASSES[size]) card.classList.add(FULL_MENU_SIZE_CLASSES[size]);
   card.classList.toggle('is-empty', !text);
@@ -64,7 +64,7 @@ async function cycleFullMenuTextSize() {
   const current = await getFullMenuTextSize();
   const next = (current + 1) % FULL_MENU_SIZE_CLASSES.length;
   await db.setSetting(FULL_MENU_SIZE_KEY, next);
-  await renderFullMenu();
+  await renderFullMenu(next);
   toast(next === 0 ? 'טקסט רגיל' : next === 1 ? 'טקסט גדול' : 'טקסט גדול מאוד', 'ok');
 }
 

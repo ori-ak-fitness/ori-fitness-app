@@ -111,7 +111,8 @@ const SWIPE_SETTLE_MS = 130;
 function swipeBlocked(target) {
   if (!(target instanceof Element)) return false;
   return !!target.closest(
-    '#sheet, .bc-scanner, .wizard, .gate, input, textarea, select, .lightbox, [data-no-swipe]');
+    '#sheet, .bc-scanner, .wizard, .gate, input, textarea, select, .lightbox,' +
+    ' .celebration, .pr-pop, [data-no-swipe]');
 }
 
 /*
@@ -132,25 +133,34 @@ function swipeBlocked(target) {
  * שהגרירה עצמה זזה בלי לצייר (repaint) מחדש בכל פריים.
  */
 function initSwipeNav() {
-  let x0 = 0, y0 = 0, t0 = 0, tracking = false, locked = false, draggingEl = null, dir = 0, i = -1;
-  let pendingDx = 0, rafId = null;
+  let x0 = 0, y0 = 0, t0 = 0, tracking = false, locked = false, draggingEl = null, dir = 0;
+  let pendingDx = 0, rafId = null, settleTimer = null, finishSettle = null;
 
   const applyTransform = () => {
     rafId = null;
     if (draggingEl) draggingEl.style.transform = `translateX(${pendingDx}px)`;
   };
 
+  /* מבטלת גרירה שבתהליך (בין אם עדיין "חיה" ובין אם רק ממתינה
+     לאנימציית הסיום שלה) — בלי זה, מגע חדש שמתחיל תוך כדי אנימציית
+     הסיום של הקודם היה כותב ל-draggingEl המשותף, ואז ה-reset המתעכב
+     של הראשון היה מוחק את הגרירה החיה של השני מתחתיו */
   const reset = () => {
     tracking = false; locked = false; dir = 0;
     if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+    if (settleTimer) { clearTimeout(settleTimer); settleTimer = null; }
+    finishSettle = null;
     if (draggingEl) { draggingEl.style.transition = ''; draggingEl.style.transform = ''; draggingEl.style.willChange = ''; }
     draggingEl = null;
   };
 
   addEventListener('touchstart', (e) => {
-    if (e.touches.length !== 1 || swipeBlocked(e.target)) { tracking = false; return; }
-    i = SWIPE_ORDER.indexOf(currentScreen);
-    if (i === -1) { tracking = false; return; }   // הגדרות או מסך שאינו במסלול
+    // מגע חדש תוך כדי שאנימציית הסיום הקודמת עדיין רצה — משלימים אותה
+    // מיד (בלי לחכות לטיימר), כדי שהיא לא "תתעורר" תוך כדי הגרירה החדשה
+    if (finishSettle) finishSettle();
+
+    if (e.touches.length !== 1 || swipeBlocked(e.target)) { reset(); return; }
+    if (SWIPE_ORDER.indexOf(currentScreen) === -1) { reset(); return; }   // הגדרות או מסך שאינו במסלול
     const t = e.touches[0];
     x0 = t.clientX; y0 = t.clientY; t0 = Date.now();
     tracking = true; locked = false;
@@ -187,6 +197,7 @@ function initSwipeNav() {
     const dt = Math.max(1, Date.now() - t0);
     const el = draggingEl;
     const width = el.clientWidth || innerWidth;
+    const i = SWIPE_ORDER.indexOf(currentScreen);
     if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
 
     /*
@@ -206,14 +217,12 @@ function initSwipeNav() {
     if (commit) {
       // dir כבר שווה לסימן הכיוון (1=ימינה/קדימה, 1-=שמאלה/אחורה) — ממשיכים לאותו כיוון עד הסוף
       el.style.transform = `translateX(${dir * width}px)`;
-      setTimeout(() => {
-        reset();
-        showScreen(next, false, dx < 0 ? 'left' : 'right');
-      }, SWIPE_SETTLE_MS);
+      finishSettle = () => { reset(); showScreen(next, false, dx < 0 ? 'left' : 'right'); };
     } else {
       el.style.transform = 'translateX(0)';
-      setTimeout(reset, SWIPE_SETTLE_MS);
+      finishSettle = reset;
     }
+    settleTimer = setTimeout(() => finishSettle?.(), SWIPE_SETTLE_MS);
   }, { passive: true });
 
   // הפסקה חיצונית של המגע (שיחה נכנסת, למשל) — לא משאירים מסך תקוע באמצע גרירה

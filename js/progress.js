@@ -84,17 +84,29 @@ function buildExerciseSeries(workouts) {
 }
 
 export async function renderProgress() {
-  const workouts = await getStrengthWorkouts();   // אירובי לא שייך לנפח ולתרגילים: הופיע כעמודה של 0 ק"ג
+  const [workouts, routines] = await Promise.all([getStrengthWorkouts(), getRoutines()]);
   const chronological = [...workouts].sort((a, b) => a.startedAt - b.startedAt);
 
   /*
    * לא לפי א"ב (זה עירבב "A"/"B" לטיניים עם שמות עבריים כמו "רגליים"
    * בסדר לא צפוי) - לפי סדר ההגדרה של התוכניות עצמן, אותו סדר שרואים
    * ב"אימוני כוח". "אימון חופשי" (בלי תוכנית) נופל בסוף, לא ממוין.
+   *
+   * ממפים לפי routineId ולא לפי השם: workout.routineName הוא תמונת-מצב
+   * מקובעת מרגע השמירה (ראו workouts.js), אז אם תוכנית משנה שם אחר-כך
+   * ההיסטוריה הישנה עדיין נושאת את השם הקודם. מיפוי לפי id (שלא
+   * משתנה) פותר גם את זה וגם שתי תוכניות שנקראות אותו דבר.
    */
-  const routineOrder = new Map((await getRoutines()).map((r) => [r.name, r.order ?? 0]));
+  const orderById = new Map(routines.map((r) => [r.id, r.order ?? 0]));
+  const orderByLabel = new Map();
+  for (const w of chronological) {
+    const label = workoutTypeLabel(w);
+    if (!orderByLabel.has(label) && w.routineId != null && orderById.has(w.routineId)) {
+      orderByLabel.set(label, orderById.get(w.routineId));
+    }
+  }
   const types = Array.from(new Set(chronological.map(workoutTypeLabel)))
-    .sort((a, b) => (routineOrder.get(a) ?? Infinity) - (routineOrder.get(b) ?? Infinity));
+    .sort((a, b) => (orderByLabel.get(a) ?? Infinity) - (orderByLabel.get(b) ?? Infinity));
 
   // ---- בורר אימון — מצמצם את רשימת התרגילים ואת הנתונים לאימון ספציפי,
   // כדי שקל למצוא בזריזות "כמה עליתי בתרגיל הזה, באימון הזה" ----
@@ -126,7 +138,7 @@ export async function renderProgress() {
    */
   const nameSet = new Set(series.keys());
   if (selectedExerciseType !== 'all') {
-    const routine = (await getRoutines()).find((r) => r.name === selectedExerciseType);
+    const routine = routines.find((r) => r.name === selectedExerciseType);
     if (routine) for (const ex of routine.exercises) nameSet.add(ex.name);
   }
   const names = Array.from(nameSet).sort((a, b) => a.localeCompare(b, 'he'));
