@@ -1102,15 +1102,27 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
   padding: 12px 14px;
 }
 
-/* התפריט המלא — הערה תמידית וגלויה בראש מסך התזונה, למי ששוכח מה לאכול */
+/* התפריט המלא — הערה תמידית וגלויה בראש מסך התזונה, למי ששוכח מה לאכול.
+   לחיצה עליו (כשיש טקסט) פותחת קריאה גדולה בגיליון — לכן cursor+active,
+   כמו כל אלמנט לחיץ אחר באפליקציה */
 .full-menu-card {
   white-space: pre-wrap; line-height: 1.55; font-size: .9rem;
   background: var(--bg-elev); border: 1px solid var(--line);
   border-radius: var(--r-md); padding: 13px 14px;
+  cursor: pointer; transition: transform .08s ease;
 }
+.full-menu-card:active { transform: scale(.985); }
 .full-menu-card.is-empty {
   color: var(--text-dim); text-align: center;
   border-style: dashed; white-space: normal;
+  cursor: default;
+}
+.full-menu-card.is-empty:active { transform: none; }
+
+/* קריאה גדולה בגיליון — מצב הגדלה רביעי, גדול אפילו מ-is-xl, בלי להזיז
+   שום דבר אחר במסך כי הוא לא חלק ממנו */
+.full-menu-reader {
+  white-space: pre-wrap; line-height: 1.65; font-size: 1.35rem;
 }
 
 /* תזכורת מוטיבציה/הבטחה בתוך האימון הפעיל — אותו ציטוט שמתחלף בבית */

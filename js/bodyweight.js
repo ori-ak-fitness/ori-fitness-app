@@ -5,7 +5,7 @@
 
 import * as db from './db.js';
 import {
-  $, el, toast, confirmSheet, guard,
+  $, el, toast, confirmSheet, openSheet, guard,
   dateKey, formatDateHe, shortDate, num, fmtNum,
 } from './ui.js';
 import { lineChart } from './charts.js';
@@ -143,9 +143,22 @@ export async function renderBodyWeight() {
   renderWeightHistory(entries);
 }
 
+/* ההיסטוריה גרה מאחורי כפתור "היסטוריית שקילות", לא בגלילה תמידית מתחת
+   לגרף — ו"הצג עוד" מוסיף עוד עמוד במקום להישאר תקוע על 20 האחרונות
+   לתמיד (כמו אימונים אחרונים ב-workouts.js, אותה סיבה) */
+const WEIGHT_HISTORY_PAGE = 25;
+let weightHistoryLimit = WEIGHT_HISTORY_PAGE;
+
+function openWeightHistorySheet() {
+  weightHistoryLimit = WEIGHT_HISTORY_PAGE;
+  openSheet('היסטוריית שקילות', el('div', { id: 'weightHistory', class: 'list' }));
+  loadEntries().then(renderWeightHistory);
+}
+
 function renderWeightHistory(entries) {
   const host = $('#weightHistory');
-  const recent = entries.slice().reverse().slice(0, 20);
+  if (!host) return; // הגיליון סגור — אין למה לרנדר
+  const recent = entries.slice().reverse();
 
   if (!recent.length) {
     host.replaceChildren(el('div', { class: 'empty-state' },
@@ -154,7 +167,7 @@ function renderWeightHistory(entries) {
     return;
   }
 
-  host.replaceChildren(...recent.map((e) => el('div', { class: 'list-item weight-row' },
+  const rows = recent.slice(0, weightHistoryLimit).map((e) => el('div', { class: 'list-item weight-row' },
     el('div', { class: 'li-main' },
       el('div', { class: 'li-title' }, formatDateHe(e.date, { withYear: true })),
     ),
@@ -169,7 +182,16 @@ function renderWeightHistory(entries) {
         toast('נמחק');
       }),
     }, '🗑'),
-  )));
+  ));
+
+  if (recent.length > weightHistoryLimit) {
+    rows.push(el('button', {
+      class: 'btn btn-ghost btn-block', style: 'margin-top:8px',
+      onclick: guard(async () => { weightHistoryLimit += WEIGHT_HISTORY_PAGE; renderWeightHistory(await loadEntries()); }),
+    }, `הצג עוד (${recent.length - weightHistoryLimit} נוספים)`));
+  }
+
+  host.replaceChildren(...rows);
 }
 
 /* ---------- אתחול ---------- */
@@ -198,4 +220,5 @@ export function initBodyWeight() {
 
   $('#weightSaveBtn').addEventListener('click', save);
   input.addEventListener('keydown', (e) => { if (e.key === 'Enter') save(); });
+  $('#weightHistoryBtn').addEventListener('click', guard(openWeightHistorySheet));
 }

@@ -68,6 +68,15 @@ async function cycleFullMenuTextSize() {
   toast(next === 0 ? 'טקסט רגיל' : next === 1 ? 'טקסט גדול' : 'טקסט גדול מאוד', 'ok');
 }
 
+/* מצב הגדלה רביעי, אבל לא עוד class על הכרטיס הקבוע במסך — כרטיס גדול
+   מדי היה "מזיז" את כל מה שמתחתיו (המשקל, ההתקדמות...). זה גיליון: קורא
+   גדול במסך מלא, לא נוגע בשום דבר אחר בעמוד */
+async function openFullMenuReader() {
+  const text = (await db.getSetting(FULL_MENU_KEY, '')).trim();
+  if (!text) return;
+  openSheet('התפריט המלא שלי', el('div', { class: 'full-menu-reader' }, text));
+}
+
 async function openFullMenuEditor() {
   const size = await getFullMenuTextSize();
   const textInput = el('textarea', {
@@ -563,6 +572,7 @@ export async function initNutrition({ onUpdate } = {}) {
 
   $('#editFullMenuBtn').addEventListener('click', guard(openFullMenuEditor));
   $('#fullMenuSizeBtn').addEventListener('click', guard(cycleFullMenuTextSize));
+  $('#fullMenuCard').addEventListener('click', guard(openFullMenuReader));
   await renderFullMenu();
 
   await renderNutrition();

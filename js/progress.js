@@ -3,7 +3,7 @@
    ונפח כולל לכל אימון.
    =================================================================== */
 
-import { $, el, num, fmtNum, shortDate, formatDateHe } from './ui.js';
+import { $, el, num, fmtNum, shortDate, formatDateHe, openSheet } from './ui.js';
 import { lineChart, barChart } from './charts.js';
 import { getStrengthWorkouts, calcVolume } from './workouts.js';
 import { isSetDone } from './records.js';
@@ -232,7 +232,7 @@ export async function renderProgress() {
  *  במצב "הכל" מוסיפים גם את סוג האימון לכל שורה, כדי שההשוואה תהיה ברורה */
 function renderVolumeHistory(recent, showType) {
   const host = $('#volumeHistory');
-  if (!host) return;
+  if (!host) return; // הגיליון סגור — אין למה לרנדר
 
   if (!recent.length) { host.replaceChildren(); return; }
 
@@ -260,6 +260,19 @@ function renderExerciseHistory(data) {
   )));
 }
 
+/* שתי הרשימות האלה גרות מאחורי כפתור "היסטוריה", לא בגלילה תמידית מתחת
+   לגרף. פותחים גיליון עם host חדש באותו id, ואז קוראים ל-renderProgress()
+   שוב — הוא ממילא מחשב ומרנדר את שתי הרשימות בכל קריאה, אז זה פשוט ימלא
+   את ה-host שעכשיו קיים בתוך הגיליון, בלי לשכפל לוגיקה */
+function openExerciseHistorySheet() {
+  openSheet('התקדמות בתרגילים — היסטוריה', el('div', { id: 'progressHistory', class: 'list' }));
+  renderProgress();
+}
+function openVolumeHistorySheet() {
+  openSheet('נפח אימונים — היסטוריה', el('div', { id: 'volumeHistory', class: 'list' }));
+  renderProgress();
+}
+
 export function initProgress() {
   $('#progressWorkoutSelect').addEventListener('change', (e) => {
     selectedExerciseType = e.target.value;
@@ -277,4 +290,6 @@ export function initProgress() {
     volOffset = 0;
     renderProgress();
   });
+  $('#progressHistoryBtn').addEventListener('click', openExerciseHistorySheet);
+  $('#volumeHistoryBtn').addEventListener('click', openVolumeHistorySheet);
 }

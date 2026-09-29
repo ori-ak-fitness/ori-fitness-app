@@ -739,8 +739,19 @@ function summarizeSets(sets) {
 const HISTORY_PAGE = 25;
 let historyLimit = HISTORY_PAGE;
 
+/* היסטוריית האימונים גרה מאחורי כפתור, לא בגלילה תמידית במסך הראשי —
+   הרשימה רק גדלה עם הזמן, וה"הצג עוד" הפך את מסך האימון לגלילה אינסופית.
+   הכפתור פותח גיליון עם host חדש שנושא את אותו id, כדי ש-renderHistory
+   (הכולל את לוגיקת "הצג עוד") ימשיך לעבוד בלי שינוי */
+function openWorkoutHistorySheet() {
+  historyLimit = HISTORY_PAGE;
+  openSheet('אימונים אחרונים', el('div', { id: 'workoutHistory', class: 'list' }));
+  renderHistory();
+}
+
 async function renderHistory() {
   const host = $('#workoutHistory');
+  if (!host) return; // הגיליון סגור — אין למה לרנדר
   const all = await getAllWorkouts();
 
   if (!all.length) {
@@ -891,6 +902,7 @@ export async function initWorkouts({ onSaved, getReminder } = {}) {
   $('#finishWorkoutBtn').addEventListener('click', guard(finishWorkout));
   $('#cancelWorkoutBtn').addEventListener('click', guard(cancelWorkout));
   $('#addExerciseBtn').addEventListener('click', guard(openAddExerciseSheet));
+  $('#workoutHistoryBtn').addEventListener('click', guard(openWorkoutHistorySheet));
 
   initRecords();
 
@@ -922,7 +934,6 @@ export async function initWorkouts({ onSaved, getReminder } = {}) {
     renderActive();
   }
 
-  await renderHistory();
   await refreshSuggestions();
 
   // כשחוזרים לאפליקציה — לוודא שהטיימר מסונכרן. וכשעוזבים (או האפליקציה
