@@ -1557,7 +1557,7 @@ main { padding: 16px; max-width: 620px; margin: 0 auto; }
   align-items: center; justify-content: center; gap: 3px; cursor: pointer;
   transition: color .15s ease;
 }
-.tab-ico { font-size: 1.24rem; line-height: 1; filter: grayscale(1) opacity(.6); transition: filter .15s ease; }
+.tab-ico { font-size: 1.24rem; line-height: 1; filter: opacity(.55); transition: filter .15s ease; }
 .tab-txt { font-size: .68rem; font-weight: 600; }
 .tab.active { color: var(--accent); }
 .tab.active .tab-ico { filter: none; }
